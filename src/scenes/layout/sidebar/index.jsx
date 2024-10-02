@@ -68,7 +68,7 @@ const SideBar = () => {
                 <img
                   style={{ width: "30px", height: "30px", borderRadius: "8px" }}
                   src={logo}
-                  alt="Argon"
+                  alt="PingPong"
                 />
                 <Typography
                   variant="h4"
@@ -76,7 +76,7 @@ const SideBar = () => {
                   textTransform="capitalize"
                   color={colors.greenAccent[500]}
                 >
-                  Argon
+                  PingPong
                 </Typography>
               </Box>
             )}
@@ -129,10 +129,108 @@ const SideBar = () => {
           }}
         >
           <Item
-            title="Dashboard"
+            title="MainPage"
             path="/"
             colors={colors}
             icon={<DashboardOutlined />}
+          />
+        </Menu>
+        <Typography
+          variant="h6"
+          color={colors.gray[300]}
+          sx={{ m: "15px 0 5px 20px" }}
+        >
+          {!collapsed ? "Mail" : " "}
+        </Typography>
+        <Menu
+          menuItemStyles={{
+            button: {
+              ":hover": {
+                color: "#868dfb",
+                background: "transparent",
+                transition: ".4s ease",
+              },
+            },
+          }}
+        >
+          <Item
+            title="메일 작성"
+            path="/form"
+            colors={colors}
+            icon={<PersonOutlined />}
+          />
+          <Item
+            title="전체 메일함"
+            path="/totalMail"
+            colors={colors}
+            icon={<BarChartOutlined />}
+          />
+          <Item
+            title="받은 메일함"
+            path="/pie"
+            colors={colors}
+            icon={<DonutLargeOutlined />}
+          />
+          <Item
+            title="보낸 메일함"
+            path="/line"
+            colors={colors}
+            icon={<TimelineOutlined />}
+          />
+          <Item
+            title="임시 보관함"
+            path="/geography"
+            colors={colors}
+            icon={<MapOutlined />}
+          />
+          <Item
+            title="내게 쓴 메일함"
+            path="/stream"
+            colors={colors}
+            icon={<WavesOutlined />}
+          />
+        </Menu>
+        <Typography
+          variant="h6"
+          color={colors.gray[300]}
+          sx={{ m: "15px 0 5px 20px" }}
+        >
+          {!collapsed ? "Pages" : " "}
+        </Typography>
+        <Menu
+          menuItemStyles={{
+            button: {
+              ":hover": {
+                color: "#868dfb",
+                background: "transparent",
+                transition: ".4s ease",
+              },
+            },
+          }}
+        >
+          <Item
+            title="EDMS"
+            path="/elec"
+            colors={colors}
+            icon={<ContactsOutlined />}
+          />
+          <Item
+            title="Calendar"
+            path="/calendar"
+            colors={colors}
+            icon={<CalendarTodayOutlined />}
+          />
+          <Item
+            title="Board"
+            path="/boards"
+            colors={colors}
+            icon={<ReceiptOutlined />}
+          />
+          <Item
+            title="FAQ Page"
+            path="/faq"
+            colors={colors}
+            icon={<HelpOutlineOutlined />}
           />
         </Menu>
         <Typography
@@ -164,98 +262,6 @@ const SideBar = () => {
             path="/contacts"
             colors={colors}
             icon={<ContactsOutlined />}
-          />
-          <Item
-            title="Invoices Balances"
-            path="/invoices"
-            colors={colors}
-            icon={<ReceiptOutlined />}
-          />
-        </Menu>
-        <Typography
-          variant="h6"
-          color={colors.gray[300]}
-          sx={{ m: "15px 0 5px 20px" }}
-        >
-          {!collapsed ? "Pages" : " "}
-        </Typography>
-        <Menu
-          menuItemStyles={{
-            button: {
-              ":hover": {
-                color: "#868dfb",
-                background: "transparent",
-                transition: ".4s ease",
-              },
-            },
-          }}
-        >
-          <Item
-            title="Profile Form"
-            path="/form"
-            colors={colors}
-            icon={<PersonOutlined />}
-          />
-          <Item
-            title="Calendar"
-            path="/calendar"
-            colors={colors}
-            icon={<CalendarTodayOutlined />}
-          />
-          <Item
-            title="FAQ Page"
-            path="/faq"
-            colors={colors}
-            icon={<HelpOutlineOutlined />}
-          />
-        </Menu>
-        <Typography
-          variant="h6"
-          color={colors.gray[300]}
-          sx={{ m: "15px 0 5px 20px" }}
-        >
-          {!collapsed ? "Charts" : " "}
-        </Typography>
-        <Menu
-          menuItemStyles={{
-            button: {
-              ":hover": {
-                color: "#868dfb",
-                background: "transparent",
-                transition: ".4s ease",
-              },
-            },
-          }}
-        >
-          <Item
-            title="Bar Chart"
-            path="/bar"
-            colors={colors}
-            icon={<BarChartOutlined />}
-          />
-          <Item
-            title="Pie Chart"
-            path="/pie"
-            colors={colors}
-            icon={<DonutLargeOutlined />}
-          />
-          <Item
-            title="Line Chart"
-            path="/line"
-            colors={colors}
-            icon={<TimelineOutlined />}
-          />
-          <Item
-            title="Geography Chart"
-            path="/geography"
-            colors={colors}
-            icon={<MapOutlined />}
-          />
-          <Item
-            title="Stream Chart"
-            path="/stream"
-            colors={colors}
-            icon={<WavesOutlined />}
           />
         </Menu>
       </Box>

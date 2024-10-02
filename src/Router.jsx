@@ -4,16 +4,17 @@ import App from "./App";
 import {
   Dashboard,
   Team,
-  Invoices,
+  Boards,
+  Elec,
   Contacts,
   Form,
-  Bar,
   Line,
   Pie,
   FAQ,
   Geography,
   Calendar,
   Stream,
+  TotalMail
 } from "./scenes";
 
 const AppRouter = () => {
@@ -23,11 +24,12 @@ const AppRouter = () => {
         <Route path="/" element={<App />}>
           <Route path="/" element={<Dashboard />} />
           <Route path="/team" element={<Team />} />
+          <Route path="/elec" element={<Elec />} />
           <Route path="/contacts" element={<Contacts />} />
-          <Route path="/invoices" element={<Invoices />} />
+          <Route path="/boards" element={<Boards />} />
           <Route path="/form" element={<Form />} />
           <Route path="/calendar" element={<Calendar />} />
-          <Route path="/bar" element={<Bar />} />
+          <Route path="/totalMail" element={<TotalMail />} />
           <Route path="/pie" element={<Pie />} />
           <Route path="/stream" element={<Stream />} />
           <Route path="/line" element={<Line />} />
