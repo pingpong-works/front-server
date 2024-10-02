@@ -2,11 +2,12 @@ import Navbar from "./layout/navbar";
 import SideBar from "./layout/sidebar";
 import Dashboard from "./dashboard";
 import Team from "./team";
-import Invoices from "./invoices";
+import Boards from "./boards";
+import Elec from "./elec";
 import Contacts from "./contacts";
 import Form from "./form";
 import Calendar from "./calendar";
-import Bar from "./bar";
+import TotalMail from "./totalMail";
 import Line from "./line";
 import Pie from "./pie";
 import Stream from "./stream";
@@ -18,11 +19,12 @@ export {
   SideBar,
   Dashboard,
   Team,
-  Invoices,
+  Boards,
+  Elec,
   Contacts,
   Form,
   Calendar,
-  Bar,
+  TotalMail,
   Line,
   Pie,
   Stream,

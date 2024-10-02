@@ -4,27 +4,21 @@ import { Formik } from "formik";
 import * as yup from "yup";
 
 const initialValues = {
-  firstName: "",
-  lastName: "",
   email: "",
-  contact: "",
+  title: "",
   address1: "",
   address2: "",
+  content:""
 };
 
-const phoneRegExp =
-  /^((\+[1-9]{1,4}[ -]?)|(\([0-9]{2,3}\)[ -]?)|([0-9]{2,4})[ -]?)*?[0-9]{3,4}[ -]?[0-9]{3,4}$/;
-
 const checkoutSchema = yup.object().shape({
-  firstName: yup.string().required("required"),
-  lastName: yup.string().required("required"),
   email: yup.string().email("invalid email").required("required"),
-  contact: yup
+  title: yup
     .string()
-    .matches(phoneRegExp, "Phone number is not valid")
     .required("required"),
   address1: yup.string().required("required"),
   address2: yup.string().required("required"),
+  content: yup.string().required("required")
 });
 
 const Form = () => {
@@ -35,9 +29,10 @@ const Form = () => {
       values: initialValues,
     });
   };
+
   return (
     <Box m="20px">
-      <Header title="CREATE USER" subtitle="Create a New User Profile" />
+      <Header title="메일 쓰기" subtitle="Create a New Mail" />
 
       <Formik
         onSubmit={handleFormSubmit}
@@ -55,42 +50,15 @@ const Form = () => {
           <form onSubmit={handleSubmit}>
             <Box
               display="grid"
-              gap="30px"
-              gridTemplateColumns="repeat(4, minmax(0, 1fr))"
+              gap="20px"
+              gridTemplateColumns="2fr 5fr"
               sx={{
                 "& > div": {
-                  gridColumn: isNonMobile ? undefined : "span 4",
+                  gridColumn: isNonMobile ? undefined : "span 12",
                 },
               }}
             >
-              <TextField
-                fullWidth
-                variant="filled"
-                type="text"
-                label="First Name"
-                onBlur={handleBlur}
-                onChange={handleChange}
-                value={values.firstName}
-                name="firstName"
-                error={touched.firstName && errors.firstName}
-                helperText={touched.firstName && errors.firstName}
-                sx={{
-                  gridColumn: "span 2",
-                }}
-              />
-              <TextField
-                fullWidth
-                variant="filled"
-                type="text"
-                label="Last Name"
-                onBlur={handleBlur}
-                onChange={handleChange}
-                value={values.lastName}
-                name="lastName"
-                error={touched.lastName && errors.lastName}
-                helperText={touched.lastName && errors.lastName}
-                sx={{ gridColumn: "span 2" }}
-              />
+              <Box display="grid" gap="20px" gridTemplateColumns="1fr" sx={{ gridColumn: "span 7" }}>
               <TextField
                 fullWidth
                 variant="filled"
@@ -102,48 +70,59 @@ const Form = () => {
                 name="email"
                 error={touched.email && errors.email}
                 helperText={touched.email && errors.email}
-                sx={{ gridColumn: "span 4" }}
               />
               <TextField
                 fullWidth
                 variant="filled"
                 type="text"
-                label="Contact Number"
+                label="제목"
                 onBlur={handleBlur}
                 onChange={handleChange}
-                value={values.contact}
-                name="contact"
-                error={touched.contact && errors.contact}
-                helperText={touched.contact && errors.contact}
-                sx={{ gridColumn: "span 4" }}
+                value={values.title}
+                name="title"
+                error={touched.title && errors.title}
+                helperText={touched.title && errors.title}
               />
               <TextField
                 fullWidth
                 variant="filled"
                 type="text"
-                label="Address 1"
+                label="참조자"
                 onBlur={handleBlur}
                 onChange={handleChange}
                 value={values.address1}
                 name="address1"
                 error={touched.address1 && errors.address1}
                 helperText={touched.address1 && errors.address1}
-                sx={{ gridColumn: "span 4" }}
               />
               <TextField
                 fullWidth
                 variant="filled"
                 type="text"
-                label="Address 2"
+                label="숨은 참조"
                 onBlur={handleBlur}
                 onChange={handleChange}
                 value={values.address2}
                 name="address2"
                 error={touched.address2 && errors.address2}
                 helperText={touched.address2 && errors.address2}
-                sx={{ gridColumn: "span 4" }}
+              />
+              <TextField
+                fullWidth
+                variant="filled"
+                type="text"
+                label="메일 내용"
+                onBlur={handleBlur}
+                onChange={handleChange}
+                value={values.content}
+                name="content"
+                error={touched.content && errors.content}
+                helperText={touched.content && errors.content}
+                multiline
+                rows={20}
               />
             </Box>
+          </Box>
             <Box
               display="flex"
               alignItems="center"
@@ -151,7 +130,7 @@ const Form = () => {
               mt="20px"
             >
               <Button type="submit" color="secondary" variant="contained">
-                Create New User
+                전송
               </Button>
             </Box>
           </form>
