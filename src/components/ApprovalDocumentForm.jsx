@@ -226,7 +226,10 @@ const ApprovalDocumentForm = ({ open, handleClose, onSubmit }) => {
                 <Button
                     variant="outlined"
                     onClick={handleSaveDraft}
-                    sx={{ marginRight: '10px', backgroundColor:colors.primary[300], color:colors.gray[150] }}
+                    sx={{ 
+                        marginRight: '10px', 
+                        backgroundColor:colors.primary[300], 
+                        color:colors.gray[150] }}
                 >
                     임시 저장
                 </Button>
