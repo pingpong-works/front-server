@@ -90,7 +90,7 @@ const Elec = () => {
     // 데이터 그리드 컬럼 정의
     const columns = [
         { field: "id", headerName: "No", flex: 0.5 },
-        { field: "code", headerName: "문서번호", flex: 1 },
+        { field: "documentCode", headerName: "문서번호", flex: 1 },
         { field: "docsTypes.type", headerName: "종류", flex: 1, valueGetter: (params) => params.row.docsTypes?.type || "N/A" },
         { field: "title", headerName: "제목", flex: 1, valueGetter: (params) => params.row.title || "N/A" },
         { field: "author", headerName: "작성자", flex: 1 },
@@ -134,7 +134,7 @@ const Elec = () => {
                     </FormControl>
                 </Box>
 
-                {/* 문서 작성 버튼 */}
+                {/*  작성 버튼 */}
                 <Box display="flex" justifyContent="flex-end" mb="10px">
                     <Button
                         onClick={handleOpenDocumentForm}
@@ -172,6 +172,12 @@ const Elec = () => {
                         "& .MuiCheckbox-root": {
                             color: `${colors.greenAccent[200]} !important`,
                         },
+                        "& .MuiDataGrid-toolbarContainer .MuiButton-text": {
+                            color: `${colors.gray[100]} !important`,
+                        },
+                        "& .MuiDataGrid-virtualScroller": {
+                            backgroundColor: colors.primary[400],
+                        }
                     }}
                 >
                     <DataGrid

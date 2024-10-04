@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Select, MenuItem, TextField, Box, Typography, Table, TableBody, TableRow, TableCell, CircularProgress, IconButton } from '@mui/material';
+import { useTheme, Dialog, DialogTitle, DialogContent, DialogActions, Button, Select, MenuItem, TextField, Box, Typography, Table, TableBody, TableRow, TableCell, CircularProgress, IconButton } from '@mui/material';
 import ApprovalLineModal from './ApprovalLineModal';
 import getDocsTypeAllRequest from '../request/GetDocsType';
 import CloseIcon from '@mui/icons-material/Close';
+import { tokens } from "../theme";
+import sendPostDocumentSubmitRequest from '../request/PostDoumentSubmit';
+import sendPostDocumentSaveRequest from '../request/PostDocumentSave';
 
 const ApprovalDocumentForm = ({ open, handleClose, onSubmit }) => {
     const [documentType, setDocumentType] = useState('');  // 문서 타입
@@ -10,9 +13,14 @@ const ApprovalDocumentForm = ({ open, handleClose, onSubmit }) => {
     const [content, setContent] = useState('');  // 문서 내용
     const [fields, setFields] = useState([]);  // 선택된 문서의 필드들
     const [approvalLines, setApprovalLines] = useState([]);  // 결재라인
+    const [workflowId, setWorkflowId] = useState(null);
     const [openApprovalLineModal, setOpenApprovalLineModal] = useState(false);
     const [docsTypes, setDocsTypes] = useState([]);  // 문서 타입 리스트 상태
     const [isLoading, setIsLoading] = useState(false);  // api로딩상태
+    const [customFields, setCustomFields] = useState({});
+
+    const theme = useTheme();
+    const colors = tokens(theme.palette.mode);
 
     // 문서 타입 가져오기
     const fetchDocsTypes = async () => {
@@ -37,7 +45,7 @@ const ApprovalDocumentForm = ({ open, handleClose, onSubmit }) => {
     // 문서 타입 선택 핸들러
     const handleDocumentTypeChange = (event) => {
         const selectedTemplate = docsTypes.data.find(doc => doc.documentTemplate.templateName === event.target.value);
-        setDocumentType(event.target.value);
+        setDocumentType(selectedTemplate?.documentTemplate.id);  // ID 저장
 
         // 선택된 문서 타입에 해당하는 필드를 설정
         if (selectedTemplate) {
@@ -58,40 +66,60 @@ const ApprovalDocumentForm = ({ open, handleClose, onSubmit }) => {
     };
 
     // 결재라인 설정 완료 시 처리
-    const handleApprovalLineSubmit = (selectedApprovals) => {
+    const handleApprovalLineSubmit = (selectedApprovals, workflowId) => {
         setApprovalLines(selectedApprovals);
+        setWorkflowId(workflowId);  // 선택한 워크플로우 ID를 저장
         setOpenApprovalLineModal(false);
     };
 
-    // 임시 저장 핸들러
-    const handleSaveDraft = () => {
-        const documentData = {
-            type: documentType,
+    //customFields 입력시 업데이트
+    const handleFieldChange = (fieldName, value) => {
+        setCustomFields((prevFields) => ({
+            ...prevFields,
+            [fieldName]: value
+        }));
+    };
+
+    const handleSaveDraft = async () => {
+        const employeeId = 21;  // 임시로 employeeId를 설정
+        
+        const requestBody = {
+            documentTypeId: documentType || null,  // 선택한 문서 타입 ID, 없으면 null
+            workflowId: workflowId || null,  // 선택한 워크플로우 ID
             title,
             content,
-            approvalLines,
-            status: 'DRAFT'
+            employeeId: employeeId, // 로그인한 사용자의 ID
+            customFields
         };
-        console.log('임시 저장:', documentData);
-        // 임시 저장 로직 추가
+
+        // 임시 저장 요청 호출
+        await sendPostDocumentSaveRequest(null, requestBody, () => {
+            console.log('임시 저장 후 추가 작업 실행');
+            handleClose();  // 모달 닫기
+        });
     };
 
     // 제출 핸들러
-    const handleSubmitDocument = () => {
-        const documentData = {
-            type: documentType,
+    const handleSubmitDocument = async () => {
+        const requestBody = {
+            documentTypeId: documentType,  // 선택한 문서 타입 ID
+            workflowId: workflowId,        // 선택한 워크플로우 ID
             title,
             content,
-            approvalLines,
-            status: 'SUBMITTED'
+            employeeId: state?.employeeId, // 로그인한 사용자의 ID
+            customFields
         };
-        console.log('제출:', documentData);
-        // 제출 로직 추가
+
+        // 제출 요청 호출
+        await sendPostDocumentSubmitRequest(null, requestBody, () => {
+            console.log('제출 후 추가 작업 실행');
+            handleClose();  // 모달 닫기
+        });
     };
 
     return (
         <Dialog open={open} onClose={handleClose} fullWidth maxWidth="md">
-            <DialogTitle>문서 작성
+            <DialogTitle >문서 작성
                 <IconButton
                     aria-label="close"
                     onClick={handleClose}
@@ -134,11 +162,10 @@ const ApprovalDocumentForm = ({ open, handleClose, onSubmit }) => {
                         variant="contained"
                         onClick={handleOpenApprovalLineModal}
                         fullWidth
-                        sx={{ marginBottom: '20px' }}
+                        sx={{ marginBottom: '20px', backgroundColor:colors.blueAccent[500]}}
                     >
                         결재라인 설정
                     </Button>
-
                     {/* 결재라인 표시 테이블 */}
                     <Table>
                         <TableBody>
@@ -157,6 +184,7 @@ const ApprovalDocumentForm = ({ open, handleClose, onSubmit }) => {
                             </TableRow>
                         </TableBody>
                     </Table>
+                    <Box p={2}></Box>
                     {/* 필드에 맞는 동적 입력 폼 생성 */}
                     {fields.length > 0 && fields.map((field) => (
                         <TextField
@@ -169,6 +197,7 @@ const ApprovalDocumentForm = ({ open, handleClose, onSubmit }) => {
                             InputLabelProps={{
                                 shrink: field.fieldType === 'Date' || field.fieldType === 'LocalDate' ? true : undefined,
                             }}
+                            onChange={(e) => handleFieldChange(field.fieldName, e.target.value)}  // 필드 값 변경 시 호출
                         />
                     ))}
                     {/* 문서 제목 및 내용 작성 */}
@@ -197,7 +226,7 @@ const ApprovalDocumentForm = ({ open, handleClose, onSubmit }) => {
                 <Button
                     variant="outlined"
                     onClick={handleSaveDraft}
-                    sx={{ marginRight: '10px' }}
+                    sx={{ marginRight: '10px', backgroundColor:colors.primary[300], color:colors.gray[150] }}
                 >
                     임시 저장
                 </Button>
