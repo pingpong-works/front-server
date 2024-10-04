@@ -74,7 +74,7 @@ const SideBar = () => {
                   variant="h4"
                   fontWeight="bold"
                   textTransform="capitalize"
-                  color={colors.greenAccent[500]}
+                  color={colors.blueAccent[450]}
                 >
                   PingPong
                 </Typography>
@@ -103,15 +103,23 @@ const SideBar = () => {
           />
           <Box sx={{ textAlign: "center" }}>
             <Typography variant="h3" fontWeight="bold" color={colors.gray[100]}>
-              Tony Stark
+              
             </Typography>
             <Typography
               variant="h6"
               fontWeight="500"
-              color={colors.greenAccent[500]}
+              color={colors.blueAccent[450]}
             >
-              VP Fancy Admin
+              인사팀 | 과장
             </Typography>
+            <Typography
+              variant="h6"
+              fontWeight="500"
+              color={colors.blueAccent[450]}
+            >
+              김준수
+            </Typography>
+            
           </Box>
         </Box>
       )}
@@ -121,7 +129,7 @@ const SideBar = () => {
           menuItemStyles={{
             button: {
               ":hover": {
-                color: "#868dfb",
+                color: "#9accfc",
                 background: "transparent",
                 transition: ".4s ease",
               },
@@ -146,7 +154,7 @@ const SideBar = () => {
           menuItemStyles={{
             button: {
               ":hover": {
-                color: "#868dfb",
+                color: "#9accfc",
                 background: "transparent",
                 transition: ".4s ease",
               },
