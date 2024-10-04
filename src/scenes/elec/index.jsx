@@ -1,10 +1,11 @@
-import {  Box, useTheme, MenuItem, Select, FormControl, InputLabel, Button } from "@mui/material";
+import { Box, useTheme, MenuItem, Select, FormControl, InputLabel, Button } from "@mui/material";
 import { DataGrid, GridToolbar } from '@mui/x-data-grid';
 import { Header } from "../../components";
 import getDocumentAllRequest from "../../request/GetDocuments";
 import { tokens } from "../../theme";
 import { useEffect, useState } from "react";
-import TableModal from '../../components/table'; 
+import TableModal from '../../components/TableModal';  // 결재 진행 상황 모달
+import ApprovalDocumentForm from '../../components/ApprovalDocumentForm';  // 문서 타입 선택 및 작성 폼
 
 const Elec = () => {
     const theme = useTheme();
@@ -15,7 +16,18 @@ const Elec = () => {
     const [list, setList] = useState([]); // 전체 문서 데이터
     const [filteredData, setFilteredData] = useState([]); // 필터링된 데이터
     const [selectedStatus, setSelectedStatus] = useState("all"); // 선택된 상태
+    const [isDocumentFormOpen, setIsDocumentFormOpen] = useState(false); // 문서 작성 모달 상태
+    const [approvalLines, setApprovalLines] = useState([]);  // 결재 라인 데이터
     const [isModalOpen, setIsModalOpen] = useState(false); // 모달 상태
+
+
+    const [approvalStatus, setApprovalStatus] = useState({  // 결재 상태 초기값 설정
+        0: null,  // 대기 중
+        1: null,
+        2: null,
+    });
+
+    const currentUser = '이대리';  // 현재 로그인한 사용자 (이 부분은 실제 로그인 시스템과 연동되어야 함)
 
     // 문서 데이터를 가져오는 함수
     const fetchDocuments = async () => {
@@ -45,27 +57,56 @@ const Elec = () => {
         setFilteredData(status === "all" ? list : list.filter(item => item.documentStatus === status));
     };
 
-    // 모달 열기/닫기
-    const handleOpenModal = () => setIsModalOpen(true);
-    const handleCloseModal = () => setIsModalOpen(false);
+    // 문서 작성 폼 열기
+    const handleOpenDocumentForm = () => {
+        console.log("결재작성 버튼이 클릭됨");
+        setIsDocumentFormOpen(true);  // 문서 작성 폼 열기
+        console.log("isDocumentFormOpen 상태:", isDocumentFormOpen);  // 이 부분에서 상태가 정상적으로 변경되는지 확인
+    };
 
-    // 데이터 그리드 컬럼 설정
+    // 문서 작성 폼 닫기
+    const handleCloseDocumentForm = () => {
+        console.log("문서 작성 모달 닫힘");
+        setIsDocumentFormOpen(false);
+    };
+
+    // 결재라인 설정 및 제출 처리
+    const handleApprovalLineSubmit = (selectedApprovals) => {
+        setApprovalLines(selectedApprovals);  // 결재라인 설정
+        setIsDocumentFormOpen(false);  // 문서 작성 폼 닫기
+    };
+
+    const handleCloseModal = () => {
+        setIsModalOpen(false);
+    };
+
+    const handleApprove = (index, status) => {
+        setApprovalStatus(prevState => ({
+            ...prevState,
+            [index]: status  // 승인 또는 반려 상태 업데이트
+        }));
+    };
+
+    // 데이터 그리드 컬럼 정의
     const columns = [
-        { field: "id", headerName: "ID", flex: 0.5 },
+        { field: "id", headerName: "No", flex: 0.5 },
+        { field: "code", headerName: "문서번호", flex: 1 },
         { field: "docsTypes.type", headerName: "종류", flex: 1, valueGetter: (params) => params.row.docsTypes?.type || "N/A" },
         { field: "title", headerName: "제목", flex: 1, valueGetter: (params) => params.row.title || "N/A" },
         { field: "author", headerName: "작성자", flex: 1 },
         { field: "departmentName", headerName: "부서", flex: 1 },
         { field: "createdAt", headerName: "작성일", flex: 1, valueGetter: (params) => params.row.createdAt?.substring(0, 10) || "N/A" },
-        { field: "documentStatus", headerName: "상태", flex: 1, valueGetter: (params) => {
-            switch (params.value) {
-                case "DRAFT": return "임시 저장";
-                case "IN_PROGRESS": return "결재중";
-                case "APPROVED": return "승인 완료";
-                case "REJECTED": return "반려";
-                default: return "전체 보기";
+        {
+            field: "documentStatus", headerName: "상태", flex: 1, valueGetter: (params) => {
+                switch (params.value) {
+                    case "DRAFT": return "임시 저장";
+                    case "IN_PROGRESS": return "결재중";
+                    case "APPROVED": return "승인 완료";
+                    case "REJECTED": return "반려";
+                    default: return "전체 보기";
+                }
             }
-        }},
+        },
     ];
 
     return (
@@ -73,7 +114,7 @@ const Elec = () => {
             {isLoading && <p>로딩 중...</p>}
             <Box m="20px">
                 <Header title="전자결재" subtitle="List of Elec for Future Reference" />
-                
+
                 {/* 상태 필터 셀렉트 */}
                 <Box mb="20px" display="flex" justifyContent="flex-end">
                     <FormControl variant="outlined" sx={{ minWidth: 200 }}>
@@ -93,18 +134,21 @@ const Elec = () => {
                     </FormControl>
                 </Box>
 
-                {/* 모달 열기 버튼 */}
-                <Box display="flex" justifyContent="flex-end" mb="20px">
+                {/* 문서 작성 버튼 */}
+                <Box display="flex" justifyContent="flex-end" mb="10px">
                     <Button
-                        onClick={handleOpenModal}
+                        onClick={handleOpenDocumentForm}
                         variant="contained"
                         sx={{
+                            width: '200px',
+                            height: '50px',
+                            fontSize: '15px',
                             backgroundColor: '#6870fa',
                             color: '#fff',
                             '&:hover': { backgroundColor: '#b6b6b6ac' },
                         }}
                     >
-                        결재 작성
+                        + 결재 작성
                     </Button>
                 </Box>
 
@@ -143,11 +187,31 @@ const Elec = () => {
                 </Box>
             </Box>
 
-            {/* 모달 컴포넌트 불러오기 */}
-            <TableModal  // 올바른 컴포넌트 이름 사용
-                isOpen={isModalOpen} 
-                handleClose={handleCloseModal} 
-                colors={colors} 
+            {/* 문서 작성 폼 모달 */}
+            {isDocumentFormOpen && (
+                <ApprovalDocumentForm
+                    handleClose={handleCloseDocumentForm}
+                    onSubmit={handleApprovalLineSubmit}
+                />
+            )}
+
+            {/* 결재 진행 상황 모달 */}
+            {approvalLines.length > 0 && (
+                <TableModal
+                    open={isModalOpen}  // 모달 열림 상태 전달
+                    handleClose={handleCloseModal}  // 모달 닫기 함수 전달
+                    approvalLines={approvalLines}  // 결재 라인 데이터 전달
+                    approvalStatus={approvalStatus}  // 승인 상태 데이터 전달
+                    handleApprove={handleApprove}  // 승인/반려 처리 함수 전달
+                    currentUser={currentUser}  // 현재 로그인한 사용자 정보 전달
+                />
+            )}
+
+            {/* 결재 작성 모달 */}
+            <ApprovalDocumentForm
+                open={isDocumentFormOpen}
+                handleClose={handleCloseDocumentForm}
+                onSubmit={() => { console.log('문서 제출됨'); }}
             />
         </div>
     );

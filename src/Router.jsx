@@ -16,6 +16,7 @@ import {
   Stream,
   TotalMail
 } from "./scenes";
+import ApprovalLineSetup from './components/ApprovalLineSetup';
 
 const AppRouter = () => {
   return (
@@ -35,6 +36,8 @@ const AppRouter = () => {
           <Route path="/line" element={<Line />} />
           <Route path="/faq" element={<FAQ />} />
           <Route path="/geography" element={<Geography />} />
+          {/* ApprovalLineSetup 경로 추가 */}
+          <Route path="/approval-line-setup" element={<ApprovalLineSetup />} />
         </Route>
       </Routes>
     </Router>
