@@ -73,15 +73,16 @@ const Boards = () => {
             color: colors.greenAccent[300],
           },
           "& .MuiDataGrid-columnHeaders": {
-            backgroundColor: colors.blueAccent[700],
+            backgroundColor: colors.blueAccent[500],
             borderBottom: "none",
+            color: colors.gray[200],
           },
           "& .MuiDataGrid-virtualScroller": {
             backgroundColor: colors.primary[400],
           },
           "& .MuiDataGrid-footerContainer": {
             borderTop: "none",
-            backgroundColor: colors.blueAccent[700],
+            backgroundColor: colors.blueAccent[500],
           },
           "& .MuiCheckbox-root": {
             color: `${colors.greenAccent[200]} !important`,

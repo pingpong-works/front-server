@@ -53,7 +53,7 @@ const Contacts = () => {
   return (
     <Box m="20px">
       <Header
-        title="EDMS"
+        title="주소록"
         subtitle="List of Contacts for Future Reference"
       />
       <Box
@@ -71,15 +71,16 @@ const Contacts = () => {
             color: colors.greenAccent[300],
           },
           "& .MuiDataGrid-columnHeaders": {
-            backgroundColor: colors.blueAccent[700],
+            backgroundColor: colors.blueAccent[500],
             borderBottom: "none",
+            color: colors.gray[200],
           },
           "& .MuiDataGrid-virtualScroller": {
             backgroundColor: colors.primary[400],
           },
           "& .MuiDataGrid-footerContainer": {
             borderTop: "none",
-            backgroundColor: colors.blueAccent[700],
+            backgroundColor: colors.blueAccent[500],
           },
           "& .MuiCheckbox-root": {
             color: `${colors.greenAccent[200]} !important`,
