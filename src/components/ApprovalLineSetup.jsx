@@ -13,7 +13,7 @@ const ApprovalLineSetup = () => {
   // 결재 작성 버튼 클릭 시 결재라인 설정 모달을 먼저 엶
   const handleWriteButtonClick = () => {
     console.log("결재 작성 버튼 클릭됨");  // 로그로 상태 확인
-    setIsWriteButtonClicked(true);
+   //setIsWriteButtonClicked(true);
     setOpenApprovalLineModal(true);  // 결재라인 설정 모달 열기
   };
 
@@ -27,11 +27,19 @@ const ApprovalLineSetup = () => {
     setApprovalLines(selectedApprovals);
     setOpenApprovalLineModal(false); // 결재라인 설정 모달 닫기
 
-    // 승인 상태 초기화
-    const initialStatus = {};
-    selectedApprovals.forEach((_, index) => {
-      initialStatus[index] = null; // null이면 대기, true는 승인, false는 반려
-    });
+    // // 승인 상태 초기화
+    // const initialStatus = {};
+    // selectedApprovals.forEach((_, index) => {
+    //   initialStatus[index] = null; // null이면 대기, true는 승인, false는 반려
+    // });
+    
+    // setApprovalStatus(initialStatus);
+    // 결재 상태 초기화
+    const initialStatus = selectedApprovals.reduce((acc, _, index) => {
+      acc[index] = null; // null이면 대기, true는 승인, false는 반려
+      return acc;
+    }, {});
+    
     setApprovalStatus(initialStatus);
 
     // 결재 진행 테이블 모달 열기 (결재라인 설정 후에만 열리도록 설정)
