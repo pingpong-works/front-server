@@ -14,14 +14,15 @@ import {
   Geography,
   Calendar,
   Stream,
-  TotalMail
+  TotalMail,
 } from "./scenes";
 import ApprovalLineSetup from './components/ApprovalLineSetup';
-
+import Login from './scenes/login/login'; 
 const AppRouter = () => {
   return (
     <Router>
       <Routes>
+        <Route path="/login" element={<Login/>}/>
         <Route path="/" element={<App />}>
           <Route path="/" element={<Dashboard />} />
           <Route path="/team" element={<Team />} />
