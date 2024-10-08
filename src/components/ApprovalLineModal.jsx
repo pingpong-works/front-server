@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Table, TableBody, TableRow, TableCell, Select, MenuItem, Box, List, ListItem, ListItemText } from '@mui/material';
+import postWorkflowRequest from '../request/PostWorkflow';
 import getEmployeesByDepartment from '../request/GetEmployeesByDepartment';
 import getDepartments from '../request/GetDepartments';
 
@@ -35,13 +36,31 @@ const ApprovalLineModal = ({ open, handleClose, onSubmit }) => {
 
     // 결재자 추가
     const handleAddApprover = (approver) => {
-        setSelectedApprovals((prev) => [...prev, approver]);
+        if (!selectedApprovals.some(a => a.employeeId === approver.employeeId)) {
+            setSelectedApprovals((prevApprovals) => [...prevApprovals, approver]);
+        }
     };
 
-    // 결재라인 설정 완료
-    const handleConfirm = () => {
-        onSubmit(selectedApprovals);
-        handleClose();
+    // 결재자 라인 설정
+    const handleConfirm = async () => {
+        const workflowPayload = {
+            approvals: selectedApprovals.map((approver, index) => ({
+                employeeId: approver.employeeId, // 결재자 ID
+                approvalOrder: index + 1 // 결재 순서
+            }))
+        };
+    
+        // POST 요청을 통해 workflow 생성
+        postWorkflowRequest(workflowPayload, (workflowId) => {
+            if (workflowId) {
+                console.log('Received workflowId:', workflowId);
+                onSubmit(selectedApprovals, workflowId);  // 추출한 workflowId를 상위 컴포넌트로 전달
+            } else {
+                console.error('workflowId를 받지 못했습니다.');
+            }
+        });
+    
+        handleClose();  // 모달 닫기
     };
 
     return (
@@ -70,7 +89,7 @@ const ApprovalLineModal = ({ open, handleClose, onSubmit }) => {
                                 <ListItem
                                     key={employee.employeeId || `employee-${index}`}
                                     button
-                                    onClick={() => handleAddApprover({ name: employee.name, position: employee.employeeRank })}
+                                    onClick={() => handleAddApprover({ name: employee.name, position: employee.employeeRank, employeeId: employee.employeeId })}
                                 >
                                     <ListItemText primary={`${employee.name} (${employee.employeeRank})`} />
                                 </ListItem>
