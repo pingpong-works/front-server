@@ -1,7 +1,10 @@
 import React from "react";
-import { Table, TableBody, TableRow, TableCell, TableHead, Typography, Box } from "@mui/material";
+import APPROVE from '../assets/images/APPROVE.png'
+import FINALIZE from '../assets/images/FINALIZE.png';
+import REJECT from '../assets/images/REJECT.png';
+import { Table, TableBody, TableRow, TableCell, TableHead, Typography, Box, Button } from "@mui/material";
 
-const ApprovalTable = ({ approvalLines }) => {
+const ApprovalTable = ({ approvalLines, handleApprovalClick }) => {
     return (
         <Table sx={{ border: "1px solid #000", width: "100%" }}>
             <TableHead>
@@ -11,15 +14,15 @@ const ApprovalTable = ({ approvalLines }) => {
                             <TableCell
                                 key={index}
                                 align="center"
-                                sx={{ fontSize: '0.8rem', border: "1px solid #000" }} // 테두리 추가
+                                sx={{ fontSize: '0.8rem', border: "1px solid #000" }}
                             >
                                 <Typography variant="body1" sx={{ fontSize: '0.7rem' }}>
                                     {approver.position}
-                                </Typography> {/* 직급 */}
+                                </Typography>
                             </TableCell>
                         ))
                     ) : (
-                        <TableCell align="center" colSpan={approvalLines.length}>
+                        <TableCell align="center" colSpan={1}>
                             결재라인이 설정되지 않았습니다.
                         </TableCell>
                     )}
@@ -32,32 +35,60 @@ const ApprovalTable = ({ approvalLines }) => {
                             <TableCell
                                 key={index}
                                 align="center"
-                                sx={{ border: "1px solid #000" }} // 테두리 추가
+                                sx={{ border: "1px solid #000" }}
                             >
-                                {/* 결재 상태 또는 추가 정보 */}
                                 <Box
                                     sx={{
                                         width: '50px',
                                         height: '50px',
+                                        display: 'flex',
+                                        justifyContent: 'center',
+                                        alignItems: 'center',
                                     }}
                                 >
-                                    {/* 승인/반려 표시 영역 */}
+                                    {/* 결재 상태가 올바르게 전달되었는지 확인 */}
+                                    {approver.approvalStatus ? (
+                                        approver.approvalStatus === 'PENDING' ? (
+                                            <Button
+                                                variant="contained"
+                                                size="small"
+                                                onClick={() => handleApprovalClick(approver.employeeId)}
+                                            >
+                                                결재
+                                            </Button>
+                                        ) : (
+                                            <img
+                                            src={
+                                                approver.approvalStatus === 'APPROVE'
+                                                    ? APPROVE
+                                                    : approver.approvalStatus === 'FINALIZE'
+                                                    ? FINALIZE
+                                                    : REJECT
+                                            }
+                                            alt={approver.approvalStatus}
+                                            style={{ width: '40px', height: '40px' }}
+                                        />
+                                        )
+                                    ) : (
+                                        <Typography>상태 없음</Typography>
+                                    )}
                                 </Box>
                             </TableCell>
                         ))
                     ) : null}
                 </TableRow>
+
                 <TableRow>
                     {approvalLines && approvalLines.length > 0 ? (
                         approvalLines.map((approver, index) => (
                             <TableCell
                                 key={index}
                                 align="center"
-                                sx={{ border: "1px solid #000" }} // 테두리 추가
+                                sx={{ border: "1px solid #000" }}
                             >
                                 <Typography variant="body2" sx={{ fontSize: '0.7rem' }}>
                                     {approver.name}
-                                </Typography> {/* 이름 */}
+                                </Typography>
                             </TableCell>
                         ))
                     ) : null}
