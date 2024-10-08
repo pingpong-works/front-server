@@ -18,6 +18,7 @@ import {
 } from "./scenes";
 import ApprovalLineSetup from './components/ApprovalLineSetup';
 import Login from './scenes/login/login'; 
+import Mypage from './scenes/mypage/mypage';
 const AppRouter = () => {
   return (
     <Router>
@@ -39,6 +40,7 @@ const AppRouter = () => {
           <Route path="/geography" element={<Geography />} />
           {/* ApprovalLineSetup 경로 추가 */}
           <Route path="/approval-line-setup" element={<ApprovalLineSetup />} />
+          <Route path="/mypage" element={<Mypage/>}/>
         </Route>
       </Routes>
     </Router>
