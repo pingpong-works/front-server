@@ -66,6 +66,7 @@ const Elec = () => {
             console.log("문서 ID:", documentId);  // documentId가 올바르게 전달되는지 확인
             setSelectedDocumentId(documentId);
             setIsModalOpen(true);  // 모달 열기
+            console.log("모달 열림 상태:", isModalOpen);  // 상태가 true로 변경되는지 확인
         } else {
             console.error("문서 ID가 올바르게 전달되지 않았습니다.");
         }

@@ -20,6 +20,7 @@ import ApprovalLineSetup from './components/ApprovalLineSetup';
 import Login from './scenes/login/login'; 
 import Mypage from './scenes/mypage/mypage';
 import { AuthProvider } from './auth/AuthContext'; // AuthProvider 추가
+import ApprovalDocumentForm from "./components/ApprovalDocumentForm";
 
 const AppRouter = () => {
   return (
@@ -48,6 +49,7 @@ const AppRouter = () => {
             <Route path="/faq" element={<FAQ />} />
             <Route path="/geography" element={<Geography />} />
             <Route path="/approval-line-setup" element={<ApprovalLineSetup />} />
+            <Route path="/approval-document-form/:documentId" element={<ApprovalDocumentForm />} />
             <Route path="/mypage" element={<Mypage />} />
           </Route>
         </Routes>
