@@ -19,31 +19,36 @@ import {
 import ApprovalLineSetup from './components/ApprovalLineSetup';
 import Login from './scenes/login/login'; 
 import Mypage from './scenes/mypage/mypage';
+
+import { AuthProvider } from './auth/AuthContext'; 
+
 const AppRouter = () => {
   return (
-    <Router>
-      <Routes>
-        <Route path="/login" element={<Login/>}/>
-        <Route path="/" element={<App />}>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/team" element={<Team />} />
-          <Route path="/elec" element={<Elec />} />
-          <Route path="/contacts" element={<Contacts />} />
-          <Route path="/boards" element={<Boards />} />
-          <Route path="/form" element={<Form />} />
-          <Route path="/calendar" element={<Calendar />} />
-          <Route path="/totalMail" element={<TotalMail />} />
-          <Route path="/pie" element={<Pie />} />
-          <Route path="/stream" element={<Stream />} />
-          <Route path="/line" element={<Line />} />
-          <Route path="/faq" element={<FAQ />} />
-          <Route path="/geography" element={<Geography />} />
-          {/* ApprovalLineSetup 경로 추가 */}
-          <Route path="/approval-line-setup" element={<ApprovalLineSetup />} />
-          <Route path="/mypage" element={<Mypage/>}/>
-        </Route>
-      </Routes>
-    </Router>
+    <AuthProvider> 
+      <Router>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/" element={<App />}>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/team" element={<Team />} />
+            <Route path="/elec" element={<Elec />} />
+            <Route path="/contacts" element={<Contacts />} />
+            <Route path="/boards" element={<Boards />} />
+            <Route path="/form" element={<Form />} />
+            <Route path="/calendar" element={<Calendar />} />
+            <Route path="/totalMail" element={<TotalMail />} />
+            <Route path="/pie" element={<Pie />} />
+            <Route path="/stream" element={<Stream />} />
+            <Route path="/line" element={<Line />} />
+            <Route path="/faq" element={<FAQ />} />
+            <Route path="/geography" element={<Geography />} />
+            {/* ApprovalLineSetup 경로 추가 */}
+            <Route path="/approval-line-setup" element={<ApprovalLineSetup />} />
+            <Route path="/mypage" element={<Mypage />} />
+          </Route>
+        </Routes>
+      </Router>
+    </AuthProvider>
   );
 };
 
