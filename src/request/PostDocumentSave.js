@@ -3,7 +3,7 @@ import Swal from "sweetalert2";
 
 const sendPostDocumentSaveRequest = async(state, requestBody, executeAfter) => {
     try{
-        const response = await axios.post('http://localhost:51142/documents/save',
+        const response = await axios.post('http://localhost:50001/documents/save',
             requestBody,
             {
                 headers: {

@@ -11,7 +11,7 @@ const getDocsTypeAllRequest = async (state, page, size, setDocuments, sort, dire
             direction: 'asc'
         };
 
-        const response = await axios.get(`http://localhost:51142/docs-types`, {
+        const response = await axios.get(`http://localhost:50001/docs-types`, {
             headers: {
                 'Content-Type': 'application/json',
                 // 'Authorization': state.token  // 토큰이 필요할 경우 사용

@@ -81,7 +81,7 @@ const ApprovalDocumentForm = ({ open, handleClose, onSubmit }) => {
     };
 
     const handleSaveDraft = async () => {
-        const employeeId = 21;  // 임시로 employeeId를 설정
+        const employeeId = 1;  // 임시로 employeeId를 설정
         
         const requestBody = {
             documentTypeId: documentType || null,  // 선택한 문서 타입 ID, 없으면 null
