@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
 import App from "./App";
 import {
   Dashboard,
@@ -19,13 +19,20 @@ import {
 import ApprovalLineSetup from './components/ApprovalLineSetup';
 import Login from './scenes/login/login'; 
 import Mypage from './scenes/mypage/mypage';
+
 const AppRouter = () => {
   return (
     <Router>
       <Routes>
-        <Route path="/login" element={<Login/>}/>
+        {/* 기본 경로로 접근 시 로그인 페이지로 리다이렉트 */}
+        <Route path="/" element={<Navigate to="/login" />} />
+        
+        {/* 로그인 페이지 */}
+        <Route path="/login" element={<Login />} />
+        
+        {/* 로그인 후의 페이지들 */}
         <Route path="/" element={<App />}>
-          <Route path="/" element={<Dashboard />} />
+          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/team" element={<Team />} />
           <Route path="/elec" element={<Elec />} />
           <Route path="/contacts" element={<Contacts />} />
@@ -38,9 +45,8 @@ const AppRouter = () => {
           <Route path="/line" element={<Line />} />
           <Route path="/faq" element={<FAQ />} />
           <Route path="/geography" element={<Geography />} />
-          {/* ApprovalLineSetup 경로 추가 */}
           <Route path="/approval-line-setup" element={<ApprovalLineSetup />} />
-          <Route path="/mypage" element={<Mypage/>}/>
+          <Route path="/mypage" element={<Mypage />} />
         </Route>
       </Routes>
     </Router>

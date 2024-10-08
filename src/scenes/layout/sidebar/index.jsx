@@ -40,7 +40,7 @@ const SideBar = () => {
   useEffect(() => {
     const fetchUserInfo = async () => {
       try {
-        const response = await axios.get("http://localhost:8083/employees/my-info", {
+        const response = await axios.get("http://localhost:50000/employees/my-info", {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
           },
