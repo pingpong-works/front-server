@@ -6,6 +6,8 @@ import { tokens } from "../../theme";
 import { useEffect, useState } from "react";
 import TableModal from '../../components/TableModal';  // 결재 진행 상황 모달
 import ApprovalDocumentForm from '../../components/ApprovalDocumentForm';  // 문서 타입 선택 및 작성 폼
+import DocumentModal from "../../components/DocumentModal";
+
 
 const Elec = () => {
     const theme = useTheme();
@@ -19,6 +21,7 @@ const Elec = () => {
     const [isDocumentFormOpen, setIsDocumentFormOpen] = useState(false); // 문서 작성 모달 상태
     const [approvalLines, setApprovalLines] = useState([]);  // 결재 라인 데이터
     const [isModalOpen, setIsModalOpen] = useState(false); // 모달 상태
+    const [selectedDocumentId, setSelectedDocumentId] = useState(null); // 선택한 문서의 ID
 
 
     const [approvalStatus, setApprovalStatus] = useState({  // 결재 상태 초기값 설정
@@ -57,6 +60,17 @@ const Elec = () => {
         setFilteredData(status === "all" ? list : list.filter(item => item.documentStatus === status));
     };
 
+    // 문서코드를 클릭했을 때 문서 ID 저장하고 모달 열기
+    const handleDocumentClick = (documentId) => {
+        if (documentId) {
+            console.log("문서 ID:", documentId);  // documentId가 올바르게 전달되는지 확인
+            setSelectedDocumentId(documentId);
+            setIsModalOpen(true);  // 모달 열기
+        } else {
+            console.error("문서 ID가 올바르게 전달되지 않았습니다.");
+        }
+    };
+
     // 문서 작성 폼 열기
     const handleOpenDocumentForm = () => {
         console.log("결재작성 버튼이 클릭됨");
@@ -89,8 +103,27 @@ const Elec = () => {
 
     // 데이터 그리드 컬럼 정의
     const columns = [
-        { field: "id", headerName: "No", flex: 0.5 },
-        { field: "documentCode", headerName: "문서번호", flex: 1 },
+        {
+            field: "documentCode",
+            headerName: "문서번호",
+            flex: 1,
+            renderCell: (params) => (
+                <Button
+                    onClick={() => handleDocumentClick(params.row.id)}
+                    sx={{
+                        color: colors.gray[100],
+                        textTransform: 'none',  // 대문자 변환 방지
+                        fontWeight: 'bold',  // 글씨 두껍게 설정
+                        '&:hover': {
+                            backgroundColor: 'transparent',  // 버튼 hover 시 배경색 변경 방지
+                            color: '#74ade2', // hover 시 텍스트 색상 변경
+                        }
+                    }}
+                >
+                    {params.value}
+                </Button>
+            )
+        },
         { field: "docsTypes.type", headerName: "종류", flex: 1, valueGetter: (params) => params.row.docsTypes?.type || "N/A" },
         { field: "title", headerName: "제목", flex: 1, valueGetter: (params) => params.row.title || "N/A" },
         { field: "author", headerName: "작성자", flex: 1 },
@@ -219,6 +252,15 @@ const Elec = () => {
                 handleClose={handleCloseDocumentForm}
                 onSubmit={() => { console.log('문서 제출됨'); }}
             />
+
+            {/* 결재 문서 모달 */}
+            {isModalOpen && (
+                <DocumentModal
+                    documentId={selectedDocumentId}
+                    handleClose={() => setIsModalOpen(false)}
+                />
+            )}
+
         </div>
     );
 };
