@@ -19,7 +19,6 @@ import {
 import ApprovalLineSetup from './components/ApprovalLineSetup';
 import Login from './scenes/login/login'; 
 import Mypage from './scenes/mypage/mypage';
-
 import { AuthProvider } from './auth/AuthContext'; // AuthProvider 추가
 
 const AppRouter = () => {
