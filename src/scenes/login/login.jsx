@@ -51,7 +51,7 @@ const Login = () => {
     useEffect(() => {
         const loggedInStatus = localStorage.getItem('accessToken');
         if (loggedInStatus) {
-            navigate('/'); // 로그인된 상태면 홈으로 리디렉션
+            navigate('/dashboard'); // 로그인된 상태면 홈으로 리디렉션
         }
     }, [navigate]);
 

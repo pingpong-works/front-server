@@ -58,7 +58,7 @@
 #login-form button {
     appearance: none;
     outline: 0;
-    background-color: #4CAF50; /* 청록색 */
+    background-color: #1a75ae; /* 청록색 */
     border: 0;
     padding: 10px 15px;
     color: white;
@@ -71,7 +71,7 @@
 }
 
 #login-form button:hover {
-    background-color: #45A049;
+    background-color: #74ade2;
 }
 
 #bg-bubbles {
