@@ -149,7 +149,7 @@ const SideBar = () => {
           menuItemStyles={{
             button: {
               ":hover": {
-                color: "#9accfc",
+                color: "#74ade2",
                 background: "transparent",
                 transition: ".4s ease",
               },
@@ -174,7 +174,7 @@ const SideBar = () => {
           menuItemStyles={{
             button: {
               ":hover": {
-                color: "#9accfc",
+                color: "#74ade2",
                 background: "transparent",
                 transition: ".4s ease",
               },
@@ -229,7 +229,7 @@ const SideBar = () => {
           menuItemStyles={{
             button: {
               ":hover": {
-                color: "#868dfb",
+                color: "#74ade2",
                 background: "transparent",
                 transition: ".4s ease",
               },
@@ -272,7 +272,7 @@ const SideBar = () => {
           menuItemStyles={{
             button: {
               ":hover": {
-                color: "#868dfb",
+                color: "#74ade2",
                 background: "transparent",
                 transition: ".4s ease",
               },
