@@ -1,5 +1,5 @@
 import React from "react";
-import APPROVE from '../assets/images/APPROVE.png'
+import APPROVE from '../assets/images/APPROVE.png';
 import FINALIZE from '../assets/images/FINALIZE.png';
 import REJECT from '../assets/images/REJECT.png';
 import { Table, TableBody, TableRow, TableCell, TableHead, Typography, Box, Button } from "@mui/material";
@@ -52,22 +52,22 @@ const ApprovalTable = ({ approvalLines, handleApprovalClick }) => {
                                             <Button
                                                 variant="contained"
                                                 size="small"
-                                                onClick={() => handleApprovalClick(approver.employeeId)}
+                                                onClick={() => handleApprovalClick(approver.employeeId, approver.approvalOrder)} // approvalOrder 전달
                                             >
                                                 결재
                                             </Button>
                                         ) : (
                                             <img
-                                            src={
-                                                approver.approvalStatus === 'APPROVE'
-                                                    ? APPROVE
-                                                    : approver.approvalStatus === 'FINALIZE'
-                                                    ? FINALIZE
-                                                    : REJECT
-                                            }
-                                            alt={approver.approvalStatus}
-                                            style={{ width: '40px', height: '40px' }}
-                                        />
+                                                src={
+                                                    approver.approvalStatus === 'APPROVE'
+                                                        ? APPROVE
+                                                        : approver.approvalStatus === 'FINALIZE'
+                                                        ? FINALIZE
+                                                        : REJECT
+                                                }
+                                                alt={approver.approvalStatus}
+                                                style={{ width: '40px', height: '40px' }}
+                                            />
                                         )
                                     ) : (
                                         <Typography>상태 없음</Typography>

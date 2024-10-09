@@ -4,7 +4,7 @@ import ApprovalLineModal from './ApprovalLineModal';
 import sendPostDocumentSubmitRequest from '../request/PostDoumentSubmit';
 import sendPostDocumentSaveRequest from '../request/PostDocumentSave';
 import getDocsTypeAllRequest from '../request/GetDocsType';
-import { useAuth } from '../auth/AuthContext';  // useAuth 사용
+import axios from 'axios'; // 로그인된 사용자 정보를 가져오기 위해 axios 사용
 
 const ApprovalDocumentForm = ({ open, handleClose, initialData, isRewriting }) => {
     const [title, setTitle] = useState('');  // 문서 제목
@@ -16,8 +16,27 @@ const ApprovalDocumentForm = ({ open, handleClose, initialData, isRewriting }) =
     const [documentType, setDocumentType] = useState('');  // 문서 타입
     const [docsTypes, setDocsTypes] = useState([]);  // 문서 타입 목록
     const [isLoading, setIsLoading] = useState(false);  // 로딩 상태
+    const [employeeId, setEmployeeId] = useState(null);  // employeeId 상태 관리
 
-    const { state } = useAuth();  // AuthContext에서 상태 가져오기
+    // 로그인된 사용자 정보를 가져오는 함수
+    const fetchUserInfo = async () => {
+        try {
+            const response = await axios.get("http://localhost:50000/employees/my-info", {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+                },
+            });
+            const { employeeId } = response.data.data; // employeeId만 사용
+            setEmployeeId(employeeId); // 로그인된 사용자의 employeeId 설정
+        } catch (error) {
+            console.error("로그인된 사용자 정보를 가져오는 중 오류 발생:", error);
+        }
+    };
+
+    // 컴포넌트 마운트 시 로그인된 사용자 정보 가져오기
+    useEffect(() => {
+        fetchUserInfo();  // 로그인된 사용자 정보를 가져옴
+    }, []);
 
     // 초기 데이터로 폼 초기화
     useEffect(() => {
@@ -104,13 +123,15 @@ const ApprovalDocumentForm = ({ open, handleClose, initialData, isRewriting }) =
     // 문서 임시 저장 처리
     const handleSaveDraft = async () => {
         const requestBody = {
-            documentTypeId: documentType,  // 문서 타입 ID
-            workflowId: workflowId,  // 결재라인 워크플로우 ID
+            documentTypeId: documentType,
+            workflowId: Number(workflowId),  // 숫자로 변환
             title,
             content,
-            employeeId: initialData?.employeeId,  // 작성자 ID
+            employeeId: employeeId,
             customFields,
         };
+
+        console.log(requestBody);
 
         await sendPostDocumentSaveRequest(requestBody, () => {
             console.log("임시 저장 완료");
@@ -118,17 +139,20 @@ const ApprovalDocumentForm = ({ open, handleClose, initialData, isRewriting }) =
         });
     };
 
+
+
     // 문서 제출 처리
     const handleSubmitDocument = async () => {
         const requestBody = {
             documentTypeId: documentType,
-            workflowId: workflowId,
+            workflowId: Number(workflowId),
             title,
             content,
-            employeeId: initialData?.employeeId,
+            employeeId: employeeId,  // 로그인된 작성자 ID
             customFields,
         };
 
+        console.log(requestBody);
         await sendPostDocumentSubmitRequest(requestBody, () => {
             console.log("문서 제출 완료");
             handleClose();
