@@ -15,6 +15,7 @@ import { tokens } from "../../theme";
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+
 const Boards = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
@@ -27,35 +28,35 @@ const Boards = () => {
   const [searchOption, setSearchOption] = useState("title");
   const [sortOption, setSortOption] = useState("createdAt_desc");
 
-    const fetchData = async () => {
-      try {
-        const response = await axios.get("http://localhost:8085/boards", {
-          params: {
-            keyword: keyword,
-            searchOption: searchOption,
-            sort: sortOption,
-            page: 1,
-            size: 10,
-          },
-        });
+  const fetchData = async () => {
+    try {
+      const response = await axios.get("http://localhost:8085/boards", {
+        params: {
+          keyword: keyword,
+          searchOption: searchOption,
+          sort: sortOption,
+          page: 1,
+          size: 10,
+        },
+      });
 
-        const transformedData = response.data.data.map((item) => ({
-          id: item.boardId, 
-          boardId: item.boardId,
-          title: item.title,
-          employeeName: item.employeeName || '익명',
-          category: item.category,
-          createdAt: item.createdAt,
-          views: item.views,
-        }));
+      const transformedData = response.data.data.map((item) => ({
+        id: item.boardId, 
+        boardId: item.boardId,
+        title: item.title,
+        employeeName: item.employeeName || '익명',
+        category: item.category,
+        createdAt: item.createdAt,
+        views: item.views,
+      }));
 
-        setData(transformedData);
-        setLoading(false);
-      } catch (error) {
-        console.error("Error fetching data", error);
-        setLoading(false);
-      }
-    };
+      setData(transformedData);
+      setLoading(false);
+    } catch (error) {
+      console.error("Error fetching data", error);
+      setLoading(false);
+    }
+  };
 
   const handleSearch = () => {
     fetchData();
@@ -129,8 +130,8 @@ const Boards = () => {
         </Typography>
       ),
     },
-    
   ];
+
   return (
     <Box m="20px">
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
@@ -183,6 +184,11 @@ const Boards = () => {
             placeholder="Search"
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
+            onKeyPress={(e) => {
+              if (e.key === "Enter") {
+                handleSearch();
+              }
+            }}
             sx={{ ml: 2, flex: 1 }}
           />
           <IconButton type="button" onClick={handleSearch} sx={{ p: 1 }}>
