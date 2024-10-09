@@ -1,6 +1,5 @@
-/* eslint-disable react/prop-types */
 import { Avatar, Box, IconButton, Typography, useTheme } from "@mui/material";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { tokens } from "../../../theme";
 import { Menu, MenuItem, Sidebar } from "react-pro-sidebar";
 import {
@@ -22,12 +21,41 @@ import avatar from "../../../assets/images/avatar.png";
 import logo from "../../../assets/images/logo.png";
 import Item from "./Item";
 import { ToggledContext } from "../../../App";
+import axios from "axios"; // axios 사용
 
 const SideBar = () => {
   const [collapsed, setCollapsed] = useState(false);
   const { toggled, setToggled } = useContext(ToggledContext);
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
+
+  // 사용자 정보 상태 관리
+  const [userInfo, setUserInfo] = useState({
+    name: "",
+    departmentName: "",
+    employeeRank: "",
+  });
+
+  // API 호출하여 사용자 정보 가져오기
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      try {
+        const response = await axios.get("http://localhost:50000/employees/my-info", {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
+        });
+        console.log(response); // 응답 로그 확인
+        const { name, departmentName, employeeRank } = response.data.data; // 정확한 경로 사용
+        setUserInfo({ name, departmentName, employeeRank });
+      } catch (error) {
+        console.error("Error fetching user info:", error);
+      }
+    };
+
+    fetchUserInfo();
+  }, []);
+
   return (
     <Sidebar
       backgroundColor={colors.primary[400]}
@@ -103,23 +131,15 @@ const SideBar = () => {
           />
           <Box sx={{ textAlign: "center" }}>
             <Typography variant="h3" fontWeight="bold" color={colors.gray[100]}>
-              
+              {userInfo.name}
             </Typography>
             <Typography
               variant="h6"
               fontWeight="500"
               color={colors.blueAccent[450]}
             >
-              인사팀 | 과장
+              {userInfo.departmentName} | {userInfo.employeeRank}
             </Typography>
-            <Typography
-              variant="h6"
-              fontWeight="500"
-              color={colors.blueAccent[450]}
-            >
-              김준수
-            </Typography>
-            
           </Box>
         </Box>
       )}
@@ -129,7 +149,7 @@ const SideBar = () => {
           menuItemStyles={{
             button: {
               ":hover": {
-                color: "#9accfc",
+                color: "#74ade2",
                 background: "transparent",
                 transition: ".4s ease",
               },
@@ -154,7 +174,7 @@ const SideBar = () => {
           menuItemStyles={{
             button: {
               ":hover": {
-                color: "#9accfc",
+                color: "#74ade2",
                 background: "transparent",
                 transition: ".4s ease",
               },
@@ -209,7 +229,7 @@ const SideBar = () => {
           menuItemStyles={{
             button: {
               ":hover": {
-                color: "#868dfb",
+                color: "#74ade2",
                 background: "transparent",
                 transition: ".4s ease",
               },
@@ -252,7 +272,7 @@ const SideBar = () => {
           menuItemStyles={{
             button: {
               ":hover": {
-                color: "#868dfb",
+                color: "#74ade2",
                 background: "transparent",
                 transition: ".4s ease",
               },

@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom"; // useNavigate 훅 가져오기
 import {
   Box,
   IconButton,
@@ -16,7 +17,11 @@ import {
   SearchOutlined,
   SettingsOutlined,
 } from "@mui/icons-material";
+
+
 import { ToggledContext } from "../../../App";
+
+
 const Navbar = () => {
   const theme = useTheme();
   const colorMode = useContext(ColorModeContext);
@@ -24,6 +29,7 @@ const Navbar = () => {
   const isMdDevices = useMediaQuery("(max-width:768px)");
   const isXsDevices = useMediaQuery("(max-width:466px)");
   const colors = tokens(theme.palette.mode);
+  const navigate = useNavigate(); // useNavigate 훅 호출
   return (
     <Box
       display="flex"
@@ -54,7 +60,8 @@ const Navbar = () => {
         <IconButton>
           <SettingsOutlined />
         </IconButton>
-        <IconButton>
+        {/* PersonOutlined 클릭 시 mypage로 이동 */}
+        <IconButton onClick={() => navigate('/mypage')}>
           <PersonOutlined />
         </IconButton>
       </Box>

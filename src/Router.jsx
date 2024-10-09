@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
 import App from "./App";
 import {
   Dashboard,
@@ -17,36 +17,50 @@ import {
   TotalMail
 } from "./scenes";
 import ApprovalLineSetup from './components/ApprovalLineSetup';
+import Login from './scenes/login/login';
+import Mypage from './scenes/mypage/mypage';
+import { AuthProvider } from './auth/AuthContext'; // AuthProvider 추가
+import ApprovalDocumentForm from "./components/ApprovalDocumentForm";
 import CreateBoard from './scenes/boards/createBoard';
 import ViewBoard from './scenes/boards/viewBoard';
 import UpdateBoard from './scenes/boards/updateBoard';
 
 const AppRouter = () => {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<App />}>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/team" element={<Team />} />
-          <Route path="/elec" element={<Elec />} />
-          <Route path="/contacts" element={<Contacts />} />
-          <Route path="/boards" element={<Boards />} />
-          <Route path="/boards/createBoard" element={<CreateBoard />} />
-          <Route path="/viewBoard/:id" element={<ViewBoard />} />
-          <Route path="/updateBoard" element={<UpdateBoard />} />
-          <Route path="/form" element={<Form />} />
-          <Route path="/calendar" element={<Calendar />} />
-          <Route path="/totalMail" element={<TotalMail />} />
-          <Route path="/pie" element={<Pie />} />
-          <Route path="/stream" element={<Stream />} />
-          <Route path="/line" element={<Line />} />
-          <Route path="/faq" element={<FAQ />} />
-          <Route path="/geography" element={<Geography />} />
-          {/* ApprovalLineSetup 경로 추가 */}
-          <Route path="/approval-line-setup" element={<ApprovalLineSetup />} />
-        </Route>
-      </Routes>
-    </Router>
+    <AuthProvider> {/* AuthProvider로 인증 상태 관리 */}
+      <Router>
+        <Routes>
+          {/* 기본 경로로 접근 시 로그인 페이지로 리다이렉트 */}
+          <Route path="/" element={<Navigate to="/login" />} />
+
+          {/* 로그인 페이지 */}
+          <Route path="/login" element={<Login />} />
+
+          {/* 로그인 후의 페이지들 */}
+          <Route path="/" element={<App />}>
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/team" element={<Team />} />
+            <Route path="/elec" element={<Elec />} />
+            <Route path="/contacts" element={<Contacts />} />
+            <Route path="/boards" element={<Boards />} />
+            <Route path="/boards/createBoard" element={<CreateBoard />} />
+            <Route path="/viewBoard/:id" element={<ViewBoard />} />
+            <Route path="/updateBoard" element={<UpdateBoard />} />
+            <Route path="/form" element={<Form />} />
+            <Route path="/calendar" element={<Calendar />} />
+            <Route path="/totalMail" element={<TotalMail />} />
+            <Route path="/pie" element={<Pie />} />
+            <Route path="/stream" element={<Stream />} />
+            <Route path="/line" element={<Line />} />
+            <Route path="/faq" element={<FAQ />} />
+            <Route path="/geography" element={<Geography />} />
+            <Route path="/approval-line-setup" element={<ApprovalLineSetup />} />
+            <Route path="/approval-document-form/:documentId" element={<ApprovalDocumentForm />} />
+            <Route path="/mypage" element={<Mypage />} />
+          </Route>
+        </Routes>
+      </Router>
+    </AuthProvider>
   );
 };
 
