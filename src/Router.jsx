@@ -17,6 +17,9 @@ import {
   TotalMail
 } from "./scenes";
 import ApprovalLineSetup from './components/ApprovalLineSetup';
+import CreateBoard from './scenes/boards/createBoard';
+import ViewBoard from './scenes/boards/viewBoard';
+import UpdateBoard from './scenes/boards/updateBoard';
 
 const AppRouter = () => {
   return (
@@ -28,6 +31,9 @@ const AppRouter = () => {
           <Route path="/elec" element={<Elec />} />
           <Route path="/contacts" element={<Contacts />} />
           <Route path="/boards" element={<Boards />} />
+          <Route path="/boards/createBoard" element={<CreateBoard />} />
+          <Route path="/viewBoard/:id" element={<ViewBoard />} />
+          <Route path="/updateBoard" element={<UpdateBoard />} />
           <Route path="/form" element={<Form />} />
           <Route path="/calendar" element={<Calendar />} />
           <Route path="/totalMail" element={<TotalMail />} />

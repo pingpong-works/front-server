@@ -35,7 +35,7 @@ const Boards = () => {
             searchOption: searchOption,
             sort: sortOption,
             page: 1,
-            size: 15,
+            size: 10,
           },
         });
 
@@ -73,6 +73,10 @@ const Boards = () => {
   useEffect(() => {
     fetchData();
   }, []);
+
+  const handleRowClick = (params) => {
+    navigate(`/viewBoard/${params.id}`);
+  };
 
   const columns = [
     { field: "boardId", 
@@ -225,6 +229,11 @@ const Boards = () => {
           rows={data}
           columns={columns}
           getRowId={(row) => row.boardId}
+          sx={{
+            "& .MuiDataGrid-row:hover": {
+              cursor: "pointer",
+            },
+          }}
           initialState={{
             pagination: {
               paginationModel: {
@@ -234,6 +243,7 @@ const Boards = () => {
           }}
           pageSizeOptions={[10]}
           checkboxSelection
+          onRowClick={handleRowClick}
         />
       </Box>
     </Box>

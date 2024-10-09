@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Button,
@@ -6,22 +6,49 @@ import {
   IconButton,
   useTheme,
 } from "@mui/material";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Header } from "../../components";
 import { Close } from "@mui/icons-material";
 import axios from "axios";
 import { tokens } from "../../theme";
 
-const CreateBoard = () => {
+const UpdateBoard = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const { boardId } = location.state; // 이전 페이지에서 넘겨받은 boardId
 
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("");
   const [content, setContent] = useState("");
   const [images, setImages] = useState([]);
   const [imagePreviews, setImagePreviews] = useState([]);
+  const [imagesToDelete, setImagesToDelete] = useState([]); // 삭제할 이미지 리스트 상태 추가
+
+  // 게시글 데이터 가져오기
+  useEffect(() => {
+    const fetchBoardData = async () => {
+      try {
+        const response = await axios.get(`http://localhost:8085/boards/${boardId}`);
+        const boardData = response.data.data;
+
+        setTitle(boardData.title);
+        setCategory(boardData.category);
+        setContent(boardData.content);
+        setImages(boardData.imageUrls || []);
+        setImagePreviews(boardData.imageUrls || []);
+      } catch (error) {
+        console.error("게시글 정보를 불러오는데 실패했습니다", error);
+        alert("게시글 정보를 불러오는데 실패했습니다.");
+      }
+    };
+
+    if (boardId) {
+      fetchBoardData();
+    }
+  }, [boardId]);
 
   const handleImageUpload = (e) => {
     const files = Array.from(e.target.files);
@@ -32,39 +59,53 @@ const CreateBoard = () => {
     e.target.value = null;
   };
 
+  const handleImageRemove = (index) => {
+    // 기존 이미지인지 확인 후 삭제 리스트에 추가
+    if (typeof images[index] === "string") {
+      setImagesToDelete([...imagesToDelete, images[index]]);
+    }
+
+    // 이미지 및 미리보기 리스트에서 제거
+    const newImages = [...images];
+    const newImagePreviews = [...imagePreviews];
+    newImages.splice(index, 1);
+    newImagePreviews.splice(index, 1);
+    setImages(newImages);
+    setImagePreviews(newImagePreviews);
+  };
+
   const handleSubmit = async () => {
     try {
-      const imageLinks = images.map((image) => image);
-  
-      const postData = {
+      const updatedData = {
         title: title,
         category: category,
         content: content,
-        images: imageLinks,
+        images: images.filter((image) => typeof image !== "string"), // 파일 객체만 남김
+        imagesToDelete: imagesToDelete, // 삭제할 이미지 리스트를 본문에 포함
       };
-  
-      const response = await axios.post("http://localhost:8085/boards", postData, {
+
+      const response = await axios.patch(`http://localhost:8085/boards/${boardId}`, updatedData, {
         params: {
-          employeeId: 1, 
+          employeeId: 1,
         },
         headers: {
           'Content-Type': 'application/json',
         },
       });
-  
-      if (response.status === 201) {
-        alert("게시글이 성공적으로 작성되었습니다.");
-        navigate("/boards");
+
+      if (response.status === 200) {
+        alert("게시글이 성공적으로 수정되었습니다.");
+        navigate(`/viewBoard/${boardId}`)
       }
     } catch (error) {
-      console.error("게시글 작성 실패", error);
-      alert("게시글 작성에 실패했습니다.");
+      console.error("게시글 수정 실패", error);
+      alert("게시글 수정에 실패했습니다.");
     }
   };
 
   return (
     <Box m="20px">
-      <Header title="Boards" subtitle="Create Board" />
+      <Header title="Boards" subtitle="Update Board" />
   
       <Box mt="20px" display="flex" flexDirection="column" gap={2} maxWidth="100%" bgcolor={colors.primary[400]} p={3} borderRadius="8px">
         <TextField
@@ -188,7 +229,7 @@ const CreateBoard = () => {
         <Box display="flex" justifyContent="flex-end" mt={3}>
           <Button
             variant="outlined"
-            onClick={() => navigate("/boards")}
+            onClick={() => navigate(`/viewBoard/${boardId}`)}
             sx={{
               color: colors.redAccent[500],
               borderColor: colors.redAccent[500],
@@ -211,7 +252,7 @@ const CreateBoard = () => {
               },
             }}
           >
-            작성하기
+            수정하기
           </Button>
         </Box>
       </Box>
@@ -219,4 +260,4 @@ const CreateBoard = () => {
   );
 };
 
-export default CreateBoard;
+export default UpdateBoard;
