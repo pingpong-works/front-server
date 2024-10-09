@@ -2,9 +2,11 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Box, Modal, Typography, Table, TableBody, TableCell, TableRow, IconButton, Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField } from "@mui/material";
 import CloseIcon from '@mui/icons-material/Close';
+import ApprovalLineModal from './ApprovalLineModal';
+import ApprovalDocumentForm from './ApprovalDocumentForm';
 import ApprovalTable from "./ApprovalTable";
 import getEmployee from "../request/GetEmployee";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 
 const DocumentModal = ({ documentId, handleClose }) => {
@@ -15,6 +17,7 @@ const DocumentModal = ({ documentId, handleClose }) => {
     const [selectedApprovalId, setSelectedApprovalId] = useState(null);
     const [message, setMessage] = useState('');
     const [isOpen, setIsOpen] = useState(true);  // isOpen 상태 추가
+    const [openApprovalDocumentForm, setOpenApprovalDocumentForm] = useState(false);  // ApprovalDocumentForm 열림 상태
     const navigate = useNavigate();
     const { state } = useAuth();  // useAuth 훅 사용
 
@@ -51,7 +54,7 @@ const DocumentModal = ({ documentId, handleClose }) => {
                 const sortedApprovals = approvals.sort((a, b) => a.approvalOrder - b.approvalOrder);
 
                 const approvalsWithInfo = await Promise.all(sortedApprovals.map(async (approval) => {
-                    const employeeInfo = await getEmployee(approval.employeeId, setIsLoading);
+                    const employeeInfo = await getEmployee(approval.employeeId);
                     return {
                         ...approval,
                         name: employeeInfo?.name || "Unknown",
@@ -76,8 +79,6 @@ const DocumentModal = ({ documentId, handleClose }) => {
         if (documentId) {
             fetchDocumentData();
             setIsOpen(true);
-            console.log("Document ID:", documentId);
-            console.log("Modal Open State:", isOpen);
         }
     }, [documentId]);
 
@@ -90,13 +91,12 @@ const DocumentModal = ({ documentId, handleClose }) => {
         setOpenMessageModal(true);
     };
 
-    const isAuthor = documentData.author === userInfo.name;
-    const isApprover = documentData.workFlow?.approvals.some(
-        (approval) => approval.employeeId === userInfo.employeeId
-    );
-
     const handleReWrite = () => {
-        navigate(`/approval-document-form/${documentId}`);
+        setOpenApprovalDocumentForm(true); // "다시 작성" 버튼을 누르면 ApprovalDocumentForm 모달 열기
+    };
+
+    const handleCloseApprovalDocumentForm = () => {
+        setOpenApprovalDocumentForm(false); // 모달 닫기
     };
 
     const handleCloseMessageModal = () => {
@@ -104,24 +104,21 @@ const DocumentModal = ({ documentId, handleClose }) => {
     };
 
     const handleConfirmApproval = (status) => {
-        // 여기에 승인/반려/전결 로직 추가
         console.log(`Document ${status}: ${selectedApprovalId}`);
         setOpenMessageModal(false);
     };
 
     return (
         <Modal open={isOpen} onClose={handleClose}>
-            <Box
-                sx={{
-                    width: "80%",
-                    maxHeight: "80vh",
-                    overflow: "auto",
-                    padding: 4,
-                    backgroundColor: "#fff",
-                    margin: "100px auto",
-                    position: "relative"
-                }}
-            >
+            <Box sx={{
+                width: "80%",
+                maxHeight: "80vh",
+                overflow: "auto",
+                padding: 4,
+                backgroundColor: "#fff",
+                margin: "100px auto",
+                position: "relative"
+            }}>
                 <IconButton
                     aria-label="close"
                     onClick={handleClose}
@@ -138,7 +135,7 @@ const DocumentModal = ({ documentId, handleClose }) => {
                 <Typography variant="h5" textAlign="center" mb={4} fontWeight="bold" fontSize={30}>
                     {documentData.title}
                 </Typography>
-                {/* 작성자이고 문서 상태가 임시 저장일 경우 '다시 작성' 버튼 표시 */}
+
                 {documentData.author === userInfo.name && documentData.documentStatus === 'DRAFT' && (
                     <Button
                         variant="contained"
@@ -149,26 +146,30 @@ const DocumentModal = ({ documentId, handleClose }) => {
                     </Button>
                 )}
 
-                {/* 결재 라인과 문서 테이블 간의 간격 조정 */}
+                {/* ApprovalDocumentForm을 엽니다 */}
+                {openApprovalDocumentForm && (
+                    <ApprovalDocumentForm
+                        open={openApprovalDocumentForm}
+                        handleClose={handleCloseApprovalDocumentForm}
+                        initialData={documentData}  // 문서 데이터를 전달합니다
+                    />
+                )}
+
                 <Box sx={{ mb: 6 }} />
 
-                {/* 결재 라인 */}
-                <Box
-                    sx={{
-                        display: "block",
-                        position: "left",
-                        width: "15em",
-                        textAlign: "center",
-                        marginBottom: "20px",
-                    }}
-                >
+                <Box sx={{
+                    display: "block",
+                    position: "left",
+                    width: "15em",
+                    textAlign: "center",
+                    marginBottom: "20px",
+                }}>
                     <ApprovalTable
                         approvalLines={documentData.workFlow?.approvals || []}
-                        handleApprovalClick={handleApprovalAction} // 결재 버튼 클릭 핸들러 전달
+                        handleApprovalClick={handleApprovalAction}
                     />
                 </Box>
 
-                {/* 문서 상세 테이블 */}
                 <Table sx={{ borderCollapse: "collapse", width: "100%" }}>
                     <TableBody>
                         <TableRow>
@@ -203,7 +204,6 @@ const DocumentModal = ({ documentId, handleClose }) => {
                     </TableBody>
                 </Table>
 
-                {/* 메시지 입력 모달 */}
                 <Dialog open={openMessageModal} onClose={handleCloseMessageModal}>
                     <DialogTitle>메시지 입력</DialogTitle>
                     <DialogContent>

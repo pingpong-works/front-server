@@ -1,63 +1,87 @@
 import React, { useState, useEffect } from 'react';
-import { useTheme, Dialog, DialogTitle, DialogContent, DialogActions, Button, Select, MenuItem, TextField, Box, Typography, TableHead, Table, TableBody, TableRow, TableCell, CircularProgress, IconButton } from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, Select, MenuItem, Box, Typography, Table, TableBody, TableRow, TableCell, CircularProgress } from '@mui/material';
 import ApprovalLineModal from './ApprovalLineModal';
-import getDocsTypeAllRequest from '../request/GetDocsType';
-import CloseIcon from '@mui/icons-material/Close';
-import { tokens } from "../theme";
 import sendPostDocumentSubmitRequest from '../request/PostDoumentSubmit';
 import sendPostDocumentSaveRequest from '../request/PostDocumentSave';
+import getDocsTypeAllRequest from '../request/GetDocsType';
+import { useAuth } from '../auth/AuthContext';  // useAuth 사용
 
-const ApprovalDocumentForm = ({ open, handleClose, onSubmit }) => {
-    const [employeeId, setEmployeeId] = useState(1);
-    const [documentType, setDocumentType] = useState({ id: '', templateName: '' });  // 문서 타입
+const ApprovalDocumentForm = ({ open, handleClose, initialData, isRewriting }) => {
     const [title, setTitle] = useState('');  // 문서 제목
     const [content, setContent] = useState('');  // 문서 내용
-    const [fields, setFields] = useState([]);  // 선택된 문서의 필드들
+    const [customFields, setCustomFields] = useState({});  // 문서의 커스텀 필드
     const [approvalLines, setApprovalLines] = useState([]);  // 결재라인
-    const [workflowId, setWorkflowId] = useState(null);
-    const [openApprovalLineModal, setOpenApprovalLineModal] = useState(false);
-    const [docsTypes, setDocsTypes] = useState([]);  // 문서 타입 리스트 상태
-    const [isLoading, setIsLoading] = useState(false);  // api로딩상태
-    const [customFields, setCustomFields] = useState({});
+    const [workflowId, setWorkflowId] = useState(null);  // 결재라인 워크플로우 ID
+    const [openApprovalLineModal, setOpenApprovalLineModal] = useState(false);  // 결재라인 모달 상태
+    const [documentType, setDocumentType] = useState('');  // 문서 타입
+    const [docsTypes, setDocsTypes] = useState([]);  // 문서 타입 목록
+    const [isLoading, setIsLoading] = useState(false);  // 로딩 상태
 
-    const theme = useTheme();
-    const colors = tokens(theme.palette.mode);
+    const { state } = useAuth();  // AuthContext에서 상태 가져오기
 
-    // 문서 타입 가져오기
-    const fetchDocsTypes = async () => {
-        setIsLoading(true);
-        try {
-            const response = await getDocsTypeAllRequest({}, 1, 10, setDocsTypes, 'templateName', 'asc', setIsLoading);
-            if (response?.data?.data) {
-                setDocsTypes(response.data.data);  // 문서 타입 리스트 설정
-            }
-        } catch (error) {
-            console.error("문서 타입 가져오기 오류:", error);
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    // 컴포넌트가 처음 렌더링될 때 문서 타입 목록을 가져옴
+    // 초기 데이터로 폼 초기화
     useEffect(() => {
+        if (initialData) {
+            setTitle(initialData.title || '');  // 기존 제목 설정
+            setContent(initialData.content || '');  // 기존 내용 설정
+            setCustomFields(initialData.customFields || {});  // 기존 필드 설정
+            setApprovalLines(initialData.workFlow?.approvals || []);  // 결재라인 설정
+            setWorkflowId(initialData.workFlow?.workflowId || null);  // 워크플로우 ID 설정
+            setDocumentType(initialData.documentType?.id || '');  // 기존 문서 타입 설정
+        } else {
+            // 새로 작성 시 상태 초기화
+            setTitle('');
+            setContent('');
+            setCustomFields({});
+            setApprovalLines([]);
+            setWorkflowId(null);
+            setDocumentType('');
+        }
+    }, [initialData]);
+
+    // 문서 타입 불러오기
+    useEffect(() => {
+        const fetchDocsTypes = async () => {
+            try {
+                setIsLoading(true);
+                const response = await getDocsTypeAllRequest(1, 10, setDocsTypes, 'id', 'asc', setIsLoading);  // 토큰 없이 호출
+                console.log('문서타입 GET요청 성공: ', response);
+                if (response.data && response.data.length > 0) {
+                    setDocsTypes(response.data);  // 받아온 데이터를 설정
+                } else {
+                    console.log('문서 타입 데이터가 없습니다.');
+                }
+            } catch (error) {
+                console.error('문서 타입 불러오기 오류: ', error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
         fetchDocsTypes();
     }, []);
 
-    // 문서 타입 선택 핸들러
-    const handleDocumentTypeChange = (event) => {
-        const selectedTemplate = docsTypes.data.find(doc => doc.documentTemplate.templateName === event.target.value);
-
-        if (selectedTemplate) {
-            setDocumentType({
-                id: selectedTemplate.id,  // 선택된 문서 템플릿의 ID 설정
-                templateName: selectedTemplate.documentTemplate.templateName  // 선택된 문서 템플릿 이름 설정
-            });
-            setFields(selectedTemplate.documentTemplate.fields);  // 선택된 템플릿에 맞는 필드 설정
-            console.log('Selected Template:', selectedTemplate.documentTemplate);  // 확인용 로그
-        } else {
-            setDocumentType('');  // 선택된 템플릿이 없을 경우 상태 초기화
-            setFields([]);  // 필드도 초기화
+    // 문서 타입 선택 시 필드 동적 생성
+    useEffect(() => {
+        if (!isRewriting && documentType) {
+            const selectedDocType = docsTypes.find(doc => doc.id === documentType);
+            if (selectedDocType && selectedDocType.documentTemplate) {
+                const fields = selectedDocType.documentTemplate.fields;
+                const initialFields = {};
+                fields.forEach(field => {
+                    initialFields[field.fieldName] = '';  // 필드 초기값을 빈 문자열로 설정
+                });
+                setCustomFields(initialFields);  // 필드를 동적으로 설정
+            }
         }
+    }, [documentType, isRewriting]);
+
+    // 커스텀 필드 값 변경 처리
+    const handleFieldChange = (fieldName, value) => {
+        setCustomFields(prev => ({
+            ...prev,
+            [fieldName]: value,
+        }));
     };
 
     // 결재라인 설정 모달 열기
@@ -73,183 +97,77 @@ const ApprovalDocumentForm = ({ open, handleClose, onSubmit }) => {
     // 결재라인 설정 완료 시 처리
     const handleApprovalLineSubmit = (selectedApprovals, workflowId) => {
         setApprovalLines(selectedApprovals);
-        setWorkflowId(workflowId);  // 선택한 워크플로우 ID를 저장
+        setWorkflowId(workflowId);  // 워크플로우 ID 저장
         setOpenApprovalLineModal(false);
     };
 
-    //customFields 입력시 업데이트
-    const handleFieldChange = (fieldName, value) => {
-        setCustomFields((prevFields) => ({
-            ...prevFields,
-            [fieldName]: value
-        }));
-    };
-
+    // 문서 임시 저장 처리
     const handleSaveDraft = async () => {
-        const employeeId = 1;  // 임시로 employeeId를 설정
-
         const requestBody = {
-            documentTypeId: documentType.id || null,  // 선택한 문서 타입 ID, 없으면 null
-            workflowId: workflowId || null,  // 선택한 워크플로우 ID
+            documentTypeId: documentType,  // 문서 타입 ID
+            workflowId: workflowId,  // 결재라인 워크플로우 ID
             title,
             content,
-            employeeId: employeeId, // 로그인한 사용자의 ID
-            customFields
+            employeeId: initialData?.employeeId,  // 작성자 ID
+            customFields,
         };
 
-        // 임시 저장 요청 호출
-        await sendPostDocumentSaveRequest(null, requestBody, () => {
-            console.log('임시 저장 후 추가 작업 실행');
-            handleClose();  // 모달 닫기
+        await sendPostDocumentSaveRequest(requestBody, () => {
+            console.log("임시 저장 완료");
+            handleClose();
         });
     };
 
-    // 제출 핸들러
+    // 문서 제출 처리
     const handleSubmitDocument = async () => {
         const requestBody = {
-            documentTypeId: documentType.id,  // 선택한 문서 타입 ID
-            workflowId: workflowId,        // 선택한 워크플로우 ID
+            documentTypeId: documentType,
+            workflowId: workflowId,
             title,
             content,
-            employeeId, // 로그인한 사용자의 ID
-            customFields
+            employeeId: initialData?.employeeId,
+            customFields,
         };
 
-        // 제출 요청 호출
-        await sendPostDocumentSubmitRequest(null, requestBody, () => {
-            console.log('requestBody',requestBody);
-            handleClose();  // 모달 닫기
+        await sendPostDocumentSubmitRequest(requestBody, () => {
+            console.log("문서 제출 완료");
+            handleClose();
         });
     };
 
     return (
         <Dialog open={open} onClose={handleClose} fullWidth maxWidth="md">
-            <DialogTitle >문서 작성
-                <IconButton
-                    aria-label="close"
-                    onClick={handleClose}
-                    sx={{
-                        position: 'absolute',
-                        right: 8,
-                        top: 8,
-                        color: (theme) => theme.palette.grey[500],
-                    }}
-                >
-                    <CloseIcon />
-                </IconButton>
-            </DialogTitle>
+            <DialogTitle>문서 작성</DialogTitle>
             <DialogContent>
-                <Box p={2}>
+                <Box>
                     {/* 문서 타입 선택 */}
                     <Typography variant="h6">문서 타입 선택</Typography>
                     {isLoading ? (
                         <CircularProgress />
                     ) : (
                         <Select
-                            value={documentType.templateName} 
-                            onChange={handleDocumentTypeChange}
+                            value={documentType}
+                            onChange={(e) => {
+                                if (!isRewriting) {
+                                    setDocumentType(e.target.value); // 새로 작성일 경우만 문서 타입 선택 가능
+                                }
+                            }}
                             displayEmpty
                             fullWidth
                             variant="outlined"
                             sx={{ marginBottom: '20px' }}
+                            disabled={isRewriting}  // 다시 작성일 경우 선택 불가
                         >
                             <MenuItem value="" disabled>문서 타입 선택</MenuItem>
-                            {docsTypes.data?.map((doc) => (
-                                <MenuItem key={doc.documentTemplate.id} value={doc.documentTemplate.templateName}>
-                                    {doc.documentTemplate.templateName}
+                            {docsTypes.map((doc, index) => (
+                                <MenuItem key={index} value={doc.id}>
+                                    {doc.type}
                                 </MenuItem>
                             ))}
                         </Select>
                     )}
 
-                    {/* 결재라인 설정 버튼 */}
-                    <Button
-                        variant="contained"
-                        onClick={handleOpenApprovalLineModal}
-                        fullWidth
-                        sx={{ marginBottom: '20px', backgroundColor: colors.blueAccent[500] }}
-                    >
-                        결재라인 설정
-                    </Button>
-                    {/* 결재라인 표시 테이블 */}
-                    <Table>
-                        <TableHead>
-                            <TableRow>
-                                {approvalLines && approvalLines.length > 0 ? (
-                                    approvalLines.map((approver, index) => (
-                                        <TableCell
-                                            key={index}
-                                            align="center"
-                                            sx={{ fontSize: '0.6rem', border: '1px solid #ccc' }}
-                                        >
-                                            <Typography variant="body1" sx={{ fontSize: '0.6rem' }}>
-                                                {approver.position}
-                                            </Typography> {/* 직급 */}
-                                        </TableCell>
-                                    ))
-                                ) : (
-                                    <TableCell align="center" colSpan={approvalLines.length}>
-                                        결재라인이 설정되지 않았습니다.
-                                    </TableCell>
-                                )}
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            <TableRow>
-                                {approvalLines && approvalLines.length > 0 ? (
-                                    approvalLines.map((approver, index) => (
-                                        <TableCell
-                                            key={index}
-                                            align="center"
-                                            sx={{ border: '1px solid #ccc' }} 
-                                        >
-                                            {/* 결재 상태 또는 추가 정보 */}
-                                            <Box
-                                                sx={{
-                                                    width: '50px',
-                                                    height: '50px',
-                                                    display: 'flex'
-                                                }}
-                                            >
-                                            </Box>
-                                        </TableCell>
-                                    ))
-                                ) : null}
-                            </TableRow>
-                        </TableBody>
-                        <TableRow>
-                            {approvalLines && approvalLines.length > 0 ? (
-                                approvalLines.map((approver, index) => (
-                                    <TableCell
-                                        key={index}
-                                        align="center"
-                                        sx={{ border: '1px solid #ccc' }} // 테두리 추가
-                                    >
-                                        <Typography variant="body2" sx={{ fontSize: '0.6rem' }}>
-                                            {approver.name}
-                                        </Typography> {/* 이름 */}
-                                    </TableCell>
-                                ))
-                            ) : null}
-                        </TableRow>
-                    </Table>
-                    <Box p={2}></Box>
-                    {/* 필드에 맞는 동적 입력 폼 생성 */}
-                    {fields.length > 0 && fields.map((field) => (
-                        <TextField
-                            key={field.id}
-                            label={field.fieldName}
-                            fullWidth
-                            variant="outlined"
-                            sx={{ marginBottom: '20px' }}
-                            type={field.fieldType === 'Date' || field.fieldType === 'LocalDate' ? 'date' : 'text'}  // 필드 타입에 맞게 input type 설정
-                            InputLabelProps={{
-                                shrink: field.fieldType === 'Date' || field.fieldType === 'LocalDate' ? true : undefined,
-                            }}
-                            onChange={(e) => handleFieldChange(field.fieldName, e.target.value)}  // 필드 값 변경 시 호출
-                        />
-                    ))}
-                    {/* 문서 제목 및 내용 작성 */}
+                    {/* 제목 입력 */}
                     <TextField
                         label="문서 제목"
                         fullWidth
@@ -258,6 +176,8 @@ const ApprovalDocumentForm = ({ open, handleClose, onSubmit }) => {
                         onChange={(e) => setTitle(e.target.value)}
                         sx={{ marginBottom: '20px' }}
                     />
+
+                    {/* 내용 입력 */}
                     <TextField
                         label="문서 내용"
                         fullWidth
@@ -268,28 +188,41 @@ const ApprovalDocumentForm = ({ open, handleClose, onSubmit }) => {
                         onChange={(e) => setContent(e.target.value)}
                         sx={{ marginBottom: '20px' }}
                     />
+
+                    {/* 커스텀 필드들 */}
+                    {Object.keys(customFields).map((field, index) => (
+                        <TextField
+                            key={index}
+                            label={field}
+                            fullWidth
+                            variant="outlined"
+                            value={customFields[field]}
+                            onChange={(e) => handleFieldChange(field, e.target.value)}
+                            sx={{ marginBottom: '20px' }}
+                        />
+                    ))}
+
+                    {/* 결재라인 설정 */}
+                    <Button variant="contained" onClick={handleOpenApprovalLineModal}>
+                        결재라인 설정
+                    </Button>
+
+                    {/* 결재라인 테이블 표시 */}
+                    <Table>
+                        <TableBody>
+                            {approvalLines.map((approver, index) => (
+                                <TableRow key={index}>
+                                    <TableCell>{approver.position}</TableCell>
+                                    <TableCell>{approver.name}</TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
                 </Box>
             </DialogContent>
             <DialogActions>
-                {/* 임시 저장 및 제출 버튼 */}
-                <Button
-                    variant="outlined"
-                    onClick={handleSaveDraft}
-                    sx={{
-                        marginRight: '10px',
-                        backgroundColor: colors.primary[300],
-                        color: colors.gray[150]
-                    }}
-                >
-                    임시 저장
-                </Button>
-                <Button
-                    variant="contained"
-                    onClick={handleSubmitDocument}
-                    color="primary"
-                >
-                    제출
-                </Button>
+                <Button onClick={handleSaveDraft} color="primary">임시 저장</Button>
+                <Button onClick={handleSubmitDocument} color="primary">제출</Button>
             </DialogActions>
 
             {/* 결재라인 설정 모달 */}
