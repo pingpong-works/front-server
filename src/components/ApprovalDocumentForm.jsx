@@ -6,7 +6,7 @@ import sendPostDocumentSaveRequest from '../request/PostDocumentSave';
 import getDocsTypeAllRequest from '../request/GetDocsType';
 import axios from 'axios'; // 로그인된 사용자 정보를 가져오기 위해 axios 사용
 
-const ApprovalDocumentForm = ({ open, handleClose, initialData, isRewriting }) => {
+const ApprovalDocumentForm = ({ open, handleClose, initialData, isRewriting, fetchDocuments }) => {
     const [title, setTitle] = useState('');  // 문서 제목
     const [content, setContent] = useState('');  // 문서 내용
     const [customFields, setCustomFields] = useState({});  // 문서의 커스텀 필드
@@ -133,14 +133,11 @@ const ApprovalDocumentForm = ({ open, handleClose, initialData, isRewriting }) =
 
         console.log(requestBody);
 
-        try {
-            await sendPostDocumentSaveRequest({}, requestBody, () => {
-                console.log("문서 임시저장 완료");
-                handleClose();
-            });
-        } catch (error) {
-            console.error("문서 임시저장 중 오류 발생: ", error);
-        }
+        await sendPostDocumentSaveRequest(requestBody, () => {
+            console.log("임시 저장 완료");
+            handleClose();
+            fetchDocuments(); // 목록 갱신
+        });
     };
 
     // 문서 제출 처리
@@ -155,14 +152,11 @@ const ApprovalDocumentForm = ({ open, handleClose, initialData, isRewriting }) =
         };
 
         console.log(requestBody);
-        try {
-            await sendPostDocumentSubmitRequest({}, requestBody, () => {
-                console.log("문서 제출 완료");
-                handleClose();
-            });
-        } catch (error) {
-            console.error("문서 제출 중 오류 발생: ", error);
-        }
+        await sendPostDocumentSubmitRequest(requestBody, () => {
+            console.log("문서 제출 완료");
+            handleClose();
+            fetchDocuments(); // 목록 갱신
+        });
     };
 
     return (
@@ -220,20 +214,34 @@ const ApprovalDocumentForm = ({ open, handleClose, initialData, isRewriting }) =
                     />
 
                     {/* 커스텀 필드들 */}
-                    {Object.keys(customFields).map((field, index) => (
-                        <TextField
-                            key={index}
-                            label={field}
-                            fullWidth
-                            variant="outlined"
-                            value={customFields[field]}
-                            onChange={(e) => handleFieldChange(field, e.target.value)}
-                            sx={{ marginBottom: '20px' }}
-                        />
-                    ))}
+                    {Object.keys(customFields).map((field, index) => {
+                        const fieldType = docsTypes.find(doc => doc.id === documentType)?.documentTemplate?.fields.find(f => f.fieldName === field)?.fieldType;
+                        return (
+                            <Box key={index} sx={{ marginBottom: '20px' }}>
+                                {fieldType === 'Date' ? (
+                                    <TextField
+                                        type="date"
+                                        label={field}
+                                        fullWidth
+                                        variant="outlined"
+                                        value={customFields[field]}
+                                        onChange={(e) => handleFieldChange(field, e.target.value)}
+                                    />
+                                ) : (
+                                    <TextField
+                                        label={field}
+                                        fullWidth
+                                        variant="outlined"
+                                        value={customFields[field]}
+                                        onChange={(e) => handleFieldChange(field, e.target.value)}
+                                    />
+                                )}
+                            </Box>
+                        );
+                    })}
 
                     {/* 결재라인 설정 */}
-                    <Button variant="contained" onClick={handleOpenApprovalLineModal}>
+                    <Button variant="contained" onClick={handleOpenApprovalLineModal} sx={{ marginBottom: '20px' }}>
                         결재라인 설정
                     </Button>
 
@@ -253,6 +261,7 @@ const ApprovalDocumentForm = ({ open, handleClose, initialData, isRewriting }) =
             <DialogActions>
                 <Button onClick={handleSaveDraft} color="primary">임시 저장</Button>
                 <Button onClick={handleSubmitDocument} color="primary">제출</Button>
+                <Button onClick={handleClose} color="secondary">닫기</Button>
             </DialogActions>
 
             {/* 결재라인 설정 모달 */}
