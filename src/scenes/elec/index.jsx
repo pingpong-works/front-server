@@ -4,41 +4,54 @@ import { Header } from "../../components";
 import getDocumentAllRequest from "../../request/GetDocuments";
 import { tokens } from "../../theme";
 import { useEffect, useState } from "react";
-import TableModal from '../../components/TableModal';  // 결재 진행 상황 모달
-import ApprovalDocumentForm from '../../components/ApprovalDocumentForm';  // 문서 타입 선택 및 작성 폼
+import TableModal from '../../components/TableModal';
+import ApprovalDocumentForm from '../../components/ApprovalDocumentForm';
 import DocumentModal from "../../components/DocumentModal";
-
+import axios from 'axios';
 
 const Elec = () => {
     const theme = useTheme();
     const colors = tokens(theme.palette.mode);
 
-    // 상태 관리
     const [isLoading, setIsLoading] = useState(false);
-    const [list, setList] = useState([]); // 전체 문서 데이터
-    const [filteredData, setFilteredData] = useState([]); // 필터링된 데이터
-    const [selectedStatus, setSelectedStatus] = useState("all"); // 선택된 상태
-    const [isDocumentFormOpen, setIsDocumentFormOpen] = useState(false); // 문서 작성 모달 상태
-    const [approvalLines, setApprovalLines] = useState([]);  // 결재 라인 데이터
-    const [isModalOpen, setIsModalOpen] = useState(false); // 모달 상태
-    const [selectedDocumentId, setSelectedDocumentId] = useState(null); // 선택한 문서의 ID
+    const [list, setList] = useState([]);
+    const [filteredData, setFilteredData] = useState([]);
+    const [selectedStatus, setSelectedStatus] = useState("all");
+    const [isDocumentFormOpen, setIsDocumentFormOpen] = useState(false);
+    const [approvalLines, setApprovalLines] = useState([]);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedDocumentId, setSelectedDocumentId] = useState(null);
+    const [employeeId, setEmployeeId] = useState(null);
+    const [selectedRows, setSelectedRows] = useState([]);
+    const [isAdmin, setIsAdmin] = useState(false);
 
-
-    const [approvalStatus, setApprovalStatus] = useState({  // 결재 상태 초기값 설정
-        0: null,  // 대기 중
+    const [approvalStatus, setApprovalStatus] = useState({
+        0: null,
         1: null,
         2: null,
     });
 
-    const currentUser = '이대리';  // 현재 로그인한 사용자 (이 부분은 실제 로그인 시스템과 연동되어야 함)
+    const fetchUserInfo = async () => {
+        try {
+            const response = await axios.get("http://localhost:50000/employees/my-info", {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+                },
+            });
+            const { employeeId, role } = response.data.data;
+            setEmployeeId(employeeId);
+            setIsAdmin(role === 'ADMIN');
+        } catch (error) {
+            console.error("로그인된 사용자 정보를 가져오는 중 오류 발생:", error);
+        }
+    };
 
-    // 문서 데이터를 가져오는 함수
     const fetchDocuments = async () => {
         try {
             const response = await getDocumentAllRequest({}, {}, 1, 10, setList, setIsLoading);
             if (response?.data?.data && Array.isArray(response.data.data)) {
-                setList(response.data.data); // 문서 리스트 설정
-                setFilteredData(response.data.data); // 필터링된 데이터 설정
+                setList(response.data.data);
+                setFilteredData(response.data.data);
             } else {
                 console.error("데이터를 찾을 수 없습니다.");
                 setList([]);
@@ -50,59 +63,78 @@ const Elec = () => {
     };
 
     useEffect(() => {
+        fetchUserInfo();
         fetchDocuments();
     }, []);
 
-    // 상태 변경 시 필터링
     const handleStatusChange = (event) => {
         const status = event.target.value;
         setSelectedStatus(status);
         setFilteredData(status === "all" ? list : list.filter(item => item.documentStatus === status));
     };
 
-    // 문서코드를 클릭했을 때 문서 ID 저장하고 모달 열기
     const handleDocumentClick = (documentId) => {
         if (documentId) {
-            console.log("문서 ID:", documentId);  // documentId가 올바르게 전달되는지 확인
+            console.log("문서 ID:", documentId);
             setSelectedDocumentId(documentId);
-            setIsModalOpen(true);  // 모달 열기
-            console.log("모달 열림 상태:", isModalOpen);  // 상태가 true로 변경되는지 확인
+            setIsModalOpen(true);
+            console.log("모달 열림 상태:", isModalOpen);
         } else {
             console.error("문서 ID가 올바르게 전달되지 않았습니다.");
         }
     };
 
-    // 문서 작성 폼 열기
     const handleOpenDocumentForm = () => {
         console.log("결재작성 버튼이 클릭됨");
-        setIsDocumentFormOpen(true);  // 문서 작성 폼 열기
-        console.log("isDocumentFormOpen 상태:", isDocumentFormOpen);  // 이 부분에서 상태가 정상적으로 변경되는지 확인
+        setIsDocumentFormOpen(true);
+        console.log("isDocumentFormOpen 상태:", isDocumentFormOpen);
     };
 
-    // 문서 작성 폼 닫기
     const handleCloseDocumentForm = () => {
         console.log("문서 작성 모달 닫힘");
         setIsDocumentFormOpen(false);
+        fetchDocuments();
     };
 
-    // 결재라인 설정 및 제출 처리
-    const handleApprovalLineSubmit = (selectedApprovals) => {
-        setApprovalLines(selectedApprovals);  // 결재라인 설정
-        setIsDocumentFormOpen(false);  // 문서 작성 폼 닫기
+    const handleDeleteDocuments = async () => {
+        if (selectedRows.length === 0) {
+            alert("삭제할 문서를 선택하세요.");
+            return;
+        }
+
+        console.log("삭제할 문서 ID들:", selectedRows);
+
+        const deletableRows = list.filter(row => selectedRows.includes(row.id) && (isAdmin || (row.employeeId === employeeId && row.documentStatus === 'DRAFT')));
+        const deletableIds = deletableRows.map(row => row.id);
+
+        if (deletableIds.length === 0) {
+            alert("삭제할 수 있는 문서가 없습니다.");
+            return;
+        }
+
+        try {
+            const response = await axios.delete('http://localhost:50001/documents', {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+                    'Content-Type': 'application/json',
+                },
+                data: {
+                    deleteIds: deletableIds,
+                },
+                params: {
+                    employeeId: employeeId,
+                },
+            });
+            if (response.status === 204) {
+                console.log("문서 삭제 완료");
+                fetchDocuments();
+                setSelectedRows([]);
+            }
+        } catch (error) {
+            console.error("문서 삭제 중 오류 발생: ", error);
+        }
     };
 
-    const handleCloseModal = () => {
-        setIsModalOpen(false);
-    };
-
-    const handleApprove = (index, status) => {
-        setApprovalStatus(prevState => ({
-            ...prevState,
-            [index]: status  // 승인 또는 반려 상태 업데이트
-        }));
-    };
-
-    // 데이터 그리드 컬럼 정의
     const columns = [
         {
             field: "documentCode",
@@ -113,11 +145,11 @@ const Elec = () => {
                     onClick={() => handleDocumentClick(params.row.id)}
                     sx={{
                         color: colors.gray[100],
-                        textTransform: 'none',  // 대문자 변환 방지
-                        fontWeight: 'bold',  // 글씨 두껍게 설정
+                        textTransform: 'none',
+                        fontWeight: 'bold',
                         '&:hover': {
-                            backgroundColor: 'transparent',  // 버튼 hover 시 배경색 변경 방지
-                            color: '#74ade2', // hover 시 텍스트 색상 변경
+                            backgroundColor: 'transparent',
+                            color: '#74ade2',
                         }
                     }}
                 >
@@ -149,7 +181,6 @@ const Elec = () => {
             <Box m="20px">
                 <Header title="전자결재" subtitle="List of Elec for Future Reference" />
 
-                {/* 상태 필터 셀렉트 */}
                 <Box mb="20px" display="flex" justifyContent="flex-end">
                     <FormControl variant="outlined" sx={{ minWidth: 200 }}>
                         <InputLabel id="status-select-label">결재 상태</InputLabel>
@@ -168,7 +199,6 @@ const Elec = () => {
                     </FormControl>
                 </Box>
 
-                {/*  작성 버튼 */}
                 <Box display="flex" justifyContent="flex-end" mb="10px">
                     <Button
                         onClick={handleOpenDocumentForm}
@@ -178,17 +208,32 @@ const Elec = () => {
                             height: '50px',
                             fontSize: '15px',
                             backgroundColor: '#6870fa',
-                            color: '#fff',
+                            color: colors.gray[200],
                             '&:hover': { backgroundColor: '#b6b6b6ac' },
                         }}
                     >
                         + 결재 작성
                     </Button>
                 </Box>
+                <Box mt="50px" />
 
-                {/* 데이터 그리드 */}
+                <Box display="flex" justifyContent="flex-end" mb="10px">
+                        <Button
+                            onClick={handleDeleteDocuments}
+                          //  variant="contained"
+                            sx={{
+                                width: '70px',
+                                height: '30px',
+                                fontSize: '12px',
+                                color: colors.gray[900],
+                                backgroundColor: colors.gray[150]
+                            }}
+                        >
+                            삭제 ({selectedRows.length})
+                        </Button>
+                    </Box>
                 <Box
-                    mt="40px"
+                    mt="10px"
                     height="75vh"
                     maxWidth="100%"
                     sx={{
@@ -223,31 +268,33 @@ const Elec = () => {
                         }}
                         pageSizeOptions={[10, 20, 50]}
                         checkboxSelection
+                        onRowSelectionModelChange={(newSelectionModel) => {
+                            console.log("Selected row IDs:", newSelectionModel);
+                            setSelectedRows(newSelectionModel);
+                        }}
+                        rowSelectionModel={selectedRows}
                     />
                 </Box>
             </Box>
 
-            {/* 문서 작성 폼 모달 */}
             {isDocumentFormOpen && (
                 <ApprovalDocumentForm
                     handleClose={handleCloseDocumentForm}
-                    onSubmit={handleApprovalLineSubmit}
+                    onSubmit={() => { }}
                 />
             )}
 
-            {/* 결재 진행 상황 모달 */}
             {approvalLines.length > 0 && (
                 <TableModal
-                    open={isModalOpen}  // 모달 열림 상태 전달
-                    handleClose={handleCloseModal}  // 모달 닫기 함수 전달
-                    approvalLines={approvalLines}  // 결재 라인 데이터 전달
-                    approvalStatus={approvalStatus}  // 승인 상태 데이터 전달
-                    handleApprove={handleApprove}  // 승인/반려 처리 함수 전달
-                    currentUser={currentUser}  // 현재 로그인한 사용자 정보 전달
+                    open={isModalOpen}
+                    handleClose={() => setIsModalOpen(false)}
+                    approvalLines={approvalLines}
+                    approvalStatus={approvalStatus}
+                    handleApprove={() => { }}
+                    currentUser={employeeId}
                 />
             )}
 
-            {/* 결재 작성 모달 */}
             <ApprovalDocumentForm
                 open={isDocumentFormOpen}
                 handleClose={handleCloseDocumentForm}
@@ -255,7 +302,6 @@ const Elec = () => {
                 fetchDocuments={fetchDocuments}
             />
 
-            {/* 결재 문서 모달 */}
             {isModalOpen && (
                 <DocumentModal
                     documentId={selectedDocumentId}
