@@ -4,7 +4,7 @@ import Swal from "sweetalert2";
 const sendPostDocumentSubmitRequest = async (state, requestBody, executeAfter) => {
     console.log("보낼 데이터:", requestBody);
     try {
-        const response = await axios.post('http://localhost:50001/documents/submit', requestBody, {
+        const response = await axios.post('http://localhost:8082/documents/submit', requestBody, {
             headers: {
                 'Content-Type': 'application/json',
                 //'Authorization': state.token

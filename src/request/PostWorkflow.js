@@ -4,7 +4,7 @@ import Swal from "sweetalert2";
 const postWorkflowRequest = async (requestBody, executeAfter) => {
     try {
         const response = await axios.post(
-            'http://localhost:50001/workflows',
+            'http://localhost:8082/workflows',
             requestBody,
             {
                 headers: {

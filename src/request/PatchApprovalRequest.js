@@ -2,7 +2,7 @@ import axios from 'axios';
 
 const patchApprovalRequest = async (approvalData, onSuccess, onError) => {
     try {
-        const response = await axios.patch('http://localhost:50001/workflows', approvalData, {
+        const response = await axios.patch('http://localhost:8082/workflows', approvalData, {
             headers: {
                 'Content-Type': 'application/json',
                 Authorization: `Bearer ${localStorage.getItem('accessToken')}`, // 토큰이 필요할 경우 추가

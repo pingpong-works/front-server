@@ -22,7 +22,7 @@ const DocumentModal = ({ documentId, handleClose }) => {
     useEffect(() => {
         const fetchUserInfo = async () => {
             try {
-                const response = await axios.get("http://localhost:50000/employees/my-info", {
+                const response = await axios.get("http://localhost:8081/employees/my-info", {
                     headers: {
                         Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
                     },
@@ -44,7 +44,7 @@ const DocumentModal = ({ documentId, handleClose }) => {
         }
 
         try {
-            const response = await axios.get(`http://localhost:50001/documents/${documentId}`);
+            const response = await axios.get(`http://localhost:8082/documents/${documentId}`);
             const data = response.data.data;
 
             if (data) {
@@ -128,7 +128,7 @@ const DocumentModal = ({ documentId, handleClose }) => {
 
     const handleConfirmApproval = async (status) => {
         try {
-            const response = await axios.patch(`http://localhost:50001/workflows`, {
+            const response = await axios.patch(`http://localhost:8082/workflows`, {
                 id: selectedApprovalId,
                 approvalOrder: documentData.workFlow.currentStep + 1,
                 approvalStatus: status,

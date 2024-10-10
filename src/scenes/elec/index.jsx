@@ -33,7 +33,7 @@ const Elec = () => {
 
     const fetchUserInfo = async () => {
         try {
-            const response = await axios.get("http://localhost:50000/employees/my-info", {
+            const response = await axios.get("http://localhost:8081/employees/my-info", {
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
                 },
@@ -113,7 +113,7 @@ const Elec = () => {
         }
 
         try {
-            const response = await axios.delete('http://localhost:50001/documents', {
+            const response = await axios.delete('http://localhost:8082/documents', {
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
                     'Content-Type': 'application/json',
