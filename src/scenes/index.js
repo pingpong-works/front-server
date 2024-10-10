@@ -5,9 +5,9 @@ import Team from "./team";
 import Boards from "./boards";
 import Elec from "./elec";
 import Contacts from "./contacts";
-import Form from "./form";
+import Mail from "./mail/mailWrite.jsx";
 import Calendar from "./calendar";
-import TotalMail from "./totalMail";
+import TotalMail from "./mail/mailbox.jsx";
 import Line from "./line";
 import Pie from "./pie";
 import Stream from "./stream";
@@ -22,7 +22,7 @@ export {
   Boards,
   Elec,
   Contacts,
-  Form,
+  Mail,
   Calendar,
   TotalMail,
   Line,
