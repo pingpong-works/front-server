@@ -4,34 +4,28 @@ import Swal from "sweetalert2";
 const sendPostDocumentSubmitRequest = async (state, requestBody, executeAfter) => {
     console.log("보낼 데이터:", requestBody);
     try {
-        const response = await axios.post('http://localhost:50001/documents/submit',
-            //JSON.stringify(requestBody),  // 요청 본문을 직렬화하여 보냄
-            {
-                headers: {
-                    'Content-Type': 'application/json',
-                    //'Authorization': state.token
-                }   
+        const response = await axios.post('http://localhost:50001/documents/submit', requestBody, {
+            headers: {
+                'Content-Type': 'application/json',
+                //'Authorization': state.token
             }
-        );
-        if (response.status === 200 || response.status === 201) {
-            console.log('결재문서 제출 성공', response);
+        });
+
+      if (response.status === 200 || response.status === 201) {
+            console.log('결재문서 임시저장 성공', response);
             if (executeAfter !== undefined) {
                 executeAfter();
             }
         } else {
-            console.log('결재문서 제출 실패: ', response.status);
+            console.log('결재문서 임시저장 실패: ', response.status);
             Swal.fire({ text: `요청 실패(${response.status})` });
         }
     } catch (error) {
-        console.error('결재문서 제출 실패(에러 발생): ', error);
-        
-        if (error.response) {
-            Swal.fire({ text: `요청 실패(${error.response.status}): ${error.response.data.message}` });
-        } else {
-            Swal.fire({ text: '알 수 없는 오류가 발생했습니다.' });
-        }
+        console.error('결재문서 임시저장 실패(에러 발생): ', error);
+        Swal.fire({ text: `요청 실패(${error.status})` });
     }
 }
+
 
 
 export default sendPostDocumentSubmitRequest;
