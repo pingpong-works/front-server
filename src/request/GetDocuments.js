@@ -10,7 +10,7 @@ const getDocumentAllRequest = async (state, searchParams, page, size, setDocumen
             size
         };
 
-        const response = await axios.get(`http://localhost:50001/documents`, {
+        const response = await axios.get(`http://localhost:8082/documents`, {
             headers: {
                 'Content-Type': 'application/json',
                 // 'Authorization': state.token

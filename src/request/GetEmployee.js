@@ -7,7 +7,7 @@ const getEmployee = async (employeeId, setEmployee, setIsLoading) => {
     }
 
     try {
-        const response = await axios.get(`http://localhost:50000/user/employees/${employeeId}`, {
+        const response = await axios.get(`http://localhost:8081/user/employees/${employeeId}`, {
             headers: {
                 'Content-Type': 'application/json',
                 // 'Authorization': state.token

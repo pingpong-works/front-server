@@ -54,7 +54,7 @@ const Mypage = () => {
   useEffect(() => {
     const fetchUserInfo = async () => {
       try {
-        const response = await axios.get("http://localhost:50000/employees/my-info", {
+        const response = await axios.get("http://localhost:8081/employees/my-info", {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
           },
@@ -75,7 +75,7 @@ const Mypage = () => {
   const fetchAttendanceData = async (employeeId) => {
     try {
       console.log("fetchAttendanceData 호출됨, employeeId:", employeeId);
-      const response = await axios.get("http://localhost:50001/attendances/my-attendance", {
+      const response = await axios.get("http://localhost:8082/attendances/my-attendance", {
         params: {
           employeeId: employeeId, 
           page: 1,
@@ -89,7 +89,7 @@ const Mypage = () => {
       const events = response.data.data.map(attendance => {
         const checkIn = new Date(attendance.checkInTime);
         const checkOut = attendance.checkOutTime ? new Date(attendance.checkOutTime) : null;
-        const workingHours = attendance.workingHours || 'N/A'; // 서버에서 계산된 근무시간 사용
+        const workingHours = attendance.dailyWorkingTime || 'N/A'; // 서버에서 계산된 근무시간 사용
 
         return {
           title: `출근: ${checkIn.toLocaleTimeString()} 퇴근: ${checkOut ? checkOut.toLocaleTimeString() : 'N/A'} 근무시간: ${workingHours} 시간`,
@@ -125,11 +125,11 @@ const Mypage = () => {
 
       if (currentStatus === "퇴근" || currentStatus === "") {
         // 현재 상태가 "퇴근" 또는 undefined일 경우 출근 수행
-        endpoint = "http://localhost:50001/attendances/check-in";
+        endpoint = "http://localhost:8082/attendances/check-in";
         newStatus = "출근";
       } else if (currentStatus === "출근") {
         // 현재 상태가 "출근"일 경우 퇴근 수행
-        endpoint = "http://localhost:50001/attendances/check-out";
+        endpoint = "http://localhost:8082/attendances/check-out";
         newStatus = "퇴근";
       } else {
         throw new Error("알 수 없는 출퇴근 상태입니다.");

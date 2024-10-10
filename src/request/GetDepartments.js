@@ -7,7 +7,7 @@ const getDepartments = async (setDepartments, setIsLoading) => {
     }
 
     try {
-        const response = await axios.get(`http://localhost:50000/departments/all`, {
+        const response = await axios.get(`http://localhost:8081/departments/all`, {
             headers: {
                 'Content-Type': 'application/json',
                 // 'Authorization': state.token

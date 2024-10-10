@@ -7,7 +7,7 @@ const sendGetMyInfoRequest = async (state, setData, setIsLoading, executeAfter) 
   }
   try {
     console.log("state: ", state);
-    const response = await axios.get("http://localhost:50000/employees/my-info", {
+    const response = await axios.get("http://localhost:8081/employees/my-info", {
       headers: {
         "Content-Type": "application/json",
         Authorization: `${state.token}`,

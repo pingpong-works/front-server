@@ -7,7 +7,7 @@ const getDocument = async (documentId, setDocument, setIsLoading) => {
     }
 
     try {
-        const response = await axios.get(`http://localhost:50001/documents/${documentId}`, {
+        const response = await axios.get(`http://localhost:8082/documents/${documentId}`, {
             headers: {
                 'Content-Type': 'application/json',
                 // 'Authorization': state.token

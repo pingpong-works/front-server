@@ -10,7 +10,7 @@ const getEmployeesByDepartment = async (departmentId, page, size, setEmployees, 
             size
         };
 
-        const response = await axios.get(`http://localhost:50000/user/employees/departments/${departmentId}`,{ 
+        const response = await axios.get(`http://localhost:8081/user/employees/departments/${departmentId}`,{ 
             headers: {
                 'Content-Type': 'application/json',
                 // 필요시 Authorization 헤더 추가

@@ -21,7 +21,7 @@ const ApprovalDocumentForm = ({ open, handleClose, initialData, isRewriting, fet
     // 로그인된 사용자 정보를 가져오는 함수
     const fetchUserInfo = async () => {
         try {
-            const response = await axios.get("http://localhost:50000/employees/my-info", {
+            const response = await axios.get("http://localhost:8081/employees/my-info", {
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
                 },
