@@ -13,6 +13,7 @@ import {
   FAQ,
   Geography,
   Calendar,
+  Chat,
   Stream,
   TotalMail,
 } from "./scenes";
@@ -42,6 +43,7 @@ const AppRouter = () => {
             <Route path="/boards" element={<Boards />} />
             <Route path="/form" element={<Form />} />
             <Route path="/calendar" element={<Calendar />} />
+            <Route path="/chat" element={<Chat />} />
             <Route path="/totalMail" element={<TotalMail />} />
             <Route path="/pie" element={<Pie />} />
             <Route path="/stream" element={<Stream />} />
