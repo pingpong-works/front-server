@@ -7,7 +7,7 @@ import {
   Boards,
   Elec,
   Contacts,
-  Form,
+  Mail,
   Line,
   Pie,
   FAQ,
@@ -24,6 +24,7 @@ import ApprovalDocumentForm from "./components/ApprovalDocumentForm";
 import CreateBoard from './scenes/boards/createBoard';
 import ViewBoard from './scenes/boards/viewBoard';
 import UpdateBoard from './scenes/boards/updateBoard';
+import MailWrite from "./scenes/mail/mailWrite.jsx";
 
 const AppRouter = () => {
   return (
@@ -46,14 +47,14 @@ const AppRouter = () => {
             <Route path="/boards/createBoard" element={<CreateBoard />} />
             <Route path="/viewBoard/:id" element={<ViewBoard />} />
             <Route path="/updateBoard" element={<UpdateBoard />} />
-            <Route path="/form" element={<Form />} />
             <Route path="/calendar" element={<Calendar />} />
-            <Route path="/totalMail" element={<TotalMail />} />
-            <Route path="/pie" element={<Pie />} />
-            <Route path="/stream" element={<Stream />} />
-            <Route path="/line" element={<Line />} />
+            <Route path="/new" element={<MailWrite />} />
+            <Route path="/mailbox/-1" element={<TotalMail />} />
+            <Route path="/mailbox/0" element={<Pie />} />
+            <Route path="/mailbox/1" element={<Line />} />
+            <Route path="/mailbox/2" element={<Geography />} />
+            <Route path="/mailbox/3" element={<Stream />} />
             <Route path="/faq" element={<FAQ />} />
-            <Route path="/geography" element={<Geography />} />
             <Route path="/approval-line-setup" element={<ApprovalLineSetup />} />
             <Route path="/approval-document-form/:documentId" element={<ApprovalDocumentForm />} />
             <Route path="/mypage" element={<Mypage />} />

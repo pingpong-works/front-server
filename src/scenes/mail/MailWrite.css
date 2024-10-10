@@ -1,0 +1,5 @@
+/*#editor-container .ql-toolbar {*/
+/*    display: flex !important;*/
+/*    flex-wrap: nowrap !important;  !* 세로 정렬 방지 *!*/
+/*    justify-content: space-between !important;  !* 가로 공간을 활용해 균등하게 배치 *!*/
+/*}*/

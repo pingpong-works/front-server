@@ -1,8 +1,8 @@
 import { Box, useTheme, MenuItem, Select, FormControl, InputLabel } from "@mui/material";
-import { Header } from "../../components";
+import { Header } from "../../components/index.jsx";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
-import { mockDataContacts } from "../../data/mockData";
-import { tokens } from "../../theme";
+import { mockDataContacts } from "../../data/mockData.js";
+import { tokens } from "../../theme.js";
 import axios from "axios";
 import { useEffect, useState } from "react";
 
