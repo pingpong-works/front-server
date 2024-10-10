@@ -252,6 +252,7 @@ const Elec = () => {
                 open={isDocumentFormOpen}
                 handleClose={handleCloseDocumentForm}
                 onSubmit={() => { console.log('문서 제출됨'); }}
+                fetchDocuments={fetchDocuments}
             />
 
             {/* 결재 문서 모달 */}
