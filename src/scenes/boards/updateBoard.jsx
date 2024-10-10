@@ -105,7 +105,7 @@ const UpdateBoard = () => {
 
   return (
     <Box m="20px">
-      <Header title="Boards" subtitle="Update Board" />
+      <Header title="Boards" subtitle="Board Update" />
   
       <Box mt="20px" display="flex" flexDirection="column" gap={2} maxWidth="100%" bgcolor={colors.primary[400]} p={3} borderRadius="8px">
         <TextField

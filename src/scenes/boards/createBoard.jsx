@@ -4,6 +4,8 @@ import {
   Button,
   TextField,
   IconButton,
+  Select,
+  MenuItem,
   useTheme,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
@@ -18,7 +20,7 @@ const CreateBoard = () => {
   const navigate = useNavigate();
 
   const [title, setTitle] = useState("");
-  const [category, setCategory] = useState("");
+  const [category, setCategory] = useState("공지"); // 초기값 설정
   const [content, setContent] = useState("");
   const [images, setImages] = useState([]);
   const [imagePreviews, setImagePreviews] = useState([]);
@@ -34,6 +36,12 @@ const CreateBoard = () => {
 
   const handleSubmit = async () => {
     try {
+      const username = localStorage.getItem("username");
+      if ((category === "공지" || category === "식단") && username !== "admin@gmail.com") {
+        alert("공지와 식단 카테고리는 관리자만 작성할 수 있습니다.");
+        return;
+      }
+
       const imageLinks = images.map((image) => image);
   
       const postData = {
@@ -89,14 +97,13 @@ const CreateBoard = () => {
           }}
         />
   
-        <TextField
+        <Select
           label="카테고리"
-          variant="outlined"
           value={category}
           onChange={(e) => setCategory(e.target.value)}
           fullWidth
-          InputLabelProps={{ style: { color: colors.gray[100] } }}
           sx={{
+            color: colors.gray[100],
             "& .MuiOutlinedInput-root": {
               "& fieldset": {
                 borderColor: colors.gray[300],
@@ -109,7 +116,12 @@ const CreateBoard = () => {
               },
             },
           }}
-        />
+        >
+          <MenuItem value="공지">공지</MenuItem>
+          <MenuItem value="식단">식단</MenuItem>
+          <MenuItem value="일반">일반</MenuItem>
+          <MenuItem value="질문">질문</MenuItem>
+        </Select>
   
         <TextField
           label="내용"
