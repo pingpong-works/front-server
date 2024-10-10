@@ -8,7 +8,7 @@ import {
   MenuItem,
   Button,
 } from "@mui/material";
-import {SearchOutlined, AddOutlined} from "@mui/icons-material";
+import { SearchOutlined, AddOutlined } from "@mui/icons-material";
 import { Header } from "../../components";
 import { DataGrid } from "@mui/x-data-grid";
 import { tokens } from "../../theme";
@@ -23,27 +23,37 @@ const Boards = () => {
 
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [pageInfo, setPageInfo] = useState({ totalElements: 0, totalPages: 1 });
 
   const [keyword, setKeyword] = useState("");
   const [searchOption, setSearchOption] = useState("title");
+  const [category, setCategory] = useState("all");
   const [sortOption, setSortOption] = useState("createdAt_desc");
 
-  const fetchData = async () => {
+  const fetchData = async (page) => {
     try {
       const response = await axios.get("http://localhost:8085/boards", {
         params: {
           keyword: keyword,
           searchOption: searchOption,
           sort: sortOption,
-          page: 1,
+          page: page,
           size: 10,
         },
       });
 
-      const transformedData = response.data.data.map((item) => ({
-        id: item.boardId, 
+      const filteredData = response.data.data.filter((item) => {
+        if (category === "all") {
+          return true;
+        }
+        return item.category === category;
+      });
+
+      const transformedData = filteredData.map((item) => ({
+        id: item.boardId,
         boardId: item.boardId,
-        title: item.title,
+        title: `[${item.category}] ${item.title}`,
         employeeName: item.employeeName || '익명',
         category: item.category,
         createdAt: item.createdAt,
@@ -51,6 +61,7 @@ const Boards = () => {
       }));
 
       setData(transformedData);
+      setPageInfo({ totalElements: response.data.pageInfo.totalElements, totalPages: response.data.pageInfo.totalPages });
       setLoading(false);
     } catch (error) {
       console.error("Error fetching data", error);
@@ -59,36 +70,38 @@ const Boards = () => {
   };
 
   const handleSearch = () => {
-    fetchData();
-  };
-
-  const handleSortChange = (event) => {
-    setSortOption(event.target.value);
-    fetchData();
+    fetchData(1);
   };
 
   const handleSearchOptionChange = (event) => {
     setSearchOption(event.target.value);
   };
 
+  const handleCategoryChange = (event) => {
+    setCategory(event.target.value);
+    fetchData(1);
+  };
+
   useEffect(() => {
-    fetchData();
-  }, []);
+    fetchData(page);
+  }, [category, page]);
 
   const handleRowClick = (params) => {
     navigate(`/viewBoard/${params.id}`);
   };
 
+  const handlePageChange = (newPage) => {
+    console.log(newPage);
+    setPage(newPag + 1);
+  };
+
   const columns = [
-    { field: "boardId", 
-      headerName: "No",
-      headerAlign:"center",
-      align: "center" },
+    { field: "boardId", headerName: "No", headerAlign: "center", align: "center" },
     {
       field: "title",
       headerName: "제목",
       flex: 2,
-      headerAlign:"center",
+      headerAlign: "center",
       align: "center",
       cellClassName: "name-column--cell",
     },
@@ -96,38 +109,25 @@ const Boards = () => {
       field: "employeeName",
       headerName: "작성자",
       flex: 1,
-      headerAlign:"center",
-      align: "center"
-    },
-    {
-      field: "category",
-      headerName: "카테고리",
-      flex: 1,
-      headerAlign:"center",
-      align: "center"
+      headerAlign: "center",
+      align: "center",
     },
     {
       field: "createdAt",
       headerName: "등록일",
       flex: 1,
-      headerAlign:"center",
+      headerAlign: "center",
       align: "center",
-      renderCell: (params) => (
-        <Typography>
-          {params.row.createdAt.split("T")[0]}
-        </Typography>
-      ),
+      renderCell: (params) => <Typography>{params.row.createdAt.split("T")[0]}</Typography>,
     },
     {
       field: "views",
       headerName: "조회수",
       flex: 0.5,
-      headerAlign:"center",
+      headerAlign: "center",
       align: "center",
       renderCell: (params) => (
-        <Typography color={colors.greenAccent[500]}>
-          {params.row.views}
-        </Typography>
+        <Typography color={colors.greenAccent[500]}>{params.row.views}</Typography>
       ),
     },
   ];
@@ -135,16 +135,16 @@ const Boards = () => {
   return (
     <Box m="20px">
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-        <Header title="Boards" subtitle="List of Boards" />
+        <Header title="Boards" subtitle={`List of Boards`} />
         <Button
           variant="contained"
           color="primary"
           startIcon={<AddOutlined />}
           onClick={() => navigate("createBoard")}
           sx={{
-            height: "50px", 
-            padding: "0 20px", 
-            backgroundColor: colors.greenAccent[500], 
+            height: "50px",
+            padding: "0 20px",
+            backgroundColor: colors.greenAccent[500],
             fontSize: "16px",
             fontWeight: "bold",
             "&:hover": {
@@ -165,6 +165,22 @@ const Boards = () => {
         mb={2}
       >
         <Box display="flex" alignItems="center" flexGrow={1}>
+          <Select
+            value={category}
+            onChange={handleCategoryChange}
+            sx={{
+              color: colors.gray[100],
+              backgroundColor: colors.primary[500],
+              mr: 2,
+            }}
+          >
+            <MenuItem value="all">전체</MenuItem>
+            <MenuItem value="공지">공지</MenuItem>
+            <MenuItem value="식단">식단</MenuItem>
+            <MenuItem value="일반">일반</MenuItem>
+            <MenuItem value="질문">질문</MenuItem>
+          </Select>
+
           <Select
             value={searchOption}
             onChange={handleSearchOptionChange}
@@ -196,7 +212,7 @@ const Boards = () => {
           </IconButton>
         </Box>
       </Box>
-      
+
       <Box
         mt="20px"
         height="63vh"
@@ -248,7 +264,11 @@ const Boards = () => {
             },
           }}
           pageSizeOptions={[10]}
-          checkboxSelection
+          rowCount={pageInfo.totalElements}
+          paginationMode="server"
+          onPaginationModelChange={(model) => {
+            setPage(model.page + 1);
+          }}
           onRowClick={handleRowClick}
         />
       </Box>

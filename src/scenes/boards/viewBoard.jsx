@@ -162,7 +162,22 @@ const ViewBoard = () => {
 
       <Box display="flex" flexDirection="column" bgcolor={colors.primary[400]} p={3} borderRadius="8px" boxShadow="0px 0px 20px rgba(0,0,0,0.1)">
         {isOwner && (
-          <Box display="flex" justifyContent="flex-end" gap={2} mb={1}>
+          <Box display="flex" justifyContent="space-between" gap={2} mb={1}>
+          <Button
+            variant="outlined"
+            onClick={() => navigate('/boards')}
+            sx={{
+              color: colors.greenAccent[400],
+              borderColor: colors.greenAccent[400],
+              "&:hover": {
+                backgroundColor: colors.greenAccent[400],
+                color: "#fff",
+              },
+            }}
+          >
+            목록
+          </Button>
+          <Box display="flex" justifyContent="flex-end" gap={2}>
             <Button
               variant="outlined"
               onClick={handleUpdate}
@@ -192,10 +207,11 @@ const ViewBoard = () => {
               삭제
             </Button>
           </Box>
+        </Box>
         )}
 
         <Typography variant="h4" color={colors.greenAccent[500]} fontWeight="bold">
-          {board.title}
+          [{board.category}] {board.title}
         </Typography>
 
         <Box display="flex" justifyContent="space-between" alignItems="center" mt={1}>
