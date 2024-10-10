@@ -133,13 +133,15 @@ const ApprovalDocumentForm = ({ open, handleClose, initialData, isRewriting }) =
 
         console.log(requestBody);
 
-        await sendPostDocumentSaveRequest(requestBody, () => {
-            console.log("임시 저장 완료");
-            handleClose();
-        });
+        try {
+            await sendPostDocumentSaveRequest({}, requestBody, () => {
+                console.log("문서 임시저장 완료");
+                handleClose();
+            });
+        } catch (error) {
+            console.error("문서 임시저장 중 오류 발생: ", error);
+        }
     };
-
-
 
     // 문서 제출 처리
     const handleSubmitDocument = async () => {
@@ -153,10 +155,14 @@ const ApprovalDocumentForm = ({ open, handleClose, initialData, isRewriting }) =
         };
 
         console.log(requestBody);
-        await sendPostDocumentSubmitRequest(requestBody, () => {
-            console.log("문서 제출 완료");
-            handleClose();
-        });
+        try {
+            await sendPostDocumentSubmitRequest({}, requestBody, () => {
+                console.log("문서 제출 완료");
+                handleClose();
+            });
+        } catch (error) {
+            console.error("문서 제출 중 오류 발생: ", error);
+        }
     };
 
     return (
