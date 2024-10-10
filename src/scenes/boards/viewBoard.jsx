@@ -26,7 +26,7 @@ const ViewBoard = () => {
   // 게시물 조회
   const fetchBoardDetails = async () => {
     try {
-      const response = await axios.get(`http://localhost:8085/boards/${id}`);
+      const response = await axios.get(`http://localhost:8084/boards/${id}`);
       const boardData = response.data.data;
       setBoard(boardData);
 
@@ -40,7 +40,7 @@ const ViewBoard = () => {
   // 댓글 전체 조회
   const fetchComments = async () => {
     try {
-      const commentsResponse = await axios.get(`http://localhost:8085/boards/${id}/comments`);
+      const commentsResponse = await axios.get(`http://localhost:8084/boards/${id}/comments`);
       const processedComments = commentsResponse.data.map(comment => ({
         id: comment.boardCommentId,
         employeeName: comment.employeeName || "익명",
@@ -57,7 +57,7 @@ const ViewBoard = () => {
 
   const handleDelete = async () => {
     try {
-      await axios.delete(`http://localhost:8085/boards/${id}`, {
+      await axios.delete(`http://localhost:8084/boards/${id}`, {
         params: {
           employeeId: 1,
         },
@@ -77,7 +77,7 @@ const ViewBoard = () => {
   // 댓글 등록 요청 수정 (employeeId는 쿼리 파라미터, content는 바디에 포함)
   const handleCommentSubmit = async (parentId = null) => {
     try {
-      await axios.post(`http://localhost:8085/boards/${id}/comments`, {
+      await axios.post(`http://localhost:8084/boards/${id}/comments`, {
         content: parentId ? replyComments[parentId] : comment,
         parentCommentId: parentId,
       }, {
@@ -102,7 +102,7 @@ const ViewBoard = () => {
   // 댓글 삭제 함수 추가
   const handleCommentDelete = async (commentId) => {
     try {
-      await axios.delete(`http://localhost:8085/boards/${id}/comments/${commentId}`, {
+      await axios.delete(`http://localhost:8084/boards/${id}/comments/${commentId}`, {
         params: {
           employeeId: 1,
         },
@@ -118,7 +118,7 @@ const ViewBoard = () => {
   // 댓글 수정 함수
   const handleCommentUpdate = async (commentId) => {
     try {
-      await axios.patch(`http://localhost:8085/boards/${id}/comments/${commentId}`, {
+      await axios.patch(`http://localhost:8084/boards/${id}/comments/${commentId}`, {
         content: replyComments[commentId],
       }, {
         params: {

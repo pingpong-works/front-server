@@ -31,7 +31,7 @@ const UpdateBoard = () => {
   useEffect(() => {
     const fetchBoardData = async () => {
       try {
-        const response = await axios.get(`http://localhost:8085/boards/${boardId}`);
+        const response = await axios.get(`http://localhost:8084/boards/${boardId}`);
         const boardData = response.data.data;
 
         setTitle(boardData.title);
@@ -84,7 +84,7 @@ const UpdateBoard = () => {
         imagesToDelete: imagesToDelete, // 삭제할 이미지 리스트를 본문에 포함
       };
 
-      const response = await axios.patch(`http://localhost:8085/boards/${boardId}`, updatedData, {
+      const response = await axios.patch(`http://localhost:8084/boards/${boardId}`, updatedData, {
         params: {
           employeeId: 1,
         },
