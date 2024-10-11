@@ -7,13 +7,12 @@ import {
   Boards,
   Elec,
   Contacts,
-  Mail,
-  Line,
-  Pie,
+  Mine,
+  Send,
+  Receive,
+  Temporary,
   FAQ,
-  Geography,
   Calendar,
-  Stream,
   TotalMail
 } from "./scenes";
 import ApprovalLineSetup from './components/ApprovalLineSetup';
@@ -25,6 +24,8 @@ import CreateBoard from './scenes/boards/createBoard';
 import ViewBoard from './scenes/boards/viewBoard';
 import UpdateBoard from './scenes/boards/updateBoard';
 import MailWrite from "./scenes/mail/mailWrite.jsx";
+import ReceiveMailbox from "./scenes/mail/receiveMailbox.jsx";
+import SendMailbox from "./scenes/mail/sendMailbox.jsx";
 
 const AppRouter = () => {
   return (
@@ -50,10 +51,10 @@ const AppRouter = () => {
             <Route path="/calendar" element={<Calendar />} />
             <Route path="/new" element={<MailWrite />} />
             <Route path="/mailbox/-1" element={<TotalMail />} />
-            <Route path="/mailbox/0" element={<Pie />} />
-            <Route path="/mailbox/1" element={<Line />} />
-            <Route path="/mailbox/2" element={<Geography />} />
-            <Route path="/mailbox/3" element={<Stream />} />
+            <Route path="/mailbox/0" element={<Receive />} />
+            <Route path="/mailbox/1" element={<Send />} />
+            <Route path="/mailbox/2" element={<Temporary />} />
+            <Route path="/mailbox/3" element={<Mine />} />
             <Route path="/faq" element={<FAQ />} />
             <Route path="/approval-line-setup" element={<ApprovalLineSetup />} />
             <Route path="/approval-document-form/:documentId" element={<ApprovalDocumentForm />} />

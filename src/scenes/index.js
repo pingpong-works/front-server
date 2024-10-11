@@ -7,12 +7,13 @@ import Elec from "./elec";
 import Contacts from "./contacts";
 import Mail from "./mail/mailWrite.jsx";
 import Calendar from "./calendar";
-import TotalMail from "./mail/mailbox.jsx";
-import Line from "./line";
-import Pie from "./pie";
-import Stream from "./stream";
+import TotalMail from "./mail/totalMailbox.jsx";
+import Send from "./mail/sendMailbox.jsx";
+import Receive from "./mail/receiveMailbox.jsx";
+import Mine from "./mail/mineMailbox.jsx";
 import FAQ from "./faq";
-import Geography from "./geography";
+import Temporary from "./mail/temporaryMailbox.jsx";
+
 
 export {
   Navbar,
@@ -25,9 +26,9 @@ export {
   Mail,
   Calendar,
   TotalMail,
-  Line,
-  Pie,
-  Stream,
+  Send,
+  Receive,
+  Mine,
   FAQ,
-  Geography,
+  Temporary,
 };
