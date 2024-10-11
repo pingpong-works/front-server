@@ -33,7 +33,7 @@
     "@nivo/pie": "^0.84.0",
     "@nivo/stream": "^0.84.0",
     "axios": "^1.7.7",
-    "formik": "^2.4.5",
+    "formik": "^2.4.6",
     "quill": "^2.0.2",
     "react": "^18.2.0",
     "react-bootstrap": "^2.10.5",
