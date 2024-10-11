@@ -33,7 +33,7 @@ const Boards = () => {
 
   const fetchData = async (page) => {
     try {
-      const response = await axios.get("http://localhost:8085/boards", {
+      const response = await axios.get("http://localhost:8084/boards", {
         params: {
           keyword: keyword,
           searchOption: searchOption,

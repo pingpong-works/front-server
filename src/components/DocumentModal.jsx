@@ -6,9 +6,11 @@ import ApprovalDocumentForm from './ApprovalDocumentForm';
 import ApprovalTable from "./ApprovalTable";
 import getEmployee from "../request/GetEmployee";
 import Swal from "sweetalert2";
+import { tokens } from "../theme";
 
 const DocumentModal = ({ documentId, handleClose }) => {
     const theme = useTheme();
+    const colors = tokens(theme.palette.mode);
     const mode = theme.palette.mode; // mode가 'light' 또는 'dark'인지 확인
     const [documentData, setDocumentData] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
@@ -86,7 +88,7 @@ const DocumentModal = ({ documentId, handleClose }) => {
 
     const handleApprovalAction = (approvalId, approvalOrder) => {
         const currentApprover = documentData.workFlow?.approvals.find(
-            approval => approval.approvalOrder === documentData.workFlow.currentStep // currentStep과 비교
+            approval => approval.approvalOrder === documentData.workFlow.currentStep + 1 // currentStep과 비교
         );
 
         console.log('currentStep:', documentData.workFlow.currentStep);  // currentStep 로그 출력
@@ -95,7 +97,7 @@ const DocumentModal = ({ documentId, handleClose }) => {
 
         if (currentApprover && currentApprover.employeeId === userInfo.employeeId) {
             // 현재 결재 순서가 맞는 경우
-            setSelectedApprovalId(approvalId);
+            setSelectedApprovalId(currentApprover.id);
             setOpenMessageModal(true);
         } else {
             // 결재 순서가 아닌 경우 에러 알림
@@ -127,6 +129,7 @@ const DocumentModal = ({ documentId, handleClose }) => {
     };
 
     const handleConfirmApproval = async (status) => {
+            console.log(documentData.workFlow.currentStep);
         try {
             const response = await axios.patch(`http://localhost:8082/workflows`, {
                 id: selectedApprovalId,
@@ -134,6 +137,11 @@ const DocumentModal = ({ documentId, handleClose }) => {
                 approvalStatus: status,
                 message: message,
                 employeeId: userInfo.employeeId
+            }, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem("accessToken")}`,
+                    'Content-Type': 'application/json'
+                }
             });
 
             if (response.status === 200) {
@@ -168,7 +176,7 @@ const DocumentModal = ({ documentId, handleClose }) => {
                 maxHeight: "80vh",
                 overflow: "auto",
                 padding: 4,
-                backgroundColor: mode === 'dark' ? theme.palette.background.default : theme.palette.background.paper,  // 다크 모드와 라이트 모드에 따른 배경색 설정
+                backgroundColor: mode === 'dark' ? colors.primary[300]: theme.palette.background.paper, 
                 color: mode === 'dark' ? theme.palette.text.primary : 'black',  // 다크 모드에 맞춰 텍스트 색상 조정
                 margin: "100px auto",
                 position: "relative"
@@ -269,9 +277,9 @@ const DocumentModal = ({ documentId, handleClose }) => {
                         />
                     </DialogContent>
                     <DialogActions>
-                        <Button onClick={() => handleConfirmApproval('APPROVED')}>승인</Button>
-                        <Button onClick={() => handleConfirmApproval('REJECTED')}>반려</Button>
-                        <Button onClick={() => handleConfirmApproval('FINALIZED')}>전결</Button>
+                        <Button onClick={() => handleConfirmApproval('APPROVE')}>승인</Button>
+                        <Button onClick={() => handleConfirmApproval('REJECTE')}>반려</Button>
+                        <Button onClick={() => handleConfirmApproval('FINALIZE')}>전결</Button>
                         <Button onClick={handleCloseMessageModal}>취소</Button>
                     </DialogActions>
                 </Dialog>

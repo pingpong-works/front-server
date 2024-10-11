@@ -24,6 +24,8 @@ import CreateBoard from './scenes/boards/createBoard';
 import ViewBoard from './scenes/boards/viewBoard';
 import UpdateBoard from './scenes/boards/updateBoard';
 import MailWrite from "./scenes/mail/mailWrite.jsx";
+import Notification from "./scenes/notification/notification.jsx"
+
 import ReceiveMailbox from "./scenes/mail/receiveMailbox.jsx";
 import SendMailbox from "./scenes/mail/sendMailbox.jsx";
 
@@ -59,6 +61,7 @@ const AppRouter = () => {
             <Route path="/approval-line-setup" element={<ApprovalLineSetup />} />
             <Route path="/approval-document-form/:documentId" element={<ApprovalDocumentForm />} />
             <Route path="/mypage" element={<Mypage />} />
+            <Route path="/notification" element={<Notification />} />
           </Route>
         </Routes>
       </Router>
