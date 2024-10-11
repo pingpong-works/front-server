@@ -51,7 +51,7 @@ const Notification = ({ onClose }) => {
         try {
             // 읽음 처리
             console.log(`Marking notification ${notification.id} as read`);
-            await axios.patch(`http://localhost:8086/notifications/${notification.id}/read`, {
+            await axios.patch(`http://localhost:8086/notifications/${notification.id}/read`, {}, {
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem("accessToken")}`
                 }
@@ -59,15 +59,15 @@ const Notification = ({ onClose }) => {
 
             // 알림의 유형에 따라 경로 설정
             if (notification.bookRoomId) {
-                window.location.href = `http://localhost:5173/room-books/${notification.bookRoomId}`;  // 예약 경로로 이동
+                navigate(`/room-books/${notification.bookRoomId}`);
             } else if (notification.calendarId) {
-                window.location.href = `http://localhost:8084/calendar/${notification.calendarId}`;  // 일정 경로로 이동
+                navigate(`/calendar/${notification.calendarId}`);
             } else if (notification.bookCarId) {
                 navigate(`/car-books/${notification.bookCarId}`);
             } else if (notification.postId) {
                 navigate(`/posts/${notification.postId}`);
             } else if (notification.documentId) {
-                window.location.href = `http://localhost:5173/elec/${notification.documentId}`;
+                navigate(`/elec/${notification.documentId}`);
             }
         } catch (error) {
             console.error("Error marking notification as read:", error);
@@ -78,7 +78,7 @@ const Notification = ({ onClose }) => {
         <div className="notification-panel-container">
             <div className="notification-panel">
                 <button className="close-button" onClick={onClose}>X</button>
-                <h3>이전 알림</h3>
+                <h3>알림</h3>
                 <div className="filter-buttons">
                     <button onClick={() => setFilter('all')}>전체</button>
                     <button onClick={() => setFilter('read')}>읽은 알림</button>

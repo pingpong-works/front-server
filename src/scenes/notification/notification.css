@@ -55,9 +55,9 @@
 
 .notification-item.unread {
     font-weight: bold;
-    color: var(--text-color);
+    color: #4d55f8;
     border-radius: 8px;
-    background-color: #d7e2f5c5;
+    background-color: #a8b1c0c5;
 }
 
 .notification-item.read {
