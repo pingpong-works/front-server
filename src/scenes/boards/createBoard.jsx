@@ -51,7 +51,7 @@ const CreateBoard = () => {
         images: imageLinks,
       };
   
-      const response = await axios.post("http://localhost:8085/boards", postData, {
+      const response = await axios.post("http://localhost:8084/boards", postData, {
         params: {
           employeeId: 1, 
         },

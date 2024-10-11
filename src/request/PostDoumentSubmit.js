@@ -1,7 +1,7 @@
 import axios from "axios";
 import Swal from "sweetalert2";
 
-const sendPostDocumentSubmitRequest = async (state, requestBody, executeAfter) => {
+const sendPostDocumentSubmitRequest = async (requestBody, executeAfter) => {
     console.log("보낼 데이터:", requestBody);
     try {
         const response = await axios.post('http://localhost:8082/documents/submit', requestBody, {
@@ -9,7 +9,9 @@ const sendPostDocumentSubmitRequest = async (state, requestBody, executeAfter) =
                 'Content-Type': 'application/json',
                 //'Authorization': state.token
             }
+            
         });
+        console.log("보낼 데이터:", requestBody);
 
       if (response.status === 200 || response.status === 201) {
             console.log('결재문서 임시저장 성공', response);
