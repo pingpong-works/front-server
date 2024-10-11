@@ -1,7 +1,7 @@
 import axios from "axios";
 import Swal from "sweetalert2";
 
-const sendPostDocumentSaveRequest = async (state, requestBody, executeAfter) => {
+const sendPostDocumentSaveRequest = async (requestBody, executeAfter) => {
     
     try {
         const response = await axios.post('http://localhost:8082/documents/save', requestBody, {
