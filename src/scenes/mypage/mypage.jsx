@@ -9,7 +9,9 @@ import {
   useTheme, 
   useMediaQuery,
   Snackbar,
-  Alert
+  Alert,
+  Tabs,
+  Tab
 } from "@mui/material";
 import { Header } from "../../components";
 import { useState, useEffect } from "react";
@@ -41,12 +43,13 @@ const Mypage = () => {
     vehicleNumber: "",
     createdAt: "",
     employeeRank: "",
-    attendanceStatus: "",
   });
 
   const [attendanceEvents, setAttendanceEvents] = useState([]);
   const [isLoading, setIsLoading] = useState(false); // To handle button loading state
   const [errorMessage, setErrorMessage] = useState(""); // For Snackbar
+  const [tabValue, setTabValue] = useState(0); // For managing tab selection
+  const [attendanceStatistics, setAttendanceStatistics] = useState([]); // For storing attendance statistics
 
   const navigate = useNavigate();
 
@@ -62,6 +65,8 @@ const Mypage = () => {
         setUserInfo(response.data.data);
         // 사용자 정보를 가져온 후 출근/퇴근 데이터 불러오기
         fetchAttendanceData(Number(response.data.data.employeeId));
+        // 월별 근무 시간 통계 데이터 가져오기
+        fetchMonthlyAttendanceStatistics(Number(response.data.data.employeeId));
       } catch (error) {
         console.error("사용자 정보 가져오기 오류:", error);
         setErrorMessage("사용자 정보를 가져오는 데 실패했습니다.");
@@ -114,29 +119,34 @@ const Mypage = () => {
     }
   };
 
-  // 출근/퇴근 상태 변경
-  const toggleAttendanceStatus = async () => {
+  // 월별 근무 시간 통계 데이터 가져오기
+  const fetchMonthlyAttendanceStatistics = async (employeeId) => {
+    try {
+      const year = new Date().getFullYear();
+      const month = new Date().getMonth() + 1;
+      const response = await axios.get("http://localhost:8082/attendances/monthly", {
+        params: {
+          employeeId: employeeId,
+          year: year,
+          month: month,
+        },
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+      });
+      setAttendanceStatistics(response.data);
+    } catch (error) {
+      console.error("월별 근무 시간 통계 가져오기 오류:", error);
+      setErrorMessage("월별 근무 시간 통계를 가져오는 데 실패했습니다.");
+    }
+  };
+
+  // 출근 수행
+  const checkIn = async () => {
     if (isLoading) return; // Prevent multiple clicks
     setIsLoading(true);
     try {
-      const currentStatus = userInfo.attendanceStatus;
-      let endpoint = "";
-      let newStatus = "";
-
-      if (currentStatus === "퇴근" || currentStatus === "") {
-        // 현재 상태가 "퇴근" 또는 undefined일 경우 출근 수행
-        endpoint = "http://localhost:8082/attendances/check-in";
-        newStatus = "출근";
-      } else if (currentStatus === "출근") {
-        // 현재 상태가 "출근"일 경우 퇴근 수행
-        endpoint = "http://localhost:8082/attendances/check-out";
-        newStatus = "퇴근";
-      } else {
-        throw new Error("알 수 없는 출퇴근 상태입니다.");
-      }
-
-      // employeeId를 쿼리 파라미터로 전달
-      const response = await axios.post(endpoint, null, {
+      const response = await axios.post("http://localhost:8082/attendances/check-in", null, {
         params: { 
           employeeId: Number(userInfo.employeeId) 
         },
@@ -144,21 +154,32 @@ const Mypage = () => {
           Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
         },
       });
-
-      // 응답에서 업데이트된 출퇴근 상태 추출
-      const updatedStatus = response.data.data.attendanceStatus === "CLOCKED_IN" ? "출근" : "퇴근";
-
-      // 상태 업데이트 및 출퇴근 데이터 재요청
-      setUserInfo((prevState) => ({
-        ...prevState,
-        attendanceStatus: updatedStatus,
-      }));
-
-      // 성공적으로 상태가 변경된 후에만 출퇴근 데이터를 다시 불러옵니다.
       fetchAttendanceData(userInfo.employeeId);
     } catch (error) {
-      console.error("출퇴근 상태 변경 오류:", error.response?.data || error);
-      setErrorMessage("출퇴근 상태 변경에 실패했습니다. 다시 시도해주세요.");
+      console.error("출근 오류:", error.response?.data || error);
+      setErrorMessage("출근에 실패했습니다. 다시 시도해주세요.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // 퇴근 수행
+  const checkOut = async () => {
+    if (isLoading) return; // Prevent multiple clicks
+    setIsLoading(true);
+    try {
+      const response = await axios.post("http://localhost:8082/attendances/check-out", null, {
+        params: { 
+          employeeId: Number(userInfo.employeeId) 
+        },
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+      });
+      fetchAttendanceData(userInfo.employeeId);
+    } catch (error) {
+      console.error("퇴근 오류:", error.response?.data || error);
+      setErrorMessage("퇴근에 실패했습니다. 다시 시도해주세요.");
     } finally {
       setIsLoading(false);
     }
@@ -169,6 +190,10 @@ const Mypage = () => {
     alert(`출근 시간: ${event.start.toLocaleTimeString()}
 퇴근 시간: ${event.extendedProps.checkOutTime}
 총 근무 시간: ${event.extendedProps.workingHours} 시간`);
+  };
+
+  const handleTabChange = (event, newValue) => {
+    setTabValue(newValue);
   };
 
   return (
@@ -258,78 +283,90 @@ const Mypage = () => {
                   <strong>입사일:</strong> {new Date(userInfo.createdAt).toLocaleDateString()}
                 </Typography>
               </Grid>
-              <Grid item xs={6}>
-                <Typography variant="body1">
-                  <strong>출퇴근 상태:</strong> {userInfo.attendanceStatus}
-                </Typography>
-              </Grid>
             </Grid>
           </Grid>
         </Grid>
 
         {/* 출근/퇴근 버튼 */}
-        <Box mt={4} display="flex" justifyContent="center">
+        <Box mt={4} display="flex" justifyContent="center" gap={2}>
           <Button
             variant="contained"
-            color={userInfo.attendanceStatus === "출근" ? "error" : "success"}
-            onClick={toggleAttendanceStatus}
+            color="success"
+            onClick={checkIn}
             sx={{ width: "200px" }}
             disabled={isLoading} // Disable button while loading
           >
-            {isLoading 
-              ? "처리 중..." 
-              : userInfo.attendanceStatus === "출근" 
-                ? "퇴근" 
-                : "출근"}
+            출근
+          </Button>
+          <Button
+            variant="contained"
+            color="error"
+            onClick={checkOut}
+            sx={{ width: "200px" }}
+            disabled={isLoading} // Disable button while loading
+          >
+            퇴근
           </Button>
         </Box>
       </Box>
 
-      {/* 근태 기록 : 달력 */}
-      <Box mt={10} />
-      <Typography variant="h3" mb={2}> 근무 기록 </Typography>
-      {/* CALENDAR */}
-      <Box mt={1} component={Paper} p={3} elevation={3}>
-        <Box
-          flex="1 1 100%"
-          sx={{
-            "& .fc-list-day-cushion ": {
-              bgcolor: `${colors.greenAccent[500]} !important`,
-            },
-          }}
-        >
-          <FullCalendar
-            height="75vh"
-            plugins={[
-              dayGridPlugin,
-              timeGridPlugin,
-              interactionPlugin,
-              listPlugin,
-            ]}
-            headerToolbar={{
-              left: `${isSmDevices ? "prev,next" : "prev,next today"}`,
-              center: "title",
-              right: `${isXsDevices
-                ? ""
-                : isSmDevices
-                  ? "dayGridMonth,listMonth"
-                  : "dayGridMonth,timeGridWeek,timeGridDay,listMonth"
-                }`,
-            }}
-            initialView="dayGridMonth"
-            editable={false}
-            selectable={false}
-            selectMirror={true}
-            dayMaxEvents={false} // 모든 이벤트를 칸 안에 표시
-            eventClick={handleEventClick}
-            events={attendanceEvents}
-            eventTimeFormat={{
-              hour: '2-digit',
-              minute: '2-digit',
-              meridiem: false,
-            }}
-          />
-        </Box>
+      {/* 근태 기록 및 통계 탭 */}
+      <Box mt={10}>
+        <Tabs value={tabValue} onChange={handleTabChange} indicatorColor="primary" textColor="primary">
+          <Tab label="근무 기록" />
+          <Tab label="월별 통계" />
+        </Tabs>
+
+        {tabValue === 0 && (
+          <Box mt={2} component={Paper} p={3} elevation={3}>
+            <FullCalendar
+              height="75vh"
+              plugins={[
+                dayGridPlugin,
+                timeGridPlugin,
+                interactionPlugin,
+                listPlugin,
+              ]}
+              headerToolbar={{
+                left: `${isSmDevices ? "prev,next" : "prev,next today"}`,
+                center: "title",
+                right: `${isXsDevices
+                  ? ""
+                  : isSmDevices
+                    ? "dayGridMonth,listMonth"
+                    : "dayGridMonth,timeGridWeek,timeGridDay,listMonth"
+                  }`,
+              }}
+              initialView="dayGridMonth"
+              editable={false}
+              selectable={false}
+              selectMirror={true}
+              dayMaxEvents={false} // 모든 이벤트를 칸 안에 표시
+              eventClick={handleEventClick}
+              events={attendanceEvents}
+              eventTimeFormat={{
+                hour: '2-digit',
+                minute: '2-digit',
+                meridiem: false,
+              }}
+            />
+          </Box>
+        )}
+
+        {tabValue === 1 && (
+          <Box mt={2} component={Paper} p={3} elevation={3}>
+            <Typography variant="h6" mb={2}>월별 근무 시간 통계</Typography>
+            <ul>
+              {attendanceStatistics.map((stat, index) => (
+                <li key={index}>
+                  <Typography variant="body1">
+                    {stat.date}: 근무시간 {stat.workingHours}시간, 초과근무 {stat.overtimeHours}시간, 조기퇴근 {stat.earlyLeaveHours}시간
+                  </Typography>
+                </li>
+              ))}
+            </ul>
+          </Box>
+        )}
       </Box>
 
       {/* Snackbar for Error Messages */}
