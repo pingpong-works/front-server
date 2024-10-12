@@ -136,7 +136,7 @@ const DocumentModal = ({ documentId, handleClose, fetchDocuments }) => {
                     'Content-Type': 'application/json'
                 }
             });
-    
+
             if (response.status === 200) {
                 const updatedWorkflow = response.data.data;
                 setDocumentData((prevData) => ({
@@ -170,7 +170,7 @@ const DocumentModal = ({ documentId, handleClose, fetchDocuments }) => {
                 maxHeight: "80vh",
                 overflow: "auto",
                 padding: 4,
-                backgroundColor: mode === 'dark' ? colors.primary[300]: theme.palette.background.paper, 
+                backgroundColor: mode === 'dark' ? colors.primary[300] : theme.palette.background.paper,
                 color: mode === 'dark' ? theme.palette.text.primary : 'black',
                 margin: "100px auto",
                 position: "relative"
@@ -257,6 +257,69 @@ const DocumentModal = ({ documentId, handleClose, fetchDocuments }) => {
                         </TableRow>
                     </TableBody>
                 </Table>
+
+                {/* 결재 내역 표시 부분 */}
+                <Box sx={{ mt: 4 }}>
+                    <Typography
+                        variant="h6"
+                        sx={{
+                            fontWeight: "bold",
+                            mb: 2,
+                            color: mode === "dark" ? "black" : "black",
+                        }}
+                    >
+                        [결재 내역]
+                    </Typography>
+                    <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                        {documentData.workFlow.approvals
+                            .filter(
+                                (approval) =>
+                                    approval.approvalOrder !== 0 &&
+                                    (approval.approvalStatus === "APPROVE" ||
+                                        approval.approvalStatus === "REJECT" ||
+                                        approval.approvalStatus === "FINALIZE")
+                            )
+                            .map((approval, index) => (
+                                <Box
+                                    key={index}
+                                    sx={{
+                                        border: `1px solid ${mode === "dark"
+                                                ? theme.palette.grey[700]
+                                                : theme.palette.grey[300]
+                                            }`,
+                                        borderRadius: 2,
+                                        padding: 2,
+                                        backgroundColor:
+                                            mode === "dark" ? colors.primary[500] : colors.blueAccent[800],
+                                    }}
+                                >
+                                    <Typography variant="body1" sx={{ fontWeight: "bold", color: "white" }}>
+                                        {approval.name} ({approval.position})
+                                    </Typography>
+                                    <Typography variant="body2" sx={{ color: theme.palette.grey[300] }}>
+                                        승인 상태:{" "}
+                                        {approval.approvalStatus === "APPROVE"
+                                            ? "승인"
+                                            : approval.approvalStatus === "REJECT"
+                                                ? "반려"
+                                                : "전결"}
+                                    </Typography>
+                                    {approval.message ? (
+                                        <Typography variant="body2" sx={{ mt: 1, color: "white" }}>
+                                            메세지: {approval.message}
+                                        </Typography>
+                                    ) : (
+                                        <Typography
+                                            variant="body2"
+                                            sx={{ mt: 1, fontStyle: "italic", color: theme.palette.grey[400] }}
+                                        >
+                                            메세지가 없습니다.
+                                        </Typography>
+                                    )}
+                                </Box>
+                            ))}
+                    </Box>
+                </Box>
                 <Dialog open={openMessageModal} onClose={handleCloseMessageModal}>
                     <DialogTitle>메시지 입력</DialogTitle>
                     <DialogContent>
@@ -276,7 +339,7 @@ const DocumentModal = ({ documentId, handleClose, fetchDocuments }) => {
                     </DialogActions>
                 </Dialog>
             </Box>
-        </Modal>
+        </Modal >
     );
 };
 
