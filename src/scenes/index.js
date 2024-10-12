@@ -12,7 +12,6 @@ import Send from "./mail/sendMailbox.jsx";
 import Receive from "./mail/receiveMailbox.jsx";
 import Mine from "./mail/mineMailbox.jsx";
 import FAQ from "./faq";
-import Geography from "./geography";
 import Chat from "./chat/Chat";
 import Temporary from "./mail/temporaryMailbox.jsx";
 
