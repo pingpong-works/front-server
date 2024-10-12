@@ -10,7 +10,7 @@ import {
   Mine,
   Send,
   Receive,
-  Temporary,
+  Waste,
   FAQ,
   Calendar,
   Chat,
@@ -26,9 +26,8 @@ import ViewBoard from './scenes/boards/viewBoard';
 import UpdateBoard from './scenes/boards/updateBoard';
 import MailWrite from "./scenes/mail/mailWrite.jsx";
 import Notification from "./scenes/notification/notification.jsx"
+import SendDetailMail from "./scenes/mail/SendDetailMail.jsx";
 
-import ReceiveMailbox from "./scenes/mail/receiveMailbox.jsx";
-import SendMailbox from "./scenes/mail/sendMailbox.jsx";
 
 const AppRouter = () => {
   return (
@@ -58,8 +57,9 @@ const AppRouter = () => {
             <Route path="/mailbox/-1" element={<TotalMail />} />
             <Route path="/mailbox/0" element={<Receive />} />
             <Route path="/mailbox/1" element={<Send />} />
-            <Route path="/mailbox/2" element={<Temporary />} />
+            <Route path="/mailbox/2" element={<Waste />} />
             <Route path="/mailbox/3" element={<Mine />} />
+            <Route path="/read/1/:mailId" element={<SendDetailMail />} />
             <Route path="/faq" element={<FAQ />} />
             <Route path="/approval-line-setup" element={<ApprovalLineSetup />} />
             <Route path="/approval-document-form/:documentId" element={<ApprovalDocumentForm />} />

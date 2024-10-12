@@ -13,10 +13,12 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import StarBorderIcon from '@mui/icons-material/StarBorder';
 import StarIcon from '@mui/icons-material/Star';
 import { tokens } from '../../theme';
+import { useNavigate } from 'react-router-dom';
 
 const Send = () => {
     const theme = useTheme();
     const colors = tokens(theme.palette.mode);
+    const navigate = useNavigate();
     const [sentMails, setSentMails] = useState([]);
     const [loading, setLoading] = useState(true);
     const [page, setPage] = useState(1);
@@ -36,24 +38,18 @@ const Send = () => {
                 setLoading(false);
             }
         };
-
         fetchSentMails();
     }, [page]);
 
-    const handleNextPage = () => {
-        if (page < totalPages) {
-            setPage(prevPage => prevPage + 1);
+    const handleDelete = async (mailId) => {
+        try {
+            await axios.delete(`http://localhost:8083/mail/${mailId}?isReceivedMail=false`);
+            // 삭제된 메일을 제외한 나머지 메일들로 상태값 업데이트
+            setSentMails(sentMails.filter(mail => mail.mailId !== mailId));
+            setTotalElements(prevTotal => prevTotal - 1); // 총 메일 수 감소
+        } catch (error) {
+            console.error('메일 삭제 중 오류 발생: ', error);
         }
-    };
-
-    const handlePrevPage = () => {
-        if (page > 1) {
-            setPage(prevPage => prevPage - 1);
-        }
-    };
-
-    const handlePageClick = (pageNumber) => {
-        setPage(pageNumber);
     };
 
     if (loading) {
@@ -66,7 +62,7 @@ const Send = () => {
 
     return (
         <Box p={3}>
-            <Typography variant="h5" mb={2}>보낸 메일함 (총 {totalElements}개)</Typography>
+            <Typography variant="h2" mb={2}>보낸 메일함 (총 {totalElements}개)</Typography>
             <Box display="flex" flexDirection="column">
                 {sentMails.map((mail, index) => (
                     <Box
@@ -81,8 +77,16 @@ const Send = () => {
                         <IconButton>
                             {mail.isImportant ? <StarIcon /> : <StarBorderIcon />}
                         </IconButton>
-                        <Typography variant="body1" noWrap>{mail.recipientName || mail.recipientEmail}</Typography>
-                        <Typography variant="h6" fontWeight="bold" noWrap>{mail.subject}</Typography>
+                        <Typography variant="h4" noWrap>{mail.recipientName || mail.recipientEmail}</Typography>
+                        <Typography
+                            variant="h4"
+                            fontWeight="bold"
+                            noWrap
+                            sx={{ cursor: 'pointer' }}
+                            onClick={() => navigate(`/read/1/${mail.mailId}`)}
+                        >
+                            {mail.subject}
+                        </Typography>
                         <Typography variant="body2" color="textSecondary" textAlign="right">
                             {new Date(mail.sentAt).toLocaleString()}
                         </Typography>
@@ -96,7 +100,7 @@ const Send = () => {
                 {[...Array(totalPages)].map((_, index) => (
                     <Button
                         key={index + 1}
-                        onClick={() => handlePageClick(index + 1)}
+                        onClick={() => setPage(index + 1)}
                         variant={page === index + 1 ? 'contained' : 'outlined'}
                         sx={{
                             mx: 0.5,

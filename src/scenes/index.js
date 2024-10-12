@@ -12,8 +12,9 @@ import Send from "./mail/sendMailbox.jsx";
 import Receive from "./mail/receiveMailbox.jsx";
 import Mine from "./mail/mineMailbox.jsx";
 import FAQ from "./faq";
+import Waste from "./mail/wasteMailbox.jsx";
 import Chat from "./chat/Chat";
-import Temporary from "./mail/temporaryMailbox.jsx";
+
 
 export {
   Navbar,
@@ -31,5 +32,5 @@ export {
   Receive,
   Mine,
   FAQ,
-  Temporary,
+  Waste,
 };
