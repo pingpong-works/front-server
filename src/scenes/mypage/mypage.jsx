@@ -1,15 +1,17 @@
-import {
-  Box,
-  Typography,
-  Avatar,
-  Grid,
-  Paper,
-  Button,
-  Stack,
-  useTheme,
+import { 
+  Box, 
+  Typography, 
+  Avatar, 
+  Grid, 
+  Paper, 
+  Button, 
+  Stack, 
+  useTheme, 
   useMediaQuery,
   Snackbar,
-  Alert
+  Alert,
+  Tabs,
+  Tab
 } from "@mui/material";
 import { Header } from "../../components";
 import { useState, useEffect } from "react";
@@ -41,12 +43,13 @@ const Mypage = () => {
     vehicleNumber: "",
     createdAt: "",
     employeeRank: "",
-    attendanceStatus: "",
   });
 
   const [attendanceEvents, setAttendanceEvents] = useState([]);
   const [isLoading, setIsLoading] = useState(false); // To handle button loading state
   const [errorMessage, setErrorMessage] = useState(""); // For Snackbar
+  const [tabValue, setTabValue] = useState(0); // For managing tab selection
+  const [attendanceStatistics, setAttendanceStatistics] = useState([]); // For storing attendance statistics
 
   const navigate = useNavigate();
 
@@ -62,6 +65,8 @@ const Mypage = () => {
         setUserInfo(response.data.data);
         // 사용자 정보를 가져온 후 출근/퇴근 데이터 불러오기
         fetchAttendanceData(Number(response.data.data.employeeId));
+        // 월별 근무 시간 통계 데이터 가져오기
+        fetchMonthlyAttendanceStatistics(Number(response.data.data.employeeId));
       } catch (error) {
         console.error("사용자 정보 가져오기 오류:", error);
         setErrorMessage("사용자 정보를 가져오는 데 실패했습니다.");
@@ -114,7 +119,27 @@ const Mypage = () => {
     }
   };
 
-
+  // 월별 근무 시간 통계 데이터 가져오기
+  const fetchMonthlyAttendanceStatistics = async (employeeId) => {
+    try {
+      const year = new Date().getFullYear();
+      const month = new Date().getMonth() + 1;
+      const response = await axios.get("http://localhost:8082/attendances/monthly", {
+        params: {
+          employeeId: employeeId,
+          year: year,
+          month: month,
+        },
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+      });
+      setAttendanceStatistics(response.data);
+    } catch (error) {
+      console.error("월별 근무 시간 통계 가져오기 오류:", error);
+      setErrorMessage("월별 근무 시간 통계를 가져오는 데 실패했습니다.");
+    }
+  };
 
   // 출근 수행
   const checkIn = async () => {
@@ -171,179 +196,191 @@ const Mypage = () => {
     setTabValue(newValue);
   };
 
-      return (
-        <Box m="20px">
-          <Header title="마이페이지" subtitle="My Page" />
-          <Box component={Paper} p={3} mt={2} elevation={3}>
-            <Grid container spacing={2} justifyContent="center">
-              {/* 프로필 사진 및 이름 */}
-              <Grid item xs={12} md={3} align="center">
-                <Avatar
-                  alt={userInfo.name}
-                  src={userInfo.profilePicture || "/path-to-default-avatar.png"}
-                  sx={{ width: 120, height: 120 }}
-                />
-                <Typography variant="h5" mt={2}>
-                  {userInfo.name}
-                </Typography>
-                <Typography variant="body1" color="textSecondary">
-                  {userInfo.departmentName} | {userInfo.employeeRank}
-                </Typography>
+  return (
+    <Box m="20px">
+      <Header title="마이페이지" subtitle="My Page" />
+      <Box component={Paper} p={3} mt={2} elevation={3}>
+        <Grid container spacing={2} justifyContent="center">
+          {/* 프로필 사진 및 이름 */}
+          <Grid item xs={12} md={3} align="center">
+            <Avatar
+              alt={userInfo.name}
+              src={userInfo.profilePicture || "/path-to-default-avatar.png"}
+              sx={{ width: 120, height: 120 }}
+            />
+            <Typography variant="h5" mt={2}>
+              {userInfo.name}
+            </Typography>
+            <Typography variant="body1" color="textSecondary">
+              {userInfo.departmentName} | {userInfo.employeeRank}
+            </Typography>
 
-                {/* 버튼들 */}
-                <Stack spacing={2} mt={3} direction="column">
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={() => navigate("/my-info/edit")}
-                  >
-                    내 정보 수정
-                  </Button>
-                  <Button
-                    variant="contained"
-                    color="secondary"
-                    onClick={() => navigate("/change-password")}
-                  >
-                    비밀번호 변경
-                  </Button>
-                </Stack>
+            {/* 버튼들 */}
+            <Stack spacing={2} mt={3} direction="column">
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={() => navigate("/my-info/edit")}
+              >
+                내 정보 수정
+              </Button>
+              <Button
+                variant="contained"
+                color="secondary"
+                onClick={() => navigate("/change-password")}
+              >
+                비밀번호 변경
+              </Button>
+            </Stack>
+          </Grid>
+
+          {/* 사용자 세부 정보 */}
+          <Grid item xs={12} md={9}>
+            <Grid container spacing={2}>
+              <Grid item xs={12}>
+                <Typography variant="h6" fontWeight="bold">
+                  연락 정보
+                </Typography>
               </Grid>
 
-              {/* 사용자 세부 정보 */}
-              <Grid item xs={12} md={9}>
-                <Grid container spacing={2}>
-                  <Grid item xs={12}>
-                    <Typography variant="h6" fontWeight="bold">
-                      연락 정보
-                    </Typography>
-                  </Grid>
-
-                  <Grid item xs={6}>
-                    <Typography variant="body1">
-                      <strong>이메일:</strong> {userInfo.email}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={6}>
-                    <Typography variant="body1">
-                      <strong>휴대폰 번호:</strong> {userInfo.phoneNumber}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={6}>
-                    <Typography variant="body1">
-                      <strong>내선 번호:</strong> {userInfo.extensionNumber || "N/A"}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={6}>
-                    <Typography variant="body1">
-                      <strong>비상 연락처:</strong> {userInfo.emergencyNumber || "N/A"}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={12}>
-                    <Typography variant="h6" fontWeight="bold" mt={2}>
-                      추가 정보
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={6}>
-                    <Typography variant="body1">
-                      <strong>주소:</strong> {userInfo.address || "N/A"}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={6}>
-                    <Typography variant="body1">
-                      <strong>차량 번호:</strong> {userInfo.vehicleNumber || "N/A"}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={6}>
-                    <Typography variant="body1">
-                      <strong>입사일:</strong> {new Date(userInfo.createdAt).toLocaleDateString()}
-                    </Typography>
-                  </Grid>
-                </Grid>
+              <Grid item xs={6}>
+                <Typography variant="body1">
+                  <strong>이메일:</strong> {userInfo.email}
+                </Typography>
+              </Grid>
+              <Grid item xs={6}>
+                <Typography variant="body1">
+                  <strong>휴대폰 번호:</strong> {userInfo.phoneNumber}
+                </Typography>
+              </Grid>
+              <Grid item xs={6}>
+                <Typography variant="body1">
+                  <strong>내선 번호:</strong> {userInfo.extensionNumber || "N/A"}
+                </Typography>
+              </Grid>
+              <Grid item xs={6}>
+                <Typography variant="body1">
+                  <strong>비상 연락처:</strong> {userInfo.emergencyNumber || "N/A"}
+                </Typography>
+              </Grid>
+              <Grid item xs={12}>
+                <Typography variant="h6" fontWeight="bold" mt={2}>
+                  추가 정보
+                </Typography>
+              </Grid>
+              <Grid item xs={6}>
+                <Typography variant="body1">
+                  <strong>주소:</strong> {userInfo.address || "N/A"}
+                </Typography>
+              </Grid>
+              <Grid item xs={6}>
+                <Typography variant="body1">
+                  <strong>차량 번호:</strong> {userInfo.vehicleNumber || "N/A"}
+                </Typography>
+              </Grid>
+              <Grid item xs={6}>
+                <Typography variant="body1">
+                  <strong>입사일:</strong> {new Date(userInfo.createdAt).toLocaleDateString()}
+                </Typography>
               </Grid>
             </Grid>
+          </Grid>
+        </Grid>
 
-            {/* 출근/퇴근 버튼 */}
-            <Box mt={4} display="flex" justifyContent="center" gap={2}>
-              <Button
-                variant="contained"
-                color="success"
-                onClick={checkIn}
-                sx={{ width: "200px" }}
-                disabled={isLoading} // Disable button while loading
-              >
-                출근
-              </Button>
-              <Button
-                variant="contained"
-                color="error"
-                onClick={checkOut}
-                sx={{ width: "200px" }}
-                disabled={isLoading} // Disable button while loading
-              >
-                퇴근
-              </Button>
-            </Box>
-          </Box>
-
-          {/* 근태 기록 : 달력 */}
-          <Box mt={10} />
-          <Typography variant="h3" mb={2}> 근무 기록 </Typography>
-          {/* CALENDAR */}
-          <Box mt={1} component={Paper} p={3} elevation={3}>
-            <Box
-              flex="1 1 100%"
-              sx={{
-                "& .fc-list-day-cushion ": {
-                  bgcolor: `${colors.greenAccent[500]} !important`,
-                },
-              }}
-            >
-              <FullCalendar
-                height="75vh"
-                plugins={[
-                  dayGridPlugin,
-                  timeGridPlugin,
-                  interactionPlugin,
-                  listPlugin,
-                ]}
-                headerToolbar={{
-                  left: `${isSmDevices ? "prev,next" : "prev,next today"}`,
-                  center: "title",
-                  right: `${isXsDevices
-                    ? ""
-                    : isSmDevices
-                      ? "dayGridMonth,listMonth"
-                      : "dayGridMonth,timeGridWeek,timeGridDay,listMonth"
-                    }`,
-                }}
-                initialView="dayGridMonth"
-                editable={false}
-                selectable={false}
-                selectMirror={true}
-                dayMaxEvents={false} // 모든 이벤트를 칸 안에 표시
-                eventClick={handleEventClick}
-                events={attendanceEvents}
-                eventTimeFormat={{
-                  hour: '2-digit',
-                  minute: '2-digit',
-                  meridiem: false,
-                }}
-              />
-            </Box>
-          </Box>
-
-          {/* Snackbar for Error Messages */}
-          <Snackbar
-            open={!!errorMessage}
-            autoHideDuration={6000}
-            onClose={() => setErrorMessage("")}
+        {/* 출근/퇴근 버튼 */}
+        <Box mt={4} display="flex" justifyContent="center" gap={2}>
+          <Button
+            variant="contained"
+            color="success"
+            onClick={checkIn}
+            sx={{ width: "200px" }}
+            disabled={isLoading} // Disable button while loading
           >
-            <Alert onClose={() => setErrorMessage("")} severity="error" sx={{ width: '100%' }}>
-              {errorMessage}
-            </Alert>
-          </Snackbar>
+            출근
+          </Button>
+          <Button
+            variant="contained"
+            color="error"
+            onClick={checkOut}
+            sx={{ width: "200px" }}
+            disabled={isLoading} // Disable button while loading
+          >
+            퇴근
+          </Button>
         </Box>
-      );
-    };
+      </Box>
 
-    export default Mypage;
+      {/* 근태 기록 및 통계 탭 */}
+      <Box mt={10}>
+        <Tabs value={tabValue} onChange={handleTabChange} indicatorColor="primary" textColor="primary">
+          <Tab label="근무 기록" />
+          <Tab label="월별 통계" />
+        </Tabs>
+
+        {tabValue === 0 && (
+          <Box mt={2} component={Paper} p={3} elevation={3}>
+            <FullCalendar
+              height="75vh"
+              plugins={[
+                dayGridPlugin,
+                timeGridPlugin,
+                interactionPlugin,
+                listPlugin,
+              ]}
+              headerToolbar={{
+                left: `${isSmDevices ? "prev,next" : "prev,next today"}`,
+                center: "title",
+                right: `${isXsDevices
+                  ? ""
+                  : isSmDevices
+                    ? "dayGridMonth,listMonth"
+                    : "dayGridMonth,timeGridWeek,timeGridDay,listMonth"
+                  }`,
+              }}
+              initialView="dayGridMonth"
+              editable={false}
+              selectable={false}
+              selectMirror={true}
+              dayMaxEvents={false} // 모든 이벤트를 칸 안에 표시
+              eventClick={handleEventClick}
+              events={attendanceEvents}
+              eventTimeFormat={{
+                hour: '2-digit',
+                minute: '2-digit',
+                meridiem: false,
+              }}
+            />
+          </Box>
+        )}
+
+        {tabValue === 1 && (
+          <Box mt={2} component={Paper} p={3} elevation={3}>
+            <Typography variant="h6" mb={2}>월별 근무 시간 통계</Typography>
+            <ul>
+              {attendanceStatistics.map((stat, index) => (
+                <li key={index}>
+                  <Typography variant="body1">
+                    {stat.date}: 근무시간 {stat.workingHours}시간, 초과근무 {stat.overtimeHours}시간, 조기퇴근 {stat.earlyLeaveHours}시간
+                  </Typography>
+                </li>
+              ))}
+            </ul>
+          </Box>
+        )}
+      </Box>
+
+      {/* Snackbar for Error Messages */}
+      <Snackbar
+        open={!!errorMessage}
+        autoHideDuration={6000}
+        onClose={() => setErrorMessage("")}
+      >
+        <Alert onClose={() => setErrorMessage("")} severity="error" sx={{ width: '100%' }}>
+          {errorMessage}
+        </Alert>
+      </Snackbar>
+    </Box>
+  );
+};
+
+export default Mypage;
