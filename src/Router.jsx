@@ -20,7 +20,6 @@ import ApprovalLineSetup from './components/ApprovalLineSetup';
 import Login from './scenes/login/login';
 import Mypage from './scenes/mypage/mypage';
 import { AuthProvider } from './auth/AuthContext'; // AuthProvider 추가
-import ApprovalDocumentForm from "./components/ApprovalDocumentForm";
 import CreateBoard from './scenes/boards/createBoard';
 import ViewBoard from './scenes/boards/viewBoard';
 import UpdateBoard from './scenes/boards/updateBoard';
@@ -62,7 +61,6 @@ const AppRouter = () => {
             <Route path="/read/1/:mailId" element={<SendDetailMail />} />
             <Route path="/faq" element={<FAQ />} />
             <Route path="/approval-line-setup" element={<ApprovalLineSetup />} />
-            <Route path="/approval-document-form/:documentId" element={<ApprovalDocumentForm />} />
             <Route path="/mypage" element={<Mypage />} />
             <Route path="/notification" element={<Notification />} />
           </Route>

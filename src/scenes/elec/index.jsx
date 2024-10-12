@@ -5,7 +5,6 @@ import getDocumentAllRequest from "../../request/GetDocuments";
 import { tokens } from "../../theme";
 import { useEffect, useState } from "react";
 import TableModal from '../../components/TableModal';
-import ApprovalDocumentForm from '../../components/ApprovalDocumentForm';
 import DocumentModal from "../../components/DocumentModal";
 import axios from 'axios';
 
@@ -277,13 +276,6 @@ const Elec = () => {
                 </Box>
             </Box>
 
-            {isDocumentFormOpen && (
-                <ApprovalDocumentForm
-                    handleClose={handleCloseDocumentForm}
-                    onSubmit={() => { }}
-                />
-            )}
-
             {approvalLines.length > 0 && (
                 <TableModal
                     open={isModalOpen}
@@ -294,13 +286,6 @@ const Elec = () => {
                     currentUser={employeeId}
                 />
             )}
-
-            <ApprovalDocumentForm
-                open={isDocumentFormOpen}
-                handleClose={handleCloseDocumentForm}
-                onSubmit={() => { console.log('문서 제출됨'); }}
-                fetchDocuments={fetchDocuments}
-            />
 
             {isModalOpen && (
                 <DocumentModal
