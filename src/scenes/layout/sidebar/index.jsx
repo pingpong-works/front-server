@@ -41,7 +41,7 @@ const SideBar = () => {
   useEffect(() => {
     const fetchUserInfo = async () => {
       try {
-        const response = await axios.get("http://localhost:50000/employees/my-info", {
+        const response = await axios.get("http://localhost:8081/employees/my-info", {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
           },
@@ -184,37 +184,37 @@ const SideBar = () => {
         >
           <Item
             title="메일 작성"
-            path="/form"
+            path="/new"
             colors={colors}
             icon={<PersonOutlined />}
           />
           <Item
             title="전체 메일함"
-            path="/totalMail"
+            path="/mailbox/-1"
             colors={colors}
             icon={<BarChartOutlined />}
           />
           <Item
             title="받은 메일함"
-            path="/pie"
+            path="/mailbox/0"
             colors={colors}
             icon={<DonutLargeOutlined />}
           />
           <Item
             title="보낸 메일함"
-            path="/line"
+            path="/mailbox/1"
             colors={colors}
             icon={<TimelineOutlined />}
           />
           <Item
             title="임시 보관함"
-            path="/geography"
+            path="/mailbox/2"
             colors={colors}
             icon={<MapOutlined />}
           />
           <Item
             title="내게 쓴 메일함"
-            path="/stream"
+            path="/mailbox/3"
             colors={colors}
             icon={<WavesOutlined />}
           />

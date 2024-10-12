@@ -11,7 +11,7 @@ const getDocsTypeAllRequest = async (page, size, setDocuments, sort, direction, 
             direction
         };
 
-        const response = await axios.get(`http://localhost:50001/docs-types`, {
+        const response = await axios.get(`http://localhost:8082/docs-types`, {
             headers: {
                 'Content-Type': 'application/json',
             }, 

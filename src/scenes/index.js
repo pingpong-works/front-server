@@ -5,15 +5,16 @@ import Team from "./team";
 import Boards from "./boards";
 import Elec from "./elec";
 import Contacts from "./contacts";
-import Form from "./form";
+import Mail from "./mail/mailWrite.jsx";
 import Calendar from "./calendar";
-import TotalMail from "./totalMail";
-import Line from "./line";
-import Pie from "./pie";
-import Stream from "./stream";
+import TotalMail from "./mail/totalMailbox.jsx";
+import Send from "./mail/sendMailbox.jsx";
+import Receive from "./mail/receiveMailbox.jsx";
+import Mine from "./mail/mineMailbox.jsx";
 import FAQ from "./faq";
 import Geography from "./geography";
 import Chat from "./chat/Chat";
+import Temporary from "./mail/temporaryMailbox.jsx";
 
 export {
   Navbar,
@@ -23,13 +24,13 @@ export {
   Boards,
   Elec,
   Contacts,
-  Form,
+  Mail,
   Calendar,
   Chat,
   TotalMail,
-  Line,
-  Pie,
-  Stream,
+  Send,
+  Receive,
+  Mine,
   FAQ,
-  Geography,
+  Temporary,
 };

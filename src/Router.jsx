@@ -7,21 +7,29 @@ import {
   Boards,
   Elec,
   Contacts,
-  Form,
-  Line,
-  Pie,
+  Mine,
+  Send,
+  Receive,
+  Temporary,
   FAQ,
-  Geography,
   Calendar,
   Chat,
   Stream,
-  TotalMail,
+  TotalMail
 } from "./scenes";
 import ApprovalLineSetup from './components/ApprovalLineSetup';
-import Login from './scenes/login/login'; 
+import Login from './scenes/login/login';
 import Mypage from './scenes/mypage/mypage';
 import { AuthProvider } from './auth/AuthContext'; // AuthProvider 추가
 import ApprovalDocumentForm from "./components/ApprovalDocumentForm";
+import CreateBoard from './scenes/boards/createBoard';
+import ViewBoard from './scenes/boards/viewBoard';
+import UpdateBoard from './scenes/boards/updateBoard';
+import MailWrite from "./scenes/mail/mailWrite.jsx";
+import Notification from "./scenes/notification/notification.jsx"
+
+import ReceiveMailbox from "./scenes/mail/receiveMailbox.jsx";
+import SendMailbox from "./scenes/mail/sendMailbox.jsx";
 
 const AppRouter = () => {
   return (
@@ -41,18 +49,26 @@ const AppRouter = () => {
             <Route path="/elec" element={<Elec />} />
             <Route path="/contacts" element={<Contacts />} />
             <Route path="/boards" element={<Boards />} />
-            <Route path="/form" element={<Form />} />
+            <Route path="/boards/createBoard" element={<CreateBoard />} />
+            <Route path="/viewBoard/:id" element={<ViewBoard />} />
+            <Route path="/updateBoard" element={<UpdateBoard />} />
             <Route path="/calendar" element={<Calendar />} />
             <Route path="/chat" element={<Chat />} />
             <Route path="/totalMail" element={<TotalMail />} />
             <Route path="/pie" element={<Pie />} />
             <Route path="/stream" element={<Stream />} />
             <Route path="/line" element={<Line />} />
+            <Route path="/new" element={<MailWrite />} />
+            <Route path="/mailbox/-1" element={<TotalMail />} />
+            <Route path="/mailbox/0" element={<Receive />} />
+            <Route path="/mailbox/1" element={<Send />} />
+            <Route path="/mailbox/2" element={<Temporary />} />
+            <Route path="/mailbox/3" element={<Mine />} />
             <Route path="/faq" element={<FAQ />} />
-            <Route path="/geography" element={<Geography />} />
             <Route path="/approval-line-setup" element={<ApprovalLineSetup />} />
             <Route path="/approval-document-form/:documentId" element={<ApprovalDocumentForm />} />
             <Route path="/mypage" element={<Mypage />} />
+            <Route path="/notification" element={<Notification />} />
           </Route>
         </Routes>
       </Router>

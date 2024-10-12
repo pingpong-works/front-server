@@ -8,7 +8,7 @@ export const tokens = (mode) => ({
   ...(mode === "dark"
     ? {
         gray: {
-          150: "#dcdcdc", //결재모달창
+          150: "#ffffff00", //전자결재 삭제버튼 배경 : 투명색
           100: "#e0e0e0",
           200: "#f7f5f5",
           300: "#a3a3a3",
@@ -17,7 +17,7 @@ export const tokens = (mode) => ({
           600: "#525252",
           700: "#3d3d3d",
           800: "#292929",
-          900: "#141414",
+          900: "#ffffff",
         },
         primary: {
           100: "#d0d1d5", 
@@ -68,7 +68,7 @@ export const tokens = (mode) => ({
       }
     : {
         gray: {
-          150: "#f7f8fc",
+          150: "#ffffff00", //전자결재 삭제버튼 배경 : 투명색
           100: "#141414",
           200: "#f7f5f5",
           300: "#3d3d3d",
@@ -77,7 +77,7 @@ export const tokens = (mode) => ({
           600: "#858585",
           700: "#a3a3a3",
           800: "#c2c2c2",
-          900: "#e0e0e0",
+          900: "#000000",
         },
         primary: {
           150: "#040509",
@@ -143,6 +143,9 @@ export const themeSettings = (mode) => {
             secondary: {
               main: colors.greenAccent[500],
             },
+            third:{
+              main: colors.redAccent[600],
+            },
             neutral: {
               dark: colors.gray[700],
               main: colors.gray[500],
@@ -158,6 +161,9 @@ export const themeSettings = (mode) => {
             },
             secondary: {
               main: colors.greenAccent[500],
+            },
+            third:{
+              main: colors.redAccent[600],
             },
             neutral: {
               dark: colors.gray[700],

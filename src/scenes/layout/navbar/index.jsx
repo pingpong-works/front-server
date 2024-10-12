@@ -1,35 +1,39 @@
-import { useNavigate } from "react-router-dom"; // useNavigate 훅 가져오기
+import { useNavigate } from "react-router-dom"; 
 import {
   Box,
   IconButton,
-  InputBase,
   useMediaQuery,
   useTheme,
 } from "@mui/material";
 import { tokens, ColorModeContext } from "../../../theme";
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import {
   DarkModeOutlined,
   LightModeOutlined,
   MenuOutlined,
   NotificationsOutlined,
   PersonOutlined,
-  SearchOutlined,
   SettingsOutlined,
 } from "@mui/icons-material";
 
-
 import { ToggledContext } from "../../../App";
-
+import Notification from "../../notification/notification";
 
 const Navbar = () => {
   const theme = useTheme();
   const colorMode = useContext(ColorModeContext);
   const { toggled, setToggled } = useContext(ToggledContext);
   const isMdDevices = useMediaQuery("(max-width:768px)");
-  const isXsDevices = useMediaQuery("(max-width:466px)");
-  const colors = tokens(theme.palette.mode);
-  const navigate = useNavigate(); // useNavigate 훅 호출
+  const navigate = useNavigate(); 
+
+  // 알림 패널 열기/닫기
+  const [isNotificationPanelOpen, setNotificationPanelOpen] = useState(false);
+
+  // 알림 패널 열기/닫기 핸들러
+  const toggleNotificationPanel = () => {
+    setNotificationPanelOpen(!isNotificationPanelOpen);
+  };
+
   return (
     <Box
       display="flex"
@@ -44,18 +48,6 @@ const Navbar = () => {
         >
           <MenuOutlined />
         </IconButton>
-        <Box
-          display="flex"
-          alignItems="center"
-          bgcolor={colors.primary[400]}
-          borderRadius="3px"
-          sx={{ display: `${isXsDevices ? "none" : "flex"}` }}
-        >
-          <InputBase placeholder="Search" sx={{ ml: 2, flex: 1 }} />
-          <IconButton type="button" sx={{ p: 1 }}>
-            <SearchOutlined />
-          </IconButton>
-        </Box>
       </Box>
 
       <Box>
@@ -66,7 +58,7 @@ const Navbar = () => {
             <DarkModeOutlined />
           )}
         </IconButton>
-        <IconButton>
+        <IconButton onClick={toggleNotificationPanel}>
           <NotificationsOutlined />
         </IconButton>
         <IconButton>
@@ -77,6 +69,11 @@ const Navbar = () => {
           <PersonOutlined />
         </IconButton>
       </Box>
+
+      {/* 알림 패널 컴포넌트 렌더링 */}
+      {isNotificationPanelOpen && (
+        <Notification onClose={toggleNotificationPanel} />
+      )}
     </Box>
   );
 };

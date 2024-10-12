@@ -1,64 +1,102 @@
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import { Box, Typography, useTheme } from "@mui/material";
 import { Header } from "../../components";
 import { DataGrid } from "@mui/x-data-grid";
-import { mockDataTeam } from "../../data/mockData";
 import { tokens } from "../../theme";
-import {
-  AdminPanelSettingsOutlined,
-  LockOpenOutlined,
-  SecurityOutlined,
-} from "@mui/icons-material";
 
 const Team = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 
+  // State 변수 선언
+  const [employees, setEmployees] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
+
+  // 직원 데이터를 가져오는 함수
+  const fetchEmployees = async () => {
+    try {
+      const response = await axios.get(`http://localhost:8081/employees/all?page=${page + 1}&size=${pageSize}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+        }
+      });
+
+      const data = response.data.data;
+
+      // 필요한 필드만 추출하고 employeeRank, attendanceStatus 값을 한글로 변환
+      const formattedEmployees = data.map((employee) => ({
+        id: employee.employeeId,             // id는 그대로
+        name: employee.name,                 // 이름
+        email: employee.email,               // 이메일
+        phoneNumber: employee.phoneNumber,   // 전화번호
+        departmentName: employee.departmentName, // 부서명
+        employeeRank: translateRank(employee.employeeRank), // 직급(한글로 변환)
+        attendanceStatus: translateAttendance(employee.attendanceStatus), // 출퇴근 상태(한글로 변환)
+      }));
+
+      setEmployees(formattedEmployees);
+      setLoading(false);
+    } catch (error) {
+      console.error("Error fetching employees:", error);
+    }
+  };
+
+  // 직급을 한글로 변환하는 함수
+  const translateRank = (rank) => {
+    switch (rank) {
+      case "INTERN":
+        return "인턴";
+      case "STAFF":
+        return "사원";
+      case "SENIOR_STAFF":
+        return "주임";
+      case "ASSISTANT_MANAGER":
+        return "대리";
+      case "MANAGER":
+        return "과장";
+      case "SENIOR_MANAGER":
+        return "차장";
+      case "DIRECTOR":
+        return "부장";
+      default:
+        return rank; // 해당 사항이 없을 경우 원래 값 반환
+    }
+  };
+
+  // 출퇴근 상태를 한글로 변환하는 함수
+  const translateAttendance = (status) => {
+    switch (status) {
+      case "CLOCKED_IN":
+        return "출근";
+      case "CLOCKED_OUT":
+        return "퇴근";
+      default:
+        return status; // 해당 사항이 없을 경우 원래 값 반환
+    }
+  };
+
+  useEffect(() => {
+    fetchEmployees();
+  }, [page, pageSize]);
+
   const columns = [
     { field: "id", headerName: "ID" },
     {
       field: "name",
-      headerName: "Name",
+      headerName: "이름",
       flex: 1,
       cellClassName: "name-column--cell",
     },
-    {
-      field: "age",
-      headerName: "Age",
-      type: "number",
-      headerAlign: "left",
-      align: "left",
-    },
-    { field: "phone", headerName: "Phone Number", flex: 1 },
-    { field: "email", headerName: "Email", flex: 1 },
-    {
-      field: "access",
-      headerName: "Access Level",
-      flex: 1,
-      renderCell: ({ row: { access } }) => {
-        return (
-          <Box
-            width="120px"
-            p={1}
-            display="flex"
-            alignItems="center"
-            justifyContent="center"
-            gap={1}
-            bgcolor={
-              access === "admin"
-                ? colors.greenAccent[600]
-                : colors.greenAccent[700]
-            }
-            borderRadius={1}
-          >
-            {access === "admin" && <AdminPanelSettingsOutlined />}
-            {access === "manager" && <SecurityOutlined />}
-            {access === "user" && <LockOpenOutlined />}
-            <Typography textTransform="capitalize">{access}</Typography>
-          </Box>
-        );
-      },
-    },
+    { field: "email", headerName: "이메일", flex: 1 },
+    { field: "phoneNumber", headerName: "전화번호", flex: 1 },
+    { field: "departmentName", headerName: "부서명", flex: 1 },
+    { field: "employeeRank", headerName: "직급", flex: 1 },
+    { field: "attendanceStatus", headerName: "출퇴근 상태", flex: 1 }, // 출퇴근 상태 추가
   ];
+
   return (
     <Box m="20px">
       <Header title="TEAM" subtitle="Managing the Team Members" />
@@ -97,15 +135,14 @@ const Team = () => {
         }}
       >
         <DataGrid
-          rows={mockDataTeam}
+          rows={employees}
           columns={columns}
-          initialState={{
-            pagination: {
-              paginationModel: {
-                pageSize: 10,
-              },
-            },
-          }}
+          loading={loading}
+          pagination
+          page={page}
+          pageSize={pageSize}
+          onPageChange={(newPage) => setPage(newPage)}
+          onPageSizeChange={(newPageSize) => setPageSize(newPageSize)}
           checkboxSelection
         />
       </Box>

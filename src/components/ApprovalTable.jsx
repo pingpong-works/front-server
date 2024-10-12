@@ -6,7 +6,7 @@ import { Table, TableBody, TableRow, TableCell, TableHead, Typography, Box, Butt
 
 const ApprovalTable = ({ approvalLines, handleApprovalClick }) => {
     return (
-        <Table sx={{ border: "1px solid #000", width: "100%" }}>
+        <Table sx={{ border: "1px solid #5c5555ea", width: "100%" , backgroundColor:"#ffffffdb", color:"black"}}>
             <TableHead>
                 <TableRow>
                     {approvalLines && approvalLines.length > 0 ? (
@@ -14,9 +14,9 @@ const ApprovalTable = ({ approvalLines, handleApprovalClick }) => {
                             <TableCell
                                 key={index}
                                 align="center"
-                                sx={{ fontSize: '0.8rem', border: "1px solid #000" }}
+                                sx={{ fontSize: '0.8rem', border: "1px solid #5c5555ea" }}
                             >
-                                <Typography variant="body1" sx={{ fontSize: '0.7rem' }}>
+                                <Typography variant="body1" sx={{ fontSize: '0.7rem', color:"black" }}>
                                     {approver.position}
                                 </Typography>
                             </TableCell>
@@ -35,7 +35,7 @@ const ApprovalTable = ({ approvalLines, handleApprovalClick }) => {
                             <TableCell
                                 key={index}
                                 align="center"
-                                sx={{ border: "1px solid #000" }}
+                                sx={{ border: "1px solid #5c5555ea" }}
                             >
                                 <Box
                                     sx={{
@@ -66,7 +66,7 @@ const ApprovalTable = ({ approvalLines, handleApprovalClick }) => {
                                                         : REJECT
                                                 }
                                                 alt={approver.approvalStatus}
-                                                style={{ width: '40px', height: '40px' }}
+                                                style={{ width: '40px', height: '40px'}}
                                             />
                                         )
                                     ) : (
@@ -84,9 +84,9 @@ const ApprovalTable = ({ approvalLines, handleApprovalClick }) => {
                             <TableCell
                                 key={index}
                                 align="center"
-                                sx={{ border: "1px solid #000" }}
+                                sx={{ border: "1px solid #5c5555ea" }}
                             >
-                                <Typography variant="body2" sx={{ fontSize: '0.7rem' }}>
+                                <Typography variant="body2" sx={{ fontSize: '0.7rem', color:"black" }}>
                                     {approver.name}
                                 </Typography>
                             </TableCell>
