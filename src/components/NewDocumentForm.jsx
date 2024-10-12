@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react'; 
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, Select, MenuItem, Box, Typography, Table, TableBody, TableRow, TableCell, CircularProgress } from '@mui/material';
 import ApprovalLineModal from './ApprovalLineModal';
 import sendPostDocumentSubmitRequest from '../request/PostDoumentSubmit';
@@ -6,7 +6,7 @@ import sendPostDocumentSaveRequest from '../request/PostDocumentSave';
 import getDocsTypeAllRequest from '../request/GetDocsType';
 import axios from 'axios'; // 로그인된 사용자 정보를 가져오기 위해 axios 사용
 
-const ApprovalDocumentForm = ({ open, handleClose, initialData, isRewriting, fetchDocuments }) => {
+const NewDocumentForm = ({ open, handleClose, fetchDocuments }) => {
     const [title, setTitle] = useState('');  // 문서 제목
     const [content, setContent] = useState('');  // 문서 내용
     const [customFields, setCustomFields] = useState({});  // 문서의 커스텀 필드
@@ -38,25 +38,15 @@ const ApprovalDocumentForm = ({ open, handleClose, initialData, isRewriting, fet
         fetchUserInfo();  // 로그인된 사용자 정보를 가져옴
     }, []);
 
-    // 초기 데이터로 폼 초기화
+    // 초기 상태 설정
     useEffect(() => {
-        if (initialData) {
-            setTitle(initialData.title || '');  // 기존 제목 설정
-            setContent(initialData.content || '');  // 기존 내용 설정
-            setCustomFields(initialData.customFields || {});  // 기존 필드 설정
-            setApprovalLines(initialData.workFlow?.approvals || []);  // 결재라인 설정
-            setWorkflowId(initialData.workFlow?.workflowId || null);  // 워크플로우 ID 설정
-            setDocumentType(initialData.documentType?.id || '');  // 기존 문서 타입 설정
-        } else {
-            // 새로 작성 시 상태 초기화
-            setTitle('');
-            setContent('');
-            setCustomFields({});
-            setApprovalLines([]);
-            setWorkflowId(null);
-            setDocumentType('');
-        }
-    }, [initialData]);
+        setTitle('');
+        setContent('');
+        setCustomFields({});
+        setApprovalLines([]);
+        setWorkflowId(null);
+        setDocumentType('');
+    }, []);
 
     // 문서 타입 불러오기
     useEffect(() => {
@@ -82,7 +72,7 @@ const ApprovalDocumentForm = ({ open, handleClose, initialData, isRewriting, fet
 
     // 문서 타입 선택 시 필드 동적 생성
     useEffect(() => {
-        if (!isRewriting && documentType) {
+        if (documentType) {
             const selectedDocType = docsTypes.find(doc => doc.id === documentType);
             if (selectedDocType && selectedDocType.documentTemplate) {
                 const fields = selectedDocType.documentTemplate.fields;
@@ -93,7 +83,7 @@ const ApprovalDocumentForm = ({ open, handleClose, initialData, isRewriting, fet
                 setCustomFields(initialFields);  // 필드를 동적으로 설정
             }
         }
-    }, [documentType, isRewriting]);
+    }, [documentType]);
 
     // 커스텀 필드 값 변경 처리
     const handleFieldChange = (fieldName, value) => {
@@ -172,15 +162,12 @@ const ApprovalDocumentForm = ({ open, handleClose, initialData, isRewriting, fet
                         <Select
                             value={documentType}
                             onChange={(e) => {
-                                if (!isRewriting) {
-                                    setDocumentType(e.target.value); // 새로 작성일 경우만 문서 타입 선택 가능
-                                }
+                                setDocumentType(e.target.value);
                             }}
                             displayEmpty
                             fullWidth
                             variant="outlined"
                             sx={{ marginBottom: '20px' }}
-                            disabled={isRewriting}  // 다시 작성일 경우 선택 불가
                         >
                             <MenuItem value="" disabled>문서 타입 선택</MenuItem>
                             {docsTypes.map((doc, index) => (
@@ -274,4 +261,4 @@ const ApprovalDocumentForm = ({ open, handleClose, initialData, isRewriting, fet
     );
 };
 
-export default ApprovalDocumentForm;
+export default NewDocumentForm;
