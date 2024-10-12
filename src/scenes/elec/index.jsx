@@ -6,6 +6,7 @@ import { tokens } from "../../theme";
 import { useEffect, useState } from "react";
 import TableModal from '../../components/TableModal';
 import DocumentModal from "../../components/DocumentModal";
+import NewDocumentForm from '../../components/NewDocumentForm';
 import axios from 'axios';
 
 const Elec = () => {
@@ -217,20 +218,19 @@ const Elec = () => {
                 <Box mt="50px" />
 
                 <Box display="flex" justifyContent="flex-end" mb="10px">
-                        <Button
-                            onClick={handleDeleteDocuments}
-                          //  variant="contained"
-                            sx={{
-                                width: '70px',
-                                height: '30px',
-                                fontSize: '12px',
-                                color: colors.gray[900],
-                                backgroundColor: colors.gray[150]
-                            }}
-                        >
-                            삭제 ({selectedRows.length})
-                        </Button>
-                    </Box>
+                    <Button
+                        onClick={handleDeleteDocuments}
+                        sx={{
+                            width: '70px',
+                            height: '30px',
+                            fontSize: '12px',
+                            color: colors.gray[900],
+                            backgroundColor: colors.gray[150]
+                        }}
+                    >
+                        삭제 ({selectedRows.length})
+                    </Button>
+                </Box>
                 <Box
                     mt="10px"
                     height="75vh"
@@ -291,6 +291,15 @@ const Elec = () => {
                 <DocumentModal
                     documentId={selectedDocumentId}
                     handleClose={() => setIsModalOpen(false)}
+                />
+            )}
+
+            {/* NewDocumentForm 렌더링 */}
+            {isDocumentFormOpen && (
+                <NewDocumentForm
+                    open={isDocumentFormOpen}
+                    handleClose={handleCloseDocumentForm}
+                    fetchDocuments={fetchDocuments}
                 />
             )}
 
