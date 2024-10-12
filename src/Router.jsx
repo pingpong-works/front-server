@@ -13,6 +13,7 @@ import {
   Waste,
   FAQ,
   Calendar,
+  Chat,
   TotalMail
 } from "./scenes";
 import ApprovalLineSetup from './components/ApprovalLineSetup';
@@ -50,6 +51,8 @@ const AppRouter = () => {
             <Route path="/viewBoard/:id" element={<ViewBoard />} />
             <Route path="/updateBoard" element={<UpdateBoard />} />
             <Route path="/calendar" element={<Calendar />} />
+            <Route path="/chat" element={<Chat />} />
+            <Route path="/totalMail" element={<TotalMail />} />
             <Route path="/new" element={<MailWrite />} />
             <Route path="/mailbox/-1" element={<TotalMail />} />
             <Route path="/mailbox/0" element={<Receive />} />

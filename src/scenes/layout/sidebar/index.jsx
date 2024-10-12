@@ -5,6 +5,7 @@ import { Menu, MenuItem, Sidebar } from "react-pro-sidebar";
 import {
   BarChartOutlined,
   CalendarTodayOutlined,
+  ChatBubbleOutline,
   ContactsOutlined,
   DashboardOutlined,
   DonutLargeOutlined,
@@ -237,25 +238,31 @@ const SideBar = () => {
           }}
         >
           <Item
-            title="EDMS"
+            title="전자결재"
             path="/elec"
             colors={colors}
             icon={<ContactsOutlined />}
           />
           <Item
-            title="Calendar"
+            title="캘린더"
             path="/calendar"
             colors={colors}
             icon={<CalendarTodayOutlined />}
           />
           <Item
-            title="Board"
+            title="채팅"
+            path="/chat"
+            colors={colors}
+            icon={<ChatBubbleOutline />}
+          />
+          <Item
+            title="게시판"
             path="/boards"
             colors={colors}
             icon={<ReceiptOutlined />}
           />
           <Item
-            title="FAQ Page"
+            title="문의사항"
             path="/faq"
             colors={colors}
             icon={<HelpOutlineOutlined />}
@@ -280,13 +287,13 @@ const SideBar = () => {
           }}
         >
           <Item
-            title="Manage Team"
+            title="조직도"
             path="/team"
             colors={colors}
             icon={<PeopleAltOutlined />}
           />
           <Item
-            title="Contacts Information"
+            title="주소록"
             path="/contacts"
             colors={colors}
             icon={<ContactsOutlined />}
