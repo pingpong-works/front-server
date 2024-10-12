@@ -12,7 +12,7 @@ import Send from "./mail/sendMailbox.jsx";
 import Receive from "./mail/receiveMailbox.jsx";
 import Mine from "./mail/mineMailbox.jsx";
 import FAQ from "./faq";
-import Temporary from "./mail/temporaryMailbox.jsx";
+import Waste from "./mail/wasteMailbox.jsx";
 
 
 export {
@@ -30,5 +30,5 @@ export {
   Receive,
   Mine,
   FAQ,
-  Temporary,
+  Waste,
 };

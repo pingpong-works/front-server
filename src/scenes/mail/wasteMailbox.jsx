@@ -6,7 +6,7 @@ import { tokens } from "../../theme.js";
 import axios from "axios";
 import { useEffect, useState } from "react";
 
-const Temporary = () => {
+const Waste = () => {
     const theme = useTheme();
     const colors = tokens(theme.palette.mode);
 
@@ -138,4 +138,4 @@ const Temporary = () => {
     );
 };
 
-export default Temporary;
+export default Waste;

@@ -19,7 +19,6 @@ const Send = () => {
     const theme = useTheme();
     const colors = tokens(theme.palette.mode);
     const navigate = useNavigate();
-
     const [sentMails, setSentMails] = useState([]);
     const [loading, setLoading] = useState(true);
     const [page, setPage] = useState(1);
@@ -39,9 +38,19 @@ const Send = () => {
                 setLoading(false);
             }
         };
-
         fetchSentMails();
     }, [page]);
+
+    const handleDelete = async (mailId) => {
+        try {
+            await axios.delete(`http://localhost:8083/mail/${mailId}?isReceivedMail=false`);
+            // 삭제된 메일을 제외한 나머지 메일들로 상태값 업데이트
+            setSentMails(sentMails.filter(mail => mail.mailId !== mailId));
+            setTotalElements(prevTotal => prevTotal - 1); // 총 메일 수 감소
+        } catch (error) {
+            console.error('메일 삭제 중 오류 발생: ', error);
+        }
+    };
 
     if (loading) {
         return (
