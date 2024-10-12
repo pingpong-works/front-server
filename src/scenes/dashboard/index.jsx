@@ -9,10 +9,8 @@ import {
 import {
   Header,
   StatBox,
-  LineChart,
   ProgressCircle,
   BarChart,
-  GeographyChart,
 } from "../../components";
 import {
   DownloadOutlined,
@@ -151,47 +149,6 @@ function Dashboard() {
 
          {/* ---------------- Row 2 ---------------- */}
 
-          {/* Line Chart */}
-          <Box
-            gridColumn={
-              isXlDevices ? "span 8" : isMdDevices ? "span 6" : "span 3"
-            }
-            gridRow="span 2"
-            bgcolor={colors.primary[400]}
-          >
-            <Box
-              mt="25px"
-              px="30px"
-              display="flex"
-              justifyContent="space-between"
-            >
-              <Box>
-                <Typography
-                  variant="h5"
-                  fontWeight="600"
-                  color={colors.gray[100]}
-                >
-                  Revenue Generated
-                </Typography>
-                <Typography
-                  variant="h5"
-                  fontWeight="bold"
-                  color={colors.greenAccent[500]}
-                >
-                  $59,342.32
-                </Typography>
-              </Box>
-              <IconButton>
-                <DownloadOutlined
-                  sx={{ fontSize: "26px", color: colors.greenAccent[500] }}
-                />
-              </IconButton>
-            </Box>
-            <Box height="250px" mt="-20px">
-              <LineChart isDashboard={true} />
-            </Box>
-          </Box>
-
           {/* Transaction Data */}
           <Box
             gridColumn={isXlDevices ? "span 4" : "span 3"}
@@ -292,26 +249,6 @@ function Dashboard() {
               mt="-20px"
             >
               <BarChart isDashboard={true} />
-            </Box>
-          </Box>
-
-          {/* Geography Chart */}
-          <Box
-            gridColumn={isXlDevices ? "span 4" : "span 3"}
-            gridRow="span 2"
-            backgroundColor={colors.primary[400]}
-            padding="30px"
-          >
-            <Typography variant="h5" fontWeight="600" mb="15px">
-              Geography Based Traffic
-            </Typography>
-            <Box
-              display="flex"
-              alignItems="center"
-              justifyContent="center"
-              height="200px"
-            >
-              <GeographyChart isDashboard={true} />
             </Box>
           </Box>
         </Box>
