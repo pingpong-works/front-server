@@ -25,7 +25,7 @@
 
 //             const response = await axios({
 //                 method: 'post',
-//                 url: '/api/employee/auth/login',
+//                 url: '/employee/auth/login',
 //                 data: data,
 //             });
 
@@ -80,7 +80,7 @@
 //     //로그아웃
 //     logout: async () => {
 //         try {
-//             const response = await axios.post('/api/employee/auth/logout');
+//             const response = await axios.post('/employee/auth/logout');
 //             if (response.status === 200) {
 //                 console.log('로그아웃 성공', response.data);
 //                 set({
@@ -105,7 +105,7 @@
 //     // 페이지 로드 시 서버에서 로그인 상태 확인
 //     initializeState: async () => {
 //         try {
-//             const response = await axios.get('/api/employee/auth/islogin');
+//             const response = await axios.get('/employee/auth/islogin');
 //             if (response.status === 200) {
 //                 const { isAdmin } = response.data;
 
