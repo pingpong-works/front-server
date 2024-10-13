@@ -369,6 +369,7 @@ const NewDocumentForm = ({ open, handleClose, fetchDocuments }) => {
                 open={openApprovalLineModal}
                 handleClose={handleCloseApprovalLineModal}
                 onSubmit={handleApprovalLineSubmit}
+                currentEmployeeId={employeeId}
             />
         </Dialog>
     );
