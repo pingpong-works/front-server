@@ -19,7 +19,6 @@ import {
   WavesOutlined,
 } from "@mui/icons-material";
 import avatar from "../../../assets/images/avatar.png";
-import logo from "../../../assets/images/logo.png";
 import Item from "./Item";
 import { ToggledContext } from "../../../App";
 import axios from "axios"; // axios 사용
@@ -94,9 +93,9 @@ const SideBar = () => {
                 gap="12px"
                 sx={{ transition: ".3s ease" }}
               >
-                <img
+                 <img
                   style={{ width: "30px", height: "30px", borderRadius: "8px" }}
-                  src={logo}
+                  src="https://img.icons8.com/3d-fluency/94/ping-pong.png"
                   alt="PingPong"
                 />
                 <Typography
