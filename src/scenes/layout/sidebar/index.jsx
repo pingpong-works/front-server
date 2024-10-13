@@ -1,4 +1,4 @@
-import { Avatar, Box, IconButton, Typography, useTheme } from "@mui/material";
+import { Avatar, Box, IconButton, Typography, useTheme, Button } from "@mui/material";
 import { useContext, useEffect, useState } from "react";
 import { tokens } from "../../../theme";
 import { Menu, MenuItem, Sidebar } from "react-pro-sidebar";
@@ -21,22 +21,22 @@ import avatar from "../../../assets/images/avatar.png";
 import logo from "../../../assets/images/logo.png";
 import Item from "./Item";
 import { ToggledContext } from "../../../App";
-import axios from "axios"; // axios 사용
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const SideBar = () => {
   const [collapsed, setCollapsed] = useState(false);
   const { toggled, setToggled } = useContext(ToggledContext);
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
+  const navigate = useNavigate();
 
-  // 사용자 정보 상태 관리
   const [userInfo, setUserInfo] = useState({
     name: "",
     departmentName: "",
     employeeRank: "",
   });
 
-  // API 호출하여 사용자 정보 가져오기
   useEffect(() => {
     const fetchUserInfo = async () => {
       try {
@@ -45,8 +45,8 @@ const SideBar = () => {
             Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
           },
         });
-        console.log(response); // 응답 로그 확인
-        const { name, departmentName, employeeRank } = response.data.data; // 정확한 경로 사용
+        console.log(response);
+        const { name, departmentName, employeeRank } = response.data.data;
         setUserInfo({ name, departmentName, employeeRank });
       } catch (error) {
         console.error("Error fetching user info:", error);
@@ -55,6 +55,20 @@ const SideBar = () => {
 
     fetchUserInfo();
   }, []);
+
+  const handleLogout = async () => {
+    try {
+      await axios.post("http://localhost:8081/logout", {}, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+      });
+      localStorage.removeItem("accessToken");
+      navigate("/login");
+    } catch (error) {
+      console.error("Error logging out:", error);
+    }
+  };
 
   return (
     <Sidebar
@@ -145,6 +159,7 @@ const SideBar = () => {
       )}
 
       <Box mb={5} pl={collapsed ? undefined : "5%"}>
+        {/* 기존 메뉴 아이템들 */}
         <Menu
           menuItemStyles={{
             button: {
@@ -267,7 +282,7 @@ const SideBar = () => {
           sx={{ m: "15px 0 5px 20px" }}
         >
           {!collapsed ? "Data" : " "}
-        </Typography>{" "}
+        </Typography>
         <Menu
           menuItemStyles={{
             button: {
@@ -280,7 +295,7 @@ const SideBar = () => {
           }}
         >
           <Item
-            title="Manage Team"
+            title="주소록"
             path="/team"
             colors={colors}
             icon={<PeopleAltOutlined />}
@@ -292,6 +307,27 @@ const SideBar = () => {
             icon={<ContactsOutlined />}
           />
         </Menu>
+
+        {/* 로그아웃 버튼 */}
+        <Box
+          sx={{
+            textAlign: "center",
+            mt: "auto", // 메뉴 아래로 위치하게 설정
+            pb: 2,
+          }}
+        >
+          <Button
+            variant="contained"
+            color="secondary"
+            onClick={handleLogout}
+            sx={{
+              width: "80%",
+              margin: "0 auto",
+            }}
+          >
+            로그아웃
+          </Button>
+        </Box>
       </Box>
     </Sidebar>
   );

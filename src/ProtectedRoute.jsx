@@ -1,41 +1,44 @@
 import React, { useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import useStore from './store';
-import { CircularProgress, Box } from '@mui/material'; // CircularProgress와 Box 임포트
+import { CircularProgress, Box } from '@mui/material';
 
 const ProtectedRoute = ({ element }) => {
     const { isLogined, initializeState } = useStore(state => state);
-    const [isChecking, setIsChecking] = useState(true);
+    const [isChecking, setIsChecking] = useState(true);  // 상태 초기화
 
     useEffect(() => {
         const checkAuth = async () => {
-            await initializeState();
-            setIsChecking(false);
+            try {
+                await initializeState();  // 비동기로 인증 상태 확인
+            } finally {
+                setIsChecking(false);  // 인증 상태 확인 후 로딩 중단
+            }
         };
         checkAuth();
     }, [initializeState]);
 
     if (isChecking) {
-        // 로딩 중일 때 CircularProgress를 화면 중앙에 표시
+        // 로딩 중일 때 표시되는 UI
         return (
             <Box
                 sx={{
                     display: 'flex',
                     justifyContent: 'center',
                     alignItems: 'center',
-                    height: '100vh'
+                    height: '100vh',
                 }}
             >
                 <CircularProgress
                     sx={{
-                        color: '#ffb121' // 원하는 색상 코드
+                        color: '#ffb121',
                     }}
                 />
             </Box>
         );
     }
 
-    // 인증된 상태면 페이지를 렌더링하고, 아니면 로그인 페이지로 리디렉션
+    // 로그인 상태가 확인되면 페이지 렌더링, 그렇지 않으면 /login으로 리디렉션
     return isLogined ? element : <Navigate to="/login" />;
 };
 

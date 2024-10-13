@@ -99,7 +99,7 @@ const Team = () => {
 
   return (
     <Box m="20px">
-      <Header title="TEAM" subtitle="Managing the Team Members" />
+      <Header title="주소록" subtitle="직원 정보 및 연락처 관리" />
       <Box
         mt="40px"
         height="75vh"
