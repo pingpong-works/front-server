@@ -1,7 +1,7 @@
 import { Avatar, Box, IconButton, Typography, useTheme } from "@mui/material";
 import { useContext, useEffect, useState } from "react";
 import { tokens } from "../../../theme";
-import { Menu, MenuItem, Sidebar } from "react-pro-sidebar";
+import { Menu, MenuItem, Sidebar, SubMenu } from "react-pro-sidebar";
 import {
   BarChartOutlined,
   CalendarTodayOutlined,
@@ -17,12 +17,13 @@ import {
   ReceiptOutlined,
   TimelineOutlined,
   WavesOutlined,
+  MailOutline as MailOutlineIcon,
+  Logout as LogoutIcon,
 } from "@mui/icons-material";
 import avatar from "../../../assets/images/avatar.png";
-import logo from "../../../assets/images/logo.png";
 import Item from "./Item";
 import { ToggledContext } from "../../../App";
-import axios from "axios"; // axios 사용
+import axios from "axios";
 
 const SideBar = () => {
   const [collapsed, setCollapsed] = useState(false);
@@ -46,8 +47,7 @@ const SideBar = () => {
             Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
           },
         });
-        console.log(response); // 응답 로그 확인
-        const { name, departmentName, employeeRank } = response.data.data; // 정확한 경로 사용
+        const { name, departmentName, employeeRank } = response.data.data;
         setUserInfo({ name, departmentName, employeeRank });
       } catch (error) {
         console.error("Error fetching user info:", error);
@@ -57,9 +57,53 @@ const SideBar = () => {
     fetchUserInfo();
   }, []);
 
+  // 로그아웃 핸들러
+  const handleLogout = async () => {
+    try {
+      // 로그아웃 시 상태를 LOGGED_OUT으로 업데이트하는 API 요청
+      await axios.patch(
+        "http://localhost:8081/employees/update-status", // 상태 변경 API 경로
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`, // Authorization 헤더에 토큰 포함
+          },
+        }
+      );
+
+      // 토큰 삭제 및 로그인 페이지로 이동
+      localStorage.removeItem("accessToken");
+      window.location.href = "/login";
+    } catch (error) {
+      console.error("Error during logout:", error);
+      // 에러 처리 (예: 알림 표시)
+    }
+  };
+
+  // 테마에 따른 스타일 정의
+  const getStyles = (mode) => ({
+    menuButton: {
+      backgroundColor: mode === "dark" ? colors.primary[400] : colors.primary[500],
+      color: mode === "dark" ? colors.gray[100] : colors.gray[900],
+      "&:hover": {
+        backgroundColor: mode === "dark" ? "#0c2a40" : "#dbe8f2",
+        color: mode === "dark" ? "#86ccff" : colors.primary[200],
+      },
+    },
+    menuLabel: {
+      color: mode === "dark" ? colors.gray[300] : colors.gray[600],
+      "&:hover": {
+        backgroundColor: mode === "dark" ? colors.primary[500] : colors.primary[200],
+        color: mode === "dark" ? colors.blueAccent[400] : colors.blueAccent[600],
+      },
+    },
+  });
+
+  const styles = getStyles(theme.palette.mode);
+
   return (
     <Sidebar
-      backgroundColor={colors.primary[400]}
+      backgroundColor={theme.palette.mode === "dark" ? colors.primary[400] : colors.primary[500]}
       rootStyles={{
         border: 0,
         height: "100%",
@@ -71,7 +115,9 @@ const SideBar = () => {
     >
       <Menu
         menuItemStyles={{
-          button: { ":hover": { background: "transparent" } },
+          button: {
+            ...styles.menuButton,
+          },
         }}
       >
         <MenuItem
@@ -96,14 +142,17 @@ const SideBar = () => {
               >
                 <img
                   style={{ width: "30px", height: "30px", borderRadius: "8px" }}
-                  src={logo}
+                  src="https://img.icons8.com/3d-fluency/94/ping-pong.png"
                   alt="PingPong"
                 />
                 <Typography
+                  component="a"
+                  href="/dashboard"
                   variant="h4"
                   fontWeight="bold"
                   textTransform="capitalize"
                   color={colors.blueAccent[450]}
+                  style={{ textDecoration: 'none' }}
                 >
                   PingPong
                 </Typography>
@@ -141,47 +190,48 @@ const SideBar = () => {
             >
               {userInfo.departmentName} | {userInfo.employeeRank}
             </Typography>
+            {/* 로그아웃 버튼 */}
+            <IconButton
+              onClick={handleLogout}
+              color="inherit"
+            >
+              <LogoutIcon />
+            </IconButton>
           </Box>
         </Box>
       )}
 
-      <Box mb={5} pl={collapsed ? undefined : "5%"}>
+      <Box pl={collapsed ? undefined : "5%"}>
         <Menu
           menuItemStyles={{
             button: {
-              ":hover": {
-                color: "#74ade2",
-                background: "transparent",
-                transition: ".4s ease",
-              },
+              ...styles.menuButton,
             },
           }}
         >
-          <Item
-            title="MainPage"
-            path="/"
-            colors={colors}
-            icon={<DashboardOutlined />}
-          />
+          <Item title="MainPage" path="/" icon={<DashboardOutlined />} />
         </Menu>
         <Typography
           variant="h6"
-          color={colors.gray[300]}
           sx={{ m: "15px 0 5px 20px" }}
         >
-          {!collapsed ? "Mail" : " "}
+          {!collapsed ? "Communication" : " "}
         </Typography>
         <Menu
           menuItemStyles={{
             button: {
-              ":hover": {
-                color: "#74ade2",
-                background: "transparent",
-                transition: ".4s ease",
-              },
+              ...styles.menuButton,
             },
           }}
         >
+          <SubMenu
+              title="메일"
+              label="메일"
+              icon={<MailOutlineIcon />}
+              rootStyles={{
+                ...styles.menuButton,
+              }}
+          >
           <Item
             title="메일 작성"
             path="/new"
@@ -218,10 +268,11 @@ const SideBar = () => {
               colors={colors}
               icon={<MapOutlined />}
           />
+          </SubMenu>
+          <Item title="메신저" path="/chat" icon={<ChatBubbleOutline />} />
         </Menu>
         <Typography
           variant="h6"
-          color={colors.gray[300]}
           sx={{ m: "15px 0 5px 20px" }}
         >
           {!collapsed ? "Pages" : " "}
@@ -229,75 +280,30 @@ const SideBar = () => {
         <Menu
           menuItemStyles={{
             button: {
-              ":hover": {
-                color: "#74ade2",
-                background: "transparent",
-                transition: ".4s ease",
-              },
+              ...styles.menuButton,
             },
           }}
         >
-          <Item
-            title="전자결재"
-            path="/elec"
-            colors={colors}
-            icon={<ContactsOutlined />}
-          />
-          <Item
-            title="캘린더"
-            path="/calendar"
-            colors={colors}
-            icon={<CalendarTodayOutlined />}
-          />
-          <Item
-            title="채팅"
-            path="/chat"
-            colors={colors}
-            icon={<ChatBubbleOutline />}
-          />
-          <Item
-            title="게시판"
-            path="/boards"
-            colors={colors}
-            icon={<ReceiptOutlined />}
-          />
-          <Item
-            title="문의사항"
-            path="/faq"
-            colors={colors}
-            icon={<HelpOutlineOutlined />}
-          />
+          <Item title="전자결재" path="/elec" icon={<ContactsOutlined />} />
+          <Item title="캘린더" path="/calendar" icon={<CalendarTodayOutlined />} />
+          <Item title="게시판" path="/boards" icon={<ReceiptOutlined />} />
+          <Item title="문의사항" path="/faq" icon={<HelpOutlineOutlined />} />
         </Menu>
         <Typography
           variant="h6"
-          color={colors.gray[300]}
           sx={{ m: "15px 0 5px 20px" }}
         >
-          {!collapsed ? "Data" : " "}
-        </Typography>{" "}
+          {!collapsed ? "Resource" : " "}
+        </Typography>
         <Menu
           menuItemStyles={{
             button: {
-              ":hover": {
-                color: "#74ade2",
-                background: "transparent",
-                transition: ".4s ease",
-              },
+              ...styles.menuButton,
             },
           }}
         >
-          <Item
-            title="조직도"
-            path="/team"
-            colors={colors}
-            icon={<PeopleAltOutlined />}
-          />
-          <Item
-            title="주소록"
-            path="/contacts"
-            colors={colors}
-            icon={<ContactsOutlined />}
-          />
+          <Item title="조직도" path="/team" icon={<PeopleAltOutlined />} />
+          <Item title="주소록" path="/contacts" icon={<ContactsOutlined />} />
         </Menu>
       </Box>
     </Sidebar>

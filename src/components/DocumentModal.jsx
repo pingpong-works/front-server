@@ -2,24 +2,23 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useTheme, Box, Modal, Typography, Table, TableBody, TableCell, TableRow, IconButton, Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField } from "@mui/material";
 import CloseIcon from '@mui/icons-material/Close';
-import ApprovalDocumentForm from './ApprovalDocumentForm';
+import RewirteDocumentForm from './RewriteDocumentForm';
 import ApprovalTable from "./ApprovalTable";
 import getEmployee from "../request/GetEmployee";
 import Swal from "sweetalert2";
 import { tokens } from "../theme";
 
-const DocumentModal = ({ documentId, handleClose }) => {
+const DocumentModal = ({ documentId, handleClose, fetchDocuments }) => {
     const theme = useTheme();
     const colors = tokens(theme.palette.mode);
-    const mode = theme.palette.mode; // mode가 'light' 또는 'dark'인지 확인
+    const mode = theme.palette.mode;
     const [documentData, setDocumentData] = useState(null);
-    const [isLoading, setIsLoading] = useState(false);
     const [userInfo, setUserInfo] = useState(null);
+    const [isOpen, setIsOpen] = useState(true);
     const [openMessageModal, setOpenMessageModal] = useState(false);
+    const [openRewirteDocumentForm, setOpenRewirteDocumentForm] = useState(false);
     const [selectedApprovalId, setSelectedApprovalId] = useState(null);
     const [message, setMessage] = useState('');
-    const [isOpen, setIsOpen] = useState(true);
-    const [openApprovalDocumentForm, setOpenApprovalDocumentForm] = useState(false);
 
     useEffect(() => {
         const fetchUserInfo = async () => {
@@ -88,19 +87,13 @@ const DocumentModal = ({ documentId, handleClose }) => {
 
     const handleApprovalAction = (approvalId, approvalOrder) => {
         const currentApprover = documentData.workFlow?.approvals.find(
-            approval => approval.approvalOrder === documentData.workFlow.currentStep + 1 // currentStep과 비교
+            approval => approval.approvalOrder === documentData.workFlow.currentStep + 1
         );
 
-        console.log('currentStep:', documentData.workFlow.currentStep);  // currentStep 로그 출력
-        console.log('approvalOrder:', approvalOrder);  // approvalOrder 로그 출력
-        console.log('currentApprover:', currentApprover);  // 현재 결재자 정보 확인
-
         if (currentApprover && currentApprover.employeeId === userInfo.employeeId) {
-            // 현재 결재 순서가 맞는 경우
             setSelectedApprovalId(currentApprover.id);
             setOpenMessageModal(true);
         } else {
-            // 결재 순서가 아닌 경우 에러 알림
             Swal.fire({
                 title: "결재 오류",
                 text: "현재 결재 순서가 아닙니다.",
@@ -111,16 +104,17 @@ const DocumentModal = ({ documentId, handleClose }) => {
         }
     };
 
-    const handleReWrite = () => {
-        setOpenApprovalDocumentForm(true);
-    };
-
-    const handleCloseApprovalDocumentForm = () => {
-        setOpenApprovalDocumentForm(false);
-    };
-
     const handleCloseMessageModal = () => {
         setOpenMessageModal(false);
+    };
+
+    const handleReWrite = () => {
+        setOpenRewirteDocumentForm(true); // RewirteDocumentForm 열기
+    };
+
+    const handleCloseRewirteDocumentForm = () => {
+        setOpenRewirteDocumentForm(false); // RewirteDocumentForm 닫기
+        fetchDocumentData(); // 문서 데이터 갱신
     };
 
     const handleCloseModal = async () => {
@@ -129,9 +123,8 @@ const DocumentModal = ({ documentId, handleClose }) => {
     };
 
     const handleConfirmApproval = async (status) => {
-            console.log(documentData.workFlow.currentStep);
         try {
-            const response = await axios.patch(`http://localhost:8082/workflows`, {
+            const response = await axios.patch('http://localhost:8082/workflows', {
                 id: selectedApprovalId,
                 approvalOrder: documentData.workFlow.currentStep + 1,
                 approvalStatus: status,
@@ -157,6 +150,7 @@ const DocumentModal = ({ documentId, handleClose }) => {
                     icon: "success",
                     confirmButtonText: "확인",
                 });
+                await fetchDocumentData(); // Refresh document data
             }
         } catch (error) {
             console.error("Error during approval:", error);
@@ -176,8 +170,8 @@ const DocumentModal = ({ documentId, handleClose }) => {
                 maxHeight: "80vh",
                 overflow: "auto",
                 padding: 4,
-                backgroundColor: mode === 'dark' ? colors.primary[300]: theme.palette.background.paper, 
-                color: mode === 'dark' ? theme.palette.text.primary : 'black',  // 다크 모드에 맞춰 텍스트 색상 조정
+                backgroundColor: mode === 'dark' ? colors.primary[300] : theme.palette.background.paper,
+                color: mode === 'dark' ? theme.palette.text.primary : 'black',
                 margin: "100px auto",
                 position: "relative"
             }}>
@@ -195,9 +189,10 @@ const DocumentModal = ({ documentId, handleClose }) => {
                 </IconButton>
 
                 <Typography variant="h5" textAlign="center" mb={4} fontWeight="bold" fontSize={30} sx={{ color: mode === 'dark' ? 'white' : 'black' }}>
-                    {documentData.title}
+                    {documentData.docsTypes.documentTemplate.templateName}
                 </Typography>
 
+                {/* 다시작성 버튼 */}
                 {documentData.author === userInfo.name && documentData.documentStatus === 'DRAFT' && (
                     <Button
                         variant="contained"
@@ -208,23 +203,18 @@ const DocumentModal = ({ documentId, handleClose }) => {
                     </Button>
                 )}
 
-                {openApprovalDocumentForm && (
-                    <ApprovalDocumentForm
-                        open={openApprovalDocumentForm}
-                        handleClose={handleCloseApprovalDocumentForm}
+                {/* RewirteDocumentForm 렌더링 */}
+                {openRewirteDocumentForm && (
+                    <RewirteDocumentForm
+                        open={openRewirteDocumentForm}
+                        handleClose={handleCloseRewirteDocumentForm}
                         initialData={documentData}
+                        fetchDocuments={fetchDocumentData} // 필요에 따라 문서 목록 갱신 함수 전달
                     />
                 )}
 
                 <Box sx={{ mb: 6 }} />
-
-                <Box sx={{
-                    display: "block",
-                    position: "left",
-                    width: "15em",
-                    textAlign: "center",
-                    marginBottom: "20px"
-                }}>
+                <Box sx={{ display: "block", position: "left", width: "15em", textAlign: "center", marginBottom: "20px" }}>
                     <ApprovalTable
                         approvalLines={documentData.workFlow?.approvals || []}
                         handleApprovalClick={handleApprovalAction}
@@ -233,38 +223,103 @@ const DocumentModal = ({ documentId, handleClose }) => {
 
                 <Table sx={{ borderCollapse: "collapse", width: "100%" }}>
                     <TableBody>
+                        {/* 문서 정보 표시 */}
                         <TableRow>
-                            <TableCell sx={{ border: `1px solid ${mode === 'dark' ? theme.palette.grey[700] : theme.palette.grey[300]}`, fontWeight: "bold", width: "20%", color: mode === 'dark' ? 'white' : 'black' }}>문서번호</TableCell>
-                            <TableCell sx={{ border: `1px solid ${mode === 'dark' ? theme.palette.grey[700] : theme.palette.grey[300]}`, color: mode === 'dark' ? 'white' : 'black' }}>{documentData.documentCode}</TableCell>
-                            <TableCell sx={{ border: `1px solid ${mode === 'dark' ? theme.palette.grey[700] : theme.palette.grey[300]}`, fontWeight: "bold", color: mode === 'dark' ? 'white' : 'black' }}>작성일자</TableCell>
-                            <TableCell sx={{ border: `1px solid ${mode === 'dark' ? theme.palette.grey[700] : theme.palette.grey[300]}`, color: mode === 'dark' ? 'white' : 'black' }}>{documentData.createdAt.substring(0, 10)}</TableCell>
+                            <TableCell sx={{ border: `1px solid ${mode === 'dark' ? theme.palette.grey[400] : theme.palette.grey[700]}`, fontWeight: "bold", width: "20%", color: mode === 'dark' ? 'white' : 'black' }}>문서번호</TableCell>
+                            <TableCell sx={{ border: `1px solid ${mode === 'dark' ? theme.palette.grey[400] : theme.palette.grey[700]}`, color: mode === 'dark' ? 'white' : 'black' }}>{documentData.documentCode}</TableCell>
+                            <TableCell sx={{ border: `1px solid ${mode === 'dark' ? theme.palette.grey[400] : theme.palette.grey[700]}`, fontWeight: "bold", color: mode === 'dark' ? 'white' : 'black' }}>작성일자</TableCell>
+                            <TableCell sx={{ border: `1px solid ${mode === 'dark' ? theme.palette.grey[400] : theme.palette.grey[700]}`, color: mode === 'dark' ? 'white' : 'black' }}>{documentData.createdAt.substring(0, 10)}</TableCell>
                         </TableRow>
                         <TableRow>
-                            <TableCell sx={{ border: `1px solid ${mode === 'dark' ? theme.palette.grey[700] : theme.palette.grey[300]}`, fontWeight: "bold", color: mode === 'dark' ? 'white' : 'black' }}>작성자</TableCell>
-                            <TableCell sx={{ border: `1px solid ${mode === 'dark' ? theme.palette.grey[700] : theme.palette.grey[300]}`, color: mode === 'dark' ? 'white' : 'black' }}>{documentData.author}</TableCell>
-                            <TableCell sx={{ border: `1px solid ${mode === 'dark' ? theme.palette.grey[700] : theme.palette.grey[300]}`, fontWeight: "bold", color: mode === 'dark' ? 'white' : 'black' }}>부서</TableCell>
-                            <TableCell sx={{ border: `1px solid ${mode === 'dark' ? theme.palette.grey[700] : theme.palette.grey[300]}`, color: mode === 'dark' ? 'white' : 'black' }}>{documentData.departmentName}</TableCell>
+                            <TableCell sx={{ border: `1px solid ${mode === 'dark' ? theme.palette.grey[400] : theme.palette.grey[700]}`, fontWeight: "bold", color: mode === 'dark' ? 'white' : 'black' }}>작성자</TableCell>
+                            <TableCell sx={{ border: `1px solid ${mode === 'dark' ? theme.palette.grey[400] : theme.palette.grey[700]}`, color: mode === 'dark' ? 'white' : 'black' }}>{documentData.author}</TableCell>
+                            <TableCell sx={{ border: `1px solid ${mode === 'dark' ? theme.palette.grey[400] : theme.palette.grey[700]}`, fontWeight: "bold", color: mode === 'dark' ? 'white' : 'black' }}>부서</TableCell>
+                            <TableCell sx={{ border: `1px solid ${mode === 'dark' ? theme.palette.grey[400] : theme.palette.grey[700]}`, color: mode === 'dark' ? 'white' : 'black' }}>{documentData.departmentName}</TableCell>
                         </TableRow>
 
+                        {/* 커스텀 필드 표시 */}
                         {documentData.customFields &&
                             Object.keys(documentData.customFields).map((field, index) => (
                                 <TableRow key={index}>
-                                    <TableCell sx={{ border: `1px solid ${mode === 'dark' ? theme.palette.grey[700] : theme.palette.grey[300]}`, fontWeight: "bold", color: mode === 'dark' ? 'white' : 'black' }}>{field}</TableCell>
-                                    <TableCell colSpan={3} sx={{ border: `1px solid ${mode === 'dark' ? theme.palette.grey[700] : theme.palette.grey[300]}`, color: mode === 'dark' ? 'white' : 'black' }}>
+                                    <TableCell sx={{ border: `1px solid ${mode === 'dark' ? theme.palette.grey[400] : theme.palette.grey[700]}`, fontWeight: "bold", color: mode === 'dark' ? 'white' : 'black' }}>{field}</TableCell>
+                                    <TableCell colSpan={3} sx={{ border: `1px solid ${mode === 'dark' ? theme.palette.grey[400] : theme.palette.grey[700]}`, color: mode === 'dark' ? 'white' : 'black' }}>
                                         {documentData.customFields[field]}
                                     </TableCell>
                                 </TableRow>
                             ))}
 
+                        {/* 문서 내용 표시 */}
                         <TableRow>
-                            <TableCell sx={{ border: `1px solid ${mode === 'dark' ? theme.palette.grey[700] : theme.palette.grey[300]}`, fontWeight: "bold", color: mode === 'dark' ? 'white' : 'black' }}>내용</TableCell>
-                            <TableCell colSpan={3} sx={{ border: `1px solid ${mode === 'dark' ? theme.palette.grey[700] : theme.palette.grey[300]}`, color: mode === 'dark' ? 'white' : 'black' }}>
+                            <TableCell sx={{ border: `1px solid ${mode === 'dark' ? theme.palette.grey[400] : theme.palette.grey[700]}`, fontWeight: "bold", color: mode === 'dark' ? 'white' : 'black' }}>내용</TableCell>
+                            <TableCell colSpan={3} sx={{ border: `1px solid ${mode === 'dark' ? theme.palette.grey[400] : theme.palette.grey[700]}`, color: mode === 'dark' ? 'white' : 'black' }}>
                                 {documentData.content}
                             </TableCell>
                         </TableRow>
                     </TableBody>
                 </Table>
 
+                {/* 결재 내역 표시 부분 */}
+                <Box sx={{ mt: 4 }}>
+                    <Typography
+                        variant="h6"
+                        sx={{
+                            fontWeight: "bold",
+                            mb: 2,
+                            color: mode === "dark" ? "black" : "black",
+                        }}
+                    >
+                        [결재 내역]
+                    </Typography>
+                    <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                        {documentData.workFlow.approvals
+                            .filter(
+                                (approval) =>
+                                    approval.approvalOrder !== 0 &&
+                                    (approval.approvalStatus === "APPROVE" ||
+                                        approval.approvalStatus === "REJECT" ||
+                                        approval.approvalStatus === "FINALIZE")
+                            )
+                            .map((approval, index) => (
+                                <Box
+                                    key={index}
+                                    sx={{
+                                        border: `1px solid ${mode === "dark"
+                                                ? theme.palette.grey[700]
+                                                : theme.palette.grey[300]
+                                            }`,
+                                        borderRadius: 2,
+                                        padding: 2,
+                                        backgroundColor:
+                                            mode === "dark" ? colors.primary[500] : colors.blueAccent[800],
+                                    }}
+                                >
+                                    <Typography variant="body1" sx={{ fontWeight: "bold", color: "white" }}>
+                                        {approval.name} ({approval.position})
+                                    </Typography>
+                                    <Typography variant="body2" sx={{ color: theme.palette.grey[300] }}>
+                                        승인 상태:{" "}
+                                        {approval.approvalStatus === "APPROVE"
+                                            ? "승인"
+                                            : approval.approvalStatus === "REJECT"
+                                                ? "반려"
+                                                : "전결"}
+                                    </Typography>
+                                    {approval.message ? (
+                                        <Typography variant="body2" sx={{ mt: 1, color: "white" }}>
+                                            메세지: {approval.message}
+                                        </Typography>
+                                    ) : (
+                                        <Typography
+                                            variant="body2"
+                                            sx={{ mt: 1, fontStyle: "italic", color: theme.palette.grey[400] }}
+                                        >
+                                            메세지가 없습니다.
+                                        </Typography>
+                                    )}
+                                </Box>
+                            ))}
+                    </Box>
+                </Box>
                 <Dialog open={openMessageModal} onClose={handleCloseMessageModal}>
                     <DialogTitle>메시지 입력</DialogTitle>
                     <DialogContent>
@@ -278,13 +333,13 @@ const DocumentModal = ({ documentId, handleClose }) => {
                     </DialogContent>
                     <DialogActions>
                         <Button onClick={() => handleConfirmApproval('APPROVE')}>승인</Button>
-                        <Button onClick={() => handleConfirmApproval('REJECTE')}>반려</Button>
+                        <Button onClick={() => handleConfirmApproval('REJECT')}>반려</Button>
                         <Button onClick={() => handleConfirmApproval('FINALIZE')}>전결</Button>
                         <Button onClick={handleCloseMessageModal}>취소</Button>
                     </DialogActions>
                 </Dialog>
             </Box>
-        </Modal>
+        </Modal >
     );
 };
 

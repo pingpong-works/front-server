@@ -12,6 +12,7 @@ export const tokens = (mode) => ({
           100: "#e0e0e0",
           200: "#f7f5f5",
           300: "#a3a3a3",
+          350: "#234e6e", //마이페이지 paper 색상
           400: "#858585",
           500: "#666666",
           600: "#525252",
@@ -24,6 +25,7 @@ export const tokens = (mode) => ({
           150: "#040509", //결재 모달 글씨
           200: "#a1a4ab",
           300: "#727681",
+          350: "#72768187",
           400: "#434957",
           500: "#141b2d",
           600: "#101624",
@@ -59,7 +61,7 @@ export const tokens = (mode) => ({
           300: "#a4a9fc",
           400: "#868dfb",
           450: "#86ccff",
-          500: "#6870fa", //결재 표 포인트 색상
+          500: "#1c8adb", //결재 표 포인트 색상
           600: "#535ac8",
           700: "#3e4396",
           800: "#2a2d64",
@@ -72,6 +74,7 @@ export const tokens = (mode) => ({
           100: "#141414",
           200: "#f7f5f5",
           300: "#3d3d3d",
+          350: "#ffffff", //마이페이지 paper 색상
           400: "#525252",
           500: "#666666",
           600: "#858585",
@@ -84,6 +87,7 @@ export const tokens = (mode) => ({
           100: "#040509",
           200: "#080b12",
           300: "#0c101b",
+          350: "#cfd6e787",
           400: "#fcfcfc",
           500: "#f2f0f0",
           600: "#434957",
@@ -119,7 +123,7 @@ export const tokens = (mode) => ({
           300: "#a4a9fc",
           400: "#868dfb",
           450: "#3387c5",
-          500: "#6870fa", //결재 표 포인트 색상
+          500: "#1c8adb", //결재 표 포인트 색상
           600: "#535ac8",
           700: "#3e4396",
           800: "#2a2d64",
@@ -152,7 +156,7 @@ export const themeSettings = (mode) => {
               light: colors.gray[100],
             },
             background: {
-              default: colors.primary[500],
+              default: '#0c2a40',
             },
           }
         : {
@@ -171,7 +175,7 @@ export const themeSettings = (mode) => {
               light: colors.gray[100],
             },
             background: {
-              default: colors.primary[500],
+              default: '#dbe8f2'//'#dbe8f2',c4d3de
             },
           }),
     },
