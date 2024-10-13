@@ -189,7 +189,7 @@ const DocumentModal = ({ documentId, handleClose, fetchDocuments }) => {
                 </IconButton>
 
                 <Typography variant="h5" textAlign="center" mb={4} fontWeight="bold" fontSize={30} sx={{ color: mode === 'dark' ? 'white' : 'black' }}>
-                    {documentData.title}
+                    {documentData.docsTypes.documentTemplate.templateName}
                 </Typography>
 
                 {/* 다시작성 버튼 */}

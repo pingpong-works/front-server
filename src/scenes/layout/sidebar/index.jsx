@@ -148,16 +148,17 @@ const SideBar = () => {
                   src="https://img.icons8.com/3d-fluency/94/ping-pong.png"
                   alt="PingPong"
                 />
-                <a href="/dashboard" style={{ textDecoration: 'none' }}>
-                  <Typography
-                    variant="h4"
-                    fontWeight="bold"
-                    textTransform="capitalize"
-                    color={colors.blueAccent[450]}
-                  >
-                    PingPong
-                  </Typography>
-                </a>
+                <Typography
+                  component="a"
+                  href="/dashboard"
+                  variant="h4"
+                  fontWeight="bold"
+                  textTransform="capitalize"
+                  color={colors.blueAccent[450]}
+                  style={{ textDecoration: 'none' }}
+                >
+                  PingPong
+                </Typography>
               </Box>
             )}
             <IconButton onClick={() => setCollapsed(!collapsed)}>
