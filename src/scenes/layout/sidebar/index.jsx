@@ -64,7 +64,7 @@ const SideBar = () => {
       color: mode === "dark" ? colors.gray[100] : colors.gray[900],
       "&:hover": {
         backgroundColor: mode === "dark" ? "#0c2a40" : "#dbe8f2",
-        color: mode === "dark" ? "#86ccff": colors.primary[200],
+        color: mode === "dark" ? "#86ccff" : colors.primary[200],
       },
     },
     menuLabel: {
@@ -91,8 +91,10 @@ const SideBar = () => {
       breakPoint="md"
     >
       <Menu
-        menuitemstyles={{
-          button: { ":hover": { background: "transparent" } },
+        menuItemStyles={{
+          button: {
+            ...styles.menuButton,
+          },
         }}
       >
         <MenuItem
@@ -120,14 +122,16 @@ const SideBar = () => {
                   src="https://img.icons8.com/3d-fluency/94/ping-pong.png"
                   alt="PingPong"
                 />
-                <Typography
-                  variant="h4"
-                  fontWeight="bold"
-                  textTransform="capitalize"
-                  color={colors.blueAccent[450]}
-                >
-                  PingPong
-                </Typography>
+                <a href="/dashboard" style={{ textDecoration: 'none' }}>
+                  <Typography
+                    variant="h4"
+                    fontWeight="bold"
+                    textTransform="capitalize"
+                    color={colors.blueAccent[450]}
+                  >
+                    PingPong
+                  </Typography>
+                </a>
               </Box>
             )}
             <IconButton onClick={() => setCollapsed(!collapsed)}>
@@ -187,7 +191,7 @@ const SideBar = () => {
         </Menu>
         <Typography
           variant="h6"
-          sx={{m: "15px 0 5px 20px" }}
+          sx={{ m: "15px 0 5px 20px" }}
         >
           {!collapsed ? "Communication" : " "}
         </Typography>
@@ -217,7 +221,7 @@ const SideBar = () => {
         </Menu>
         <Typography
           variant="h6"
-          sx={{m: "15px 0 5px 20px" }}
+          sx={{ m: "15px 0 5px 20px" }}
         >
           {!collapsed ? "Pages" : " "}
         </Typography>
@@ -235,7 +239,7 @@ const SideBar = () => {
         </Menu>
         <Typography
           variant="h6"
-          sx={{m: "15px 0 5px 20px" }}
+          sx={{ m: "15px 0 5px 20px" }}
         >
           {!collapsed ? "Resource" : " "}
         </Typography>
