@@ -207,16 +207,16 @@ const SideBar = () => {
             icon={<TimelineOutlined />}
           />
           <Item
-            title="임시 보관함"
-            path="/mailbox/2"
-            colors={colors}
-            icon={<MapOutlined />}
-          />
-          <Item
             title="내게 쓴 메일함"
             path="/mailbox/3"
             colors={colors}
             icon={<WavesOutlined />}
+          />
+          <Item
+              title="휴지통"
+              path="/mailbox/2"
+              colors={colors}
+              icon={<MapOutlined />}
           />
         </Menu>
         <Typography
