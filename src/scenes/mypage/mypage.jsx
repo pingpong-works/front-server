@@ -199,7 +199,7 @@ const Mypage = () => {
   return (
     <Box m="20px">
       <Header title="마이페이지" subtitle="My Page" />
-      <Box component={Paper} p={3} mt={2} elevation={3}>
+      <Box component={Paper} p={3} mt={2} elevation={3} sx={{ backgroundColor: colors.gray[350] }}>
         <Grid container spacing={2} justifyContent="center">
           {/* 프로필 사진 및 이름 */}
           <Grid item xs={12} md={3} align="center">
@@ -226,7 +226,7 @@ const Mypage = () => {
               </Button>
               <Button
                 variant="contained"
-                color="secondary"
+                color="primary"
                 onClick={() => navigate("/change-password")}
               >
                 비밀번호 변경
@@ -294,7 +294,7 @@ const Mypage = () => {
             color="success"
             onClick={checkIn}
             sx={{ width: "200px" }}
-            disabled={isLoading} // Disable button while loading
+            disabled={isLoading}
           >
             출근
           </Button>
@@ -303,7 +303,7 @@ const Mypage = () => {
             color="error"
             onClick={checkOut}
             sx={{ width: "200px" }}
-            disabled={isLoading} // Disable button while loading
+            disabled={isLoading} 
           >
             퇴근
           </Button>
@@ -312,13 +312,13 @@ const Mypage = () => {
 
       {/* 근태 기록 및 통계 탭 */}
       <Box mt={10}>
-        <Tabs value={tabValue} onChange={handleTabChange} indicatorColor="primary" textColor="primary">
+        <Tabs value={tabValue} onChange={handleTabChange} indicatorColor="secondary" textColor="secondary">
           <Tab label="근무 기록" />
           <Tab label="월별 통계" />
         </Tabs>
 
         {tabValue === 0 && (
-          <Box mt={2} component={Paper} p={3} elevation={3}>
+          <Box mt={2} component={Paper} p={3} elevation={3} sx={{ backgroundColor: colors.gray[350] }}>
             <FullCalendar
               height="75vh"
               plugins={[
