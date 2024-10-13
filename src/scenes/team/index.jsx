@@ -4,6 +4,7 @@ import { Box, Typography, useTheme } from "@mui/material";
 import { Header } from "../../components";
 import { DataGrid } from "@mui/x-data-grid";
 import { tokens } from "../../theme";
+import CircleIcon from '@mui/icons-material/Circle'; // 아이콘 추가
 
 const Team = () => {
   const theme = useTheme();
@@ -35,6 +36,7 @@ const Team = () => {
         departmentName: employee.departmentName, // 부서명
         employeeRank: translateRank(employee.employeeRank), // 직급(한글로 변환)
         attendanceStatus: translateAttendance(employee.attendanceStatus), // 출퇴근 상태(한글로 변환)
+        status: employee.status              // 상태 추가
       }));
 
       setEmployees(formattedEmployees);
@@ -94,7 +96,19 @@ const Team = () => {
     { field: "phoneNumber", headerName: "전화번호", flex: 1 },
     { field: "departmentName", headerName: "부서명", flex: 1 },
     { field: "employeeRank", headerName: "직급", flex: 1 },
-    { field: "attendanceStatus", headerName: "출퇴근 상태", flex: 1 }, // 출퇴근 상태 추가
+    { field: "attendanceStatus", headerName: "출/퇴근", flex: 1 }, // 출퇴근 상태 추가
+    {
+      field: "status",
+      headerName: "활동 중",
+      flex: 1,
+      renderCell: (params) => (
+        <CircleIcon
+          style={{
+            color: params.value === "LOGGED_IN" ? colors.greenAccent[500] : colors.gray[500],
+          }}
+        />
+      ),
+    },
   ];
 
   return (
