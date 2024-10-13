@@ -90,7 +90,7 @@ const Send = () => {
                         <Typography variant="body2" color="textSecondary" textAlign="right">
                             {new Date(mail.sentAt).toLocaleString()}
                         </Typography>
-                        <IconButton>
+                        <IconButton onClick={() => handleDelete(mail.mailId)}>
                             <DeleteIcon />
                         </IconButton>
                     </Box>

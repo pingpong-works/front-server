@@ -225,19 +225,49 @@ const SideBar = () => {
           }}
         >
           <SubMenu
-            title="메일"
-            label="메일"
-            icon={<MailOutlineIcon />}
-            rootStyles={{
-              ...styles.menuButton,
-            }}
+              title="메일"
+              label="메일"
+              icon={<MailOutlineIcon />}
+              rootStyles={{
+                ...styles.menuButton,
+              }}
           >
-            <Item title="메일 작성" path="/new" icon={<PersonOutlined />} />
-            <Item title="전체 메일함" path="/mailbox/-1" icon={<BarChartOutlined />} />
-            <Item title="받은 메일함" path="/mailbox/0" icon={<DonutLargeOutlined />} />
-            <Item title="보낸 메일함" path="/mailbox/1" icon={<TimelineOutlined />} />
-            <Item title="임시 보관함" path="/mailbox/2" icon={<MapOutlined />} />
-            <Item title="내게 쓴 메일함" path="/mailbox/3" icon={<WavesOutlined />} />
+          <Item
+            title="메일 작성"
+            path="/new"
+            colors={colors}
+            icon={<PersonOutlined />}
+          />
+          <Item
+            title="전체 메일함"
+            path="/mailbox/-1"
+            colors={colors}
+            icon={<BarChartOutlined />}
+          />
+          <Item
+            title="받은 메일함"
+            path="/mailbox/0"
+            colors={colors}
+            icon={<DonutLargeOutlined />}
+          />
+          <Item
+            title="보낸 메일함"
+            path="/mailbox/1"
+            colors={colors}
+            icon={<TimelineOutlined />}
+          />
+          <Item
+            title="내게 쓴 메일함"
+            path="/mailbox/3"
+            colors={colors}
+            icon={<WavesOutlined />}
+          />
+          <Item
+              title="휴지통"
+              path="/mailbox/2"
+              colors={colors}
+              icon={<MapOutlined />}
+          />
           </SubMenu>
           <Item title="메신저" path="/chat" icon={<ChatBubbleOutline />} />
         </Menu>

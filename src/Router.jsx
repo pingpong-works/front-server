@@ -60,6 +60,7 @@ const AppRouter = () => {
             <Route path="/mailbox/2" element={<Waste />} />
             <Route path="/mailbox/3" element={<Mine />} />
             <Route path="/read/1/:mailId" element={<SendDetailMail />} />
+            <Route path="/read/2/:mailId" element={<SendDetailMail />} />
             <Route path="/faq" element={<FAQ />} />
             <Route path="/approval-line-setup" element={<ApprovalLineSetup />} />
             <Route path="/mypage" element={<Mypage />} />
