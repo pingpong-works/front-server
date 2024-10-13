@@ -250,7 +250,7 @@ const Elec = () => {
                             width: '200px',
                             height: '50px',
                             fontSize: '15px',
-                            backgroundColor: '#6870fa',
+                            backgroundColor: '#1c8adb',
                             color: colors.gray[200],
                             '&:hover': { backgroundColor: '#b6b6b6ac' },
                         }}
@@ -272,7 +272,7 @@ const Elec = () => {
                         variant={showMyDocuments ? "contained" : "outlined"}
                         sx={{
                             width: '100px', height: '40px', border: "1px solid #5c5555ea", color: colors.gray[900],
-                            backgroundColor: showMyDocuments ? '#6870fa' : '#686ffa0',
+                            backgroundColor: showMyDocuments ? '#1c8adb' : '#686ffa0',
 
                             '&:hover': {
                                 backgroundColor: '#ffffff5d',
@@ -292,7 +292,7 @@ const Elec = () => {
                         variant={showApproverDocuments ? "contained" : "outlined"}
                         sx={{
                             width: '100px', height: '40px', border: "1px solid #5c5555ea", color: colors.gray[900],
-                            backgroundColor: showApproverDocuments ? '#6870fa' : '#686ffa0',
+                            backgroundColor: showApproverDocuments ? '#1c8adb' : '#686ffa0',
 
                             '&:hover': {
                                 backgroundColor: '#ffffff5d',
@@ -326,16 +326,17 @@ const Elec = () => {
                         "& .MuiDataGrid-root": { border: "none" },
                         "& .MuiDataGrid-cell": { border: "none" },
                         "& .MuiDataGrid-columnHeaders": {
-                            backgroundColor: colors.blueAccent[500],
+                            backgroundColor: "#1c8adb",
                             borderBottom: "none",
                             color: colors.gray[200],
                         },
                         "& .MuiDataGrid-footerContainer": {
                             borderTop: "none",
-                            backgroundColor: colors.blueAccent[500],
+                            color: colors.gray[200],
+                            backgroundColor: "#1c8adb",
                         },
                         "& .MuiCheckbox-root": {
-                            color: `${colors.greenAccent[200]} !important`,
+                            color: `${colors.blueAccent[700]} !important`,
                         },
                         "& .MuiDataGrid-toolbarContainer .MuiButton-text": {
                             color: `${colors.gray[100]} !important`,

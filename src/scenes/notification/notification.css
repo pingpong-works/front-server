@@ -1,5 +1,5 @@
 :root {
-    --background-color: #e1edf5e1;
+    --background-color: #eaf0f5e1;
     --text-color: #000;
     --secondary-color: #888;
 }
@@ -50,14 +50,13 @@
 }
 
 .filter-buttons button:hover {
-    background-color: var(--primary-color-hover, #e4effb);
+    background-color: var(--primary-color-hover, #e8e4fb);
 }
 
 .notification-item.unread {
-    font-weight: bold;
-    color: #4d55f8;
+    color: #07273f;
     border-radius: 8px;
-    background-color: #a8b1c0c5;
+    background-color: #f2fbffda;
 }
 
 .notification-item.read {
