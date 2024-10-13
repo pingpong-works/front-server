@@ -24,7 +24,6 @@ import avatar from "../../../assets/images/avatar.png";
 import Item from "./Item";
 import { ToggledContext } from "../../../App";
 import axios from "axios";
-//import "../sidebar/global-style.css";
 
 const SideBar = () => {
   const [collapsed, setCollapsed] = useState(false);
@@ -64,8 +63,8 @@ const SideBar = () => {
       backgroundColor: mode === "dark" ? colors.primary[400] : colors.primary[500],
       color: mode === "dark" ? colors.gray[100] : colors.gray[900],
       "&:hover": {
-        backgroundColor: mode === "dark" ? colors.primary[500] : colors.primary[200],
-        color: mode === "dark" ? colors.blueAccent[400] : colors.blueAccent[600],
+        backgroundColor: mode === "dark" ? "#0c2a40" : "#dbe8f2",
+        color: mode === "dark" ? "#86ccff": colors.primary[200],
       },
     },
     menuLabel: {
