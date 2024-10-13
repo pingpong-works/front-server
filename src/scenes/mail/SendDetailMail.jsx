@@ -57,30 +57,30 @@ const SendDetailMail = () => {
     }
 
     return (
-        <Box p={3}>
-            <Box display="flex" alignItems="center" mb={2}>
+        <Box p={5}>
+            <Box display="flex" alignItems="center" mb={5}>
                 <IconButton onClick={() => navigate(-1)}>
                     <ArrowBackIcon />
                 </IconButton>
-                <Typography variant="h5" fontWeight="bold">
+                <Typography variant="h1"  color="textSecondary" fontWeight="bold">
                     {mailDetail.subject}
                 </Typography>
             </Box>
 
-            <Box mb={2}>
-                <Typography variant="body1" color="textSecondary">
+            <Box mb={5}>
+                <Typography variant="h3" color="textSecondary" mt={3}>
                     <strong>보낸 사람:</strong> {mailDetail.senderName} ({mailDetail.senderEmail})
                 </Typography>
-                <Typography variant="body1" color="textSecondary">
+                <Typography variant="h3" color="textSecondary" mt={3}>
                     <strong>받는 사람:</strong> {mailDetail.recipientName} ({mailDetail.recipientEmail})
                 </Typography>
-                <Typography variant="body2" color="textSecondary" mt={1}>
+                <Typography variant="h5" color="textSecondary" mt={3}>
                     {new Date(mailDetail.sentAt).toLocaleString()}
                 </Typography>
             </Box>
 
             <Box p={2} border="1px solid #ccc" borderRadius="5px" bgcolor={colors.primary[400]}>
-                <Typography variant="body1" whiteSpace="pre-line">
+                <Typography variant="h3" whiteSpace="pre-line">
                     {mailDetail.body}
                 </Typography>
             </Box>
