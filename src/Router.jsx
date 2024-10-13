@@ -28,7 +28,8 @@ import UpdateBoard from './scenes/boards/updateBoard';
 import MailWrite from "./scenes/mail/mailWrite.jsx";
 import Notification from "./scenes/notification/notification.jsx"
 import SendDetailMail from "./scenes/mail/SendDetailMail.jsx";
-
+import SignUp from './scenes/signup/signup.jsx'
+import AdminRoute from './auth/AdminRoute';
 
 const AppRouter = () => {
   return (
@@ -68,6 +69,7 @@ const AppRouter = () => {
             <Route path="/my-info/edit" element={<MyInfoEdit />} />
             <Route path="/change-password" element={<ChangePassword />} />
             <Route path="/notification" element={<Notification />} />
+            <Route path="/signup" element={<AdminRoute><SignUp /></AdminRoute>} />
           </Route>
         </Routes>
       </Router>

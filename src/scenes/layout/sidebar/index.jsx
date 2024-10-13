@@ -1,5 +1,5 @@
+import React, { useContext, useEffect, useState } from "react";
 import { Avatar, Box, IconButton, Typography, useTheme } from "@mui/material";
-import { useContext, useEffect, useState } from "react";
 import { tokens } from "../../../theme";
 import { Menu, MenuItem, Sidebar, SubMenu } from "react-pro-sidebar";
 import {
@@ -37,6 +37,7 @@ const SideBar = () => {
     departmentName: "",
     employeeRank: "",
     profilePicture: "",  // 프로필 사진 추가
+    email: "", // 이메일 추가
   });
 
   const [avatar, setAvatar] = useState(defaultAvatar);  // 기본 이미지
@@ -50,8 +51,8 @@ const SideBar = () => {
             Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
           },
         });
-        const { name, departmentName, employeeRank, profilePicture } = response.data.data;
-        setUserInfo({ name, departmentName, employeeRank, profilePicture });
+        const { name, departmentName, employeeRank, profilePicture, email } = response.data.data;
+        setUserInfo({ name, departmentName, employeeRank, profilePicture, email });
         
         // 프로필 사진이 있으면 설정, 없으면 기본 이미지 사용
         if (profilePicture) {
@@ -65,7 +66,9 @@ const SideBar = () => {
     fetchUserInfo();
   }, []);
 
-  // 로그아웃 핸들러
+  // isAdmin 체크 시 userInfo.email이 존재할 때만
+  const isAdmin = userInfo.email === "admin@example.com";
+
   const handleLogout = async () => {
     try {
       await axios.patch(
@@ -287,6 +290,9 @@ const SideBar = () => {
           <Item title="캘린더" path="/calendar" icon={<CalendarTodayOutlined />} />
           <Item title="게시판" path="/boards" icon={<ReceiptOutlined />} />
           <Item title="문의사항" path="/faq" icon={<HelpOutlineOutlined />} />
+          {userInfo.email && isAdmin && ( // email이 있을 때만 렌더링
+            <Item title="계정 생성" path="/signup" icon={<PersonOutlined />} />
+          )}
         </Menu>
         <Typography
           variant="h6"
