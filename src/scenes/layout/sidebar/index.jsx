@@ -24,7 +24,6 @@ import avatar from "../../../assets/images/avatar.png";
 import Item from "./Item";
 import { ToggledContext } from "../../../App";
 import axios from "axios";
-//import "../sidebar/global-style.css";
 
 const SideBar = () => {
   const [collapsed, setCollapsed] = useState(false);
@@ -57,6 +56,29 @@ const SideBar = () => {
 
     fetchUserInfo();
   }, []);
+
+  // 로그아웃 핸들러
+  const handleLogout = async () => {
+    try {
+      // 로그아웃 시 상태를 LOGGED_OUT으로 업데이트하는 API 요청
+      await axios.patch(
+        "http://localhost:8081/employees/update-status", // 상태 변경 API 경로
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`, // Authorization 헤더에 토큰 포함
+          },
+        }
+      );
+
+      // 토큰 삭제 및 로그인 페이지로 이동
+      localStorage.removeItem("accessToken");
+      window.location.href = "/login";
+    } catch (error) {
+      console.error("Error during logout:", error);
+      // 에러 처리 (예: 알림 표시)
+    }
+  };
 
   // 테마에 따른 스타일 정의
   const getStyles = (mode) => ({
@@ -163,11 +185,9 @@ const SideBar = () => {
             >
               {userInfo.departmentName} | {userInfo.employeeRank}
             </Typography>
+            {/* 로그아웃 버튼 */}
             <IconButton
-              onClick={() => {
-                localStorage.removeItem("accessToken");
-                window.location.href = "/login";
-              }}
+              onClick={handleLogout}
               color="inherit"
             >
               <LogoutIcon />
