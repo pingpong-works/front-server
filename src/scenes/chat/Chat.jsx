@@ -80,7 +80,7 @@ const Chat = () => {
 
   const getChatRoomList = async () => {
     try {
-      const res = await axios.post('/chat/chatting/list', { memberId }, {
+      const res = await axios.post('/chat/list', { memberId }, {
         headers: { 'Content-Type': 'application/json' },
       });
       setChatRoomList(res.data);
@@ -120,7 +120,7 @@ const Chat = () => {
       lastActive: currentDate.toISOString()
     };
     try {
-      await axios.post("/chat/chatting/create", data, {
+      await axios.post("/chat/create", data, {
         headers: { 'Content-Type': 'application/json' }
       });
       getChatRoomList();
