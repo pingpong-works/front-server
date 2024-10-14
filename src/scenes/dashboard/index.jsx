@@ -252,7 +252,7 @@ const getKoreanRank = (rank) => {
             }}>
             <Box sx={{ mt: "10px" }}>
               {/* 헤더 부분 디자인 추가 */}
-                <Box display="flex" justifyContent="space-between" p="10px" sx={{ backgroundColor: colors.gray[700], borderRadius: "4px" }}>
+                <Box display="flex" justifyContent="space-between" p="10px" sx={{ backgroundColor: colors.gray[800], borderRadius: "4px" }}>
                   <Typography sx={{ color: colors.primary[100], fontWeight: "bold", fontSize: "1rem", marginLeft: "8px" }}>이름</Typography>
                   <Typography sx={{ color: colors.primary[100], fontWeight: "bold", fontSize: "1rem", textAlign: "center", width: "100px", marginLeft: "45px" }}>직급</Typography> {/* 오른쪽으로 10px 이동 */}
                   <Typography sx={{ color: colors.primary[100], fontWeight: "bold", fontSize: "1rem", textAlign: "right" }}>활동중</Typography>
@@ -266,7 +266,7 @@ const getKoreanRank = (rank) => {
                       width: "10px",
                       height: "10px",
                       borderRadius: "50%",
-                      backgroundColor: employee.status === 'LOGGED_IN' ? colors.greenAccent[500] : colors.redAccent[500],
+                      backgroundColor: employee.status === 'LOGGED_IN' ? colors.greenAccent[500] : colors.gray[400],
                     }}
                   />
                 </Box>
