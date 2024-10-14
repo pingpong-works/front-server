@@ -78,7 +78,7 @@ function Dashboard() {
   const fetchDepartmentEmployees = async (departmentId) => {
     try {
       const response = await axios.get(
-        `http://localhost:8081/user/employees/departments/${departmentId}`, 
+        `http://localhost:8081/user/employees/departments/${departmentId}`,
         {
           params: {
             page: 1,
@@ -141,43 +141,43 @@ function Dashboard() {
 
 
   // 직급 변환 함수 추가
-const getKoreanRank = (rank) => {
-  switch(rank) {
-    case 'INTERN':
-      return '인턴';
-    case 'STAFF':
-      return '사원';
-    case 'SENIOR_STAFF':
-      return '주임';
-    case 'ASSISTANT_MANAGER':
-      return '대리';
-    case 'MANAGER':
-      return '과장';
-    case 'SENIOR_MANAGER':
-      return '차장';
-    case 'DIRECTOR':
-      return '부장';
-    default:
-      return rank; // 매칭되지 않는 경우 기본 값으로 반환
-  }
-};
+  const getKoreanRank = (rank) => {
+    switch (rank) {
+      case 'INTERN':
+        return '인턴';
+      case 'STAFF':
+        return '사원';
+      case 'SENIOR_STAFF':
+        return '주임';
+      case 'ASSISTANT_MANAGER':
+        return '대리';
+      case 'MANAGER':
+        return '과장';
+      case 'SENIOR_MANAGER':
+        return '차장';
+      case 'DIRECTOR':
+        return '부장';
+      default:
+        return rank; // 매칭되지 않는 경우 기본 값으로 반환
+    }
+  };
 
-<Box sx={{ mt: "10px" }}>
-  {employees.map((employee) => (
-    <Box key={employee.employeeId} display="flex" justifyContent="space-between" p="10px">
-      <Typography>{employee.name}</Typography>
-      <Typography>{getKoreanRank(employee.employeeRank)}</Typography> {/* 직급을 한국어로 변환 */}
-      <Box
-        sx={{
-          width: "10px",
-          height: "10px",
-          borderRadius: "50%",
-          backgroundColor: employee.status === 'LOGGED_IN' ? colors.greenAccent[500] : colors.gray[500],
-        }}
-      />
-    </Box>
-  ))}
-</Box>
+  <Box sx={{ mt: "10px" }}>
+    {employees.map((employee) => (
+      <Box key={employee.employeeId} display="flex" justifyContent="space-between" p="10px">
+        <Typography>{employee.name}</Typography>
+        <Typography>{getKoreanRank(employee.employeeRank)}</Typography> {/* 직급을 한국어로 변환 */}
+        <Box
+          sx={{
+            width: "10px",
+            height: "10px",
+            borderRadius: "50%",
+            backgroundColor: employee.status === 'LOGGED_IN' ? colors.greenAccent[500] : colors.gray[500],
+          }}
+        />
+      </Box>
+    ))}
+  </Box>
 
 
   return (
@@ -239,36 +239,49 @@ const getKoreanRank = (rank) => {
           </Box>
           <p></p>
           {/* 부서별 팀원 로그인 상태 */}
-          <Box 
+          <Box
             gridColumn={isXlDevices ? "span 4" : isMdDevices ? "span 6" : "span 3"}
             gridRow="span 2"
-            sx={{ 
-              width: "100%", 
+            sx={{
+              width: "100%",
               height: "200px",  // 높이 설정
-              padding: "10px", 
-              backgroundColor: colors.gray[850], 
-              borderRadius: "8px", 
+              padding: "10px",
+              backgroundColor: colors.gray[850],
+              borderRadius: "8px",
               overflowY: "scroll" // 스크롤 기능 추가
             }}>
             <Box sx={{ mt: "10px" }}>
-              {/* 헤더 부분 디자인 추가 */}
-                <Box display="flex" justifyContent="space-between" p="10px" sx={{ backgroundColor: colors.gray[800], borderRadius: "4px" }}>
-                  <Typography sx={{ color: colors.primary[100], fontWeight: "bold", fontSize: "1rem", marginLeft: "8px" }}>이름</Typography>
-                  <Typography sx={{ color: colors.primary[100], fontWeight: "bold", fontSize: "1rem", textAlign: "center", width: "100px", marginLeft: "45px" }}>직급</Typography> {/* 오른쪽으로 10px 이동 */}
-                  <Typography sx={{ color: colors.primary[100], fontWeight: "bold", fontSize: "1rem", textAlign: "right" }}>활동중</Typography>
-                </Box>
+              {/* 헤더 부분 */}
+              <Box display="flex" justifyContent="space-between" p="5px" sx={{ backgroundColor: theme.palette.background.default, borderRadius: "4px" }}>
+                <Typography sx={{ minWidth: "120px", width: "120px", fontSize: "0.8rem", color: colors.primary[100] }}>이름</Typography>
+                <Typography sx={{ minWidth: "100px", width: "100px", textAlign: "center", fontSize: "0.8rem", color: colors.primary[100]}}>직급</Typography>
+                <Typography sx={{ minWidth: "50px", width: "50px", textAlign: "center", fontSize: "0.8rem", color: colors.primary[100]}}>활동중</Typography>
+              </Box>
+
+              {/* 본문 부분 */}
               {employees.map((employee) => (
                 <Box key={employee.employeeId} display="flex" justifyContent="space-between" p="10px">
-                  <Typography sx={{ fontSize: "0.95rem", color: colors.gray[50] }}>{employee.name}</Typography>
-                  <Typography sx={{ textAlign: "center", width: "120px", fontSize: "0.95rem", color: colors.gray[50] }}>{getKoreanRank(employee.employeeRank)}</Typography>
+                  <Typography sx={{ minWidth: "120px", width: "120px", fontSize: "0.95rem", color: colors.gray[50] }}>{employee.name}</Typography>
+                  <Typography sx={{ minWidth: "100px", width: "100px", textAlign: "center", fontSize: "0.95rem", color: colors.gray[50] }}>{getKoreanRank(employee.employeeRank)}</Typography>
                   <Box
                     sx={{
-                      width: "10px",
-                      height: "10px",
-                      borderRadius: "50%",
-                      backgroundColor: employee.status === 'LOGGED_IN' ? colors.greenAccent[500] : colors.gray[400],
+                      minWidth: "50px",
+                      width: "50px",
+                      textAlign: "center",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center"
                     }}
-                  />
+                  >
+                    <Box
+                      sx={{
+                        width: "10px",
+                        height: "10px",
+                        borderRadius: "50%",
+                        backgroundColor: employee.status === 'LOGGED_IN' ? colors.greenAccent[500] : colors.gray[400],
+                      }}
+                    />
+                  </Box>
                 </Box>
               ))}
             </Box>
@@ -285,8 +298,8 @@ const getKoreanRank = (rank) => {
           <Typography variant="h5" fontWeight="300" sx={{ mb: "15px" }} mt={1} >
             결재 문서 현황
           </Typography>
-          <Box display="flex" alignItems= "center" justifyContent= "center" height= "250px" width= "100%">
-            <DocumentSummaryWithButtons />  {/* 문서 요약 컴포넌트 추가 */}
+          <Box display="flex" alignItems="flex-start" height="250px" width="100%">
+            <DocumentSummaryWithButtons />  
           </Box>
         </Box>
 
