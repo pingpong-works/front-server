@@ -266,7 +266,7 @@ const getKoreanRank = (rank) => {
                       width: "10px",
                       height: "10px",
                       borderRadius: "50%",
-                      backgroundColor: employee.status === 'LOGGED_IN' ? colors.greenAccent[500] : colors.redAccent[500],
+                      backgroundColor: employee.status === 'LOGGED_IN' ? colors.greenAccent[500] : colors.gray[300],
                     }}
                   />
                 </Box>
