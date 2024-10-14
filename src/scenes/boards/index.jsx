@@ -12,7 +12,7 @@ import { SearchOutlined, AddOutlined } from "@mui/icons-material";
 import { Header } from "../../components";
 import { DataGrid } from "@mui/x-data-grid";
 import { tokens } from "../../theme";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
@@ -22,16 +22,16 @@ const Boards = () => {
   const navigate = useNavigate();
 
   const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [pageInfo, setPageInfo] = useState({ totalElements: 0, totalPages: 1 });
-
   const [keyword, setKeyword] = useState("");
   const [searchOption, setSearchOption] = useState("title");
   const [category, setCategory] = useState("all");
   const [sortOption, setSortOption] = useState("createdAt_desc");
+  const [loading, setLoading] = useState(false);
 
-  const fetchData = async (page) => {
+  const fetchData = useCallback(async (page) => {
+    setLoading(true);  // 로딩 상태 시작
     try {
       const response = await axios.get("http://localhost:8084/boards", {
         params: {
@@ -62,12 +62,12 @@ const Boards = () => {
 
       setData(transformedData);
       setPageInfo({ totalElements: response.data.pageInfo.totalElements, totalPages: response.data.pageInfo.totalPages });
-      setLoading(false);
     } catch (error) {
       console.error("Error fetching data", error);
-      setLoading(false);
+    } finally {
+      setLoading(false);  // 로딩 상태 종료
     }
-  };
+  }, [keyword, searchOption, sortOption, category]);
 
   const handleSearch = () => {
     fetchData(1);
@@ -79,20 +79,14 @@ const Boards = () => {
 
   const handleCategoryChange = (event) => {
     setCategory(event.target.value);
-    fetchData(1);
   };
 
   useEffect(() => {
     fetchData(page);
-  }, [category, page]);
+  }, [category, page, fetchData]);
 
   const handleRowClick = (params) => {
     navigate(`/viewBoard/${params.id}`);
-  };
-
-  const handlePageChange = (newPage) => {
-    console.log(newPage);
-    setPage(newPag + 1);
   };
 
   const columns = [
@@ -247,30 +241,34 @@ const Boards = () => {
           },
         }}
       >
-        <DataGrid
-          rows={data}
-          columns={columns}
-          getRowId={(row) => row.boardId}
-          sx={{
-            "& .MuiDataGrid-row:hover": {
-              cursor: "pointer",
-            },
-          }}
-          initialState={{
-            pagination: {
-              paginationModel: {
-                pageSize: 10,
+        {loading ? (
+          <Typography>Loading...</Typography>
+        ) : (
+          <DataGrid
+            rows={data}
+            columns={columns}
+            getRowId={(row) => row.boardId}
+            sx={{
+              "& .MuiDataGrid-row:hover": {
+                cursor: "pointer",
               },
-            },
-          }}
-          pageSizeOptions={[10]}
-          rowCount={pageInfo.totalElements}
-          paginationMode="server"
-          onPaginationModelChange={(model) => {
-            setPage(model.page + 1);
-          }}
-          onRowClick={handleRowClick}
-        />
+            }}
+            initialState={{
+              pagination: {
+                paginationModel: {
+                  pageSize: 10,
+                },
+              },
+            }}
+            pageSizeOptions={[10]}
+            rowCount={pageInfo.totalElements}
+            paginationMode="server"
+            onPaginationModelChange={(model) => {
+              setPage(model.page + 1);
+            }}
+            onRowClick={handleRowClick}
+          />
+        )}
       </Box>
     </Box>
   );

@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from "react";
 import {
   Box,
   List,
@@ -9,11 +10,10 @@ import {
 } from "@mui/material";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
-import timeGridPlugin from "@fullcalendar/timegrid";
+import timeGridPlugin from "@fullcalendar/timegrid"; 
 import interactionPlugin from "@fullcalendar/interaction";
-import listPlugin from "@fullcalendar/list";
+import axios from "axios";
 import { tokens } from "../../theme";
-import { useState } from "react";
 import { Header } from "../../components";
 import { formatDate } from "@fullcalendar/core";
 import useModal from "./useModal";
@@ -23,128 +23,253 @@ const Calendar = () => {
   const colors = tokens(theme.palette.mode);
   const isMdDevices = useMediaQuery("(max-width:920px)");
   const isSmDevices = useMediaQuery("(max-width:600px)");
-  const isXsDevices = useMediaQuery("(max-width:380px)");
   const [currentEvents, setCurrentEvents] = useState([]);
-  const {showModal, modal} = useModal();
+
+  const fetchEvents = async () => {
+    try {
+        const response = await axios.get("http://localhost:8084/calendars", {
+            params: {
+              departmentId: 1,
+            },
+          });
+      const data = response.data;
+
+      const events = data
+        .map((item) => {
+          const start = new Date(item.startTime);
+          const end = new Date(item.endTime);
+
+          let backgroundColor = colors.greenAccent[500];
+          if (item.carBookId) {
+            backgroundColor = colors.redAccent[500];
+          } else if (item.roomBookId) {
+            backgroundColor = colors.blueAccent[500]; 
+          }
+
+          return {
+            id: item.calendarId,
+            title: item.title,
+            start: start, 
+            end: end,
+            allDay: false, 
+            content: item.content,
+            backgroundColor, 
+          };
+        })
+        .sort((a, b) => a.start - b.start);
+
+      setCurrentEvents(events);
+    } catch (error) {
+      console.error("Error fetching calendar events:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchEvents();
+  }, []);
+
+  const { showModal, modal } = useModal(fetchEvents);
 
   const handleDateClick = async (selected) => {
     const calendarApi = selected.view.calendar;
     calendarApi.unselect();
-
-    const inputValues = await showModal("일정 추가", "일정을 입력하세요:", 'prompt');
-    if (inputValues) {
-        const { title, start, end, description } = inputValues;
-        const event = {
-            id: `${selected.startStr}-${title}`,
-            title,
-            start: new Date(start), // start 값 설정
-            end: new Date(end), // end 값 설정
-            allDay: selected.allDay,
-            description,
-        };
-        // 시간을 로컬 시간 형식으로 변환
-        const localStart = new Date(start).toLocaleString();
-        const localEnd = new Date(end).toLocaleString();
-        console.log(`Adding Event: ${event.title} | Start: ${localStart} | End: ${localEnd}`); // 콘솔에 로그 출력
-        calendarApi.addEvent(event);
-    }
-};
-const handleEventClick = async (selected) => {
-    const result = await showModal(
-        `${selected.event.title}`,
-        `해당일정을 정말로 취소하시겠습니까?`
+  
+    const inputValues = await showModal(
+      "일정 추가",
+      "일정을 입력하세요:",
+      "add"
     );
-    if (result) {
-        selected.event.remove();
+  
+    if (inputValues) {
+      const { title, start, end, content, isReservation, reservationType, selectedOption, purpose } = inputValues;
+  
+      if (!isReservation) {
+        const newEvent = {
+          title: title,
+          content: content,
+          startTime: new Date(start).toISOString(),
+          endTime: new Date(end).toISOString(),
+        };
+  
+        try {
+          const response = await axios.post("http://localhost:8084/calendars?departmentId=1", newEvent);
+  
+          if (response.status === 201) {
+            fetchEvents();
+          } else {
+            console.error("Error saving event to server.");
+          }
+        } catch (error) {
+          console.error("Error making POST request:", error);
+        }
+      } else {
+        let reservationUrl = "";
+        let requestBody = {
+          bookStart: new Date(start).toISOString(),
+          bookEnd: new Date(end).toISOString(),
+          purpose: purpose,
+        };
+  
+        if (reservationType === "car") {
+          reservationUrl = `http://localhost:8084/cars/${selectedOption}/books?employeeId=1&title=${title}&content=${content}`;
+        }
+        else if (reservationType === "room") {
+          reservationUrl = `http://localhost:8084/rooms/${selectedOption}/books?employeeId=1&title=${title}&content=${content}`;
+        }
+  
+        if (reservationUrl) {
+          try {
+            const response = await axios.post(reservationUrl, requestBody);
+  
+            if (response.status === 201) {
+              fetchEvents();
+            } else {
+              console.error("Error saving reservation to server.");
+            }
+          } catch (error) {
+            console.error("Error making POST request:", error);
+          }
+        }
+      }
     }
-};
-return (
-    <Box m="20px">
-        <Header title="Calendar" subtitle="Full Calendar Interactive Page"/>
-        <Box display="flex" justifyContent="space-between" gap={2}>
-            {/* CALENDAR SIDEBAR */}
-            <Box
-                display={`${isMdDevices ? "none" : "block"}`}
-                flex="1 1 20%"
-                bgcolor={colors.primary[400]}
-                p="15px"
-                borderRadius="4px"
-            >
-                <Typography variant="h5">Events</Typography>
-                <List>
-                    {currentEvents.map((event) => (
-                        <ListItem
-                            key={event.id}
-                            sx={{
-                                bgcolor: `${colors.greenAccent[500]}`,
-                                my: "10px",
-                                borderRadius: "2px",
-                            }}
-                        >
-                            <ListItemText
-                                primary={event.title}
-                                secondary={
-                                    <Typography>
-                                        {formatDate(event.start, {
-                                            year: "numeric",
-                                            month: "short",
-                                            day: "numeric",
-                                        })}
-                                    </Typography>
-                                }
-                            />
-                        </ListItem>
-                    ))}
-                </List>
-            </Box>
+  };
 
-            {/* CALENDAR */}
-            <Box
-                flex="1 1 100%"
-                sx={{
-                    "& .fc-list-day-cushion ": {
-                        bgcolor: `${colors.greenAccent[500]} !important`,
-                    },
-                }}
-            >
-                <FullCalendar
-                    height="75vh"
-                    plugins={[
-                        dayGridPlugin,
-                        timeGridPlugin,
-                        interactionPlugin,
-                        listPlugin,
-                    ]}
-                    headerToolbar={{
-                        left: `${isSmDevices ? "prev,next" : "prev,next today"}`,
-                        center: "title",
-                        right: `${
-                            isXsDevices
-                                ? ""
-                                : isSmDevices
-                                    ? "dayGridMonth,listMonth"
-                                    : "dayGridMonth,timeGridWeek,timeGridDay,listMonth"
-                        }`,
-                    }}
-                    initialView="dayGridMonth"
-                    editable={true}
-                    selectable={true}
-                    selectMirror={true}
-                    dayMaxEvents={true}
-                    select={handleDateClick}
-                    eventClick={handleEventClick}
-                    eventsSet={(events) => setCurrentEvents(events)}
-                    eventTimeFormat={{
-                        hour: '2-digit',
-                        minute: '2-digit',
-                        meridiem: false,
-                    }} // 시간 포맷 설정
-                />
-            </Box>
+  const handleEventClick = async (selected) => {
+    try {
+      const response = await axios.get(`http://localhost:8084/calendars/${selected.event.id}`);
+      const eventData = response.data.data;
+  
+      const userDepartmentId = 1;
+      const isOwner = eventData.departmentId === userDepartmentId;
+  
+      const carBookId = eventData.carBookId || null;
+      const roomBookId = eventData.roomBookId || null;
+  
+      await showModal(
+        `${eventData.title}`, 
+        "", 
+        "view", 
+        { 
+          id: eventData.calendarId,
+          ...eventData, 
+          isOwner, 
+          carBookId, 
+          roomBookId 
+        }
+      );
+    } catch (error) {
+      console.error("Error fetching event details:", error);
+    }
+  };
+
+  return (
+    <Box m="20px">
+      <Header title="Calendar" subtitle="Full Calendar Interactive Page" />
+
+      <Box display="flex" justifyContent="center" mb={2}>
+        <Box display="flex" alignItems="center" mr={3}>
+            <Box 
+            width={20} 
+            height={20} 
+            bgcolor={colors.greenAccent[500]} 
+            mr={1} 
+            borderRadius="50%"
+            />
+            <Typography color={colors.gray[100]}>일반 일정</Typography>
         </Box>
-        {modal}
+        <Box display="flex" alignItems="center" mr={3}>
+            <Box 
+            width={20} 
+            height={20} 
+            bgcolor={colors.redAccent[500]} 
+            mr={1} 
+            borderRadius="50%" 
+            />
+            <Typography color={colors.gray[100]}>차량 예약</Typography>
+        </Box>
+        <Box display="flex" alignItems="center">
+            <Box 
+            width={20} 
+            height={20} 
+            bgcolor={colors.blueAccent[500]} 
+            mr={1} 
+            borderRadius="50%" 
+            />
+            <Typography color={colors.gray[100]}>회의실 예약</Typography>
+        </Box>
+        </Box>
+
+      <Box display="flex" justifyContent="space-between" gap={2}>
+        <Box
+          display={`${isMdDevices ? "none" : "block"}`}
+          flex="1 1 20%"
+          bgcolor={colors.primary[400]}
+          p="15px"
+          borderRadius="4px"
+        >
+          <Typography variant="h5">Events</Typography>
+          <List>
+            {currentEvents.map((event) => (
+              <ListItem
+                key={event.id}
+                sx={{
+                  bgcolor: `${event.backgroundColor}`, 
+                  my: "10px",
+                  borderRadius: "2px",
+                }}
+              >
+                <ListItemText
+                  primary={event.title}
+                  secondary={
+                    <Typography>
+                      {formatDate(event.start, {
+                        year: "numeric",
+                        month: "short",
+                        day: "numeric",
+                      })}
+                    </Typography>
+                  }
+                />
+              </ListItem>
+            ))}
+          </List>
+        </Box>
+
+        <Box
+          flex="1 1 100%"
+          sx={{
+            "& .fc-list-day-cushion ": {
+              bgcolor: `${colors.greenAccent[500]} !important`,
+            },
+          }}
+        >
+          <FullCalendar
+            height="75vh"
+            plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]} 
+            headerToolbar={{
+              left: `${isSmDevices ? "prev,next" : "prev,next today"}`,
+              center: "title",
+              right: "dayGridMonth,timeGridWeek,timeGridDay", 
+            }}
+            initialView="dayGridMonth" 
+            editable={true}
+            selectable={true}
+            selectMirror={true}
+            dayMaxEvents={true}
+            select={handleDateClick}
+            eventClick={handleEventClick}
+            events={currentEvents} 
+            eventTimeFormat={{
+              hour: "2-digit",
+              minute: "2-digit",
+              meridiem: false,
+            }}
+          />
+        </Box>
+      </Box>
+      {modal}
     </Box>
-);
+  );
 };
 
 export default Calendar;

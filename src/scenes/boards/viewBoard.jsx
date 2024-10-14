@@ -22,8 +22,10 @@ const ViewBoard = () => {
   const [selectedImage, setSelectedImage] = useState("");
   const [editCommentId, setEditCommentId] = useState(null);
   const navigate = useNavigate();
+  const [openDeleteModal, setOpenDeleteModal] = useState(false);
+  const handleOpenDeleteModal = () => setOpenDeleteModal(true);
+  const handleCloseDeleteModal = () => setOpenDeleteModal(false);
 
-  // 게시물 조회
   const fetchBoardDetails = async () => {
     try {
       const response = await axios.get(`http://localhost:8084/boards/${id}`);
@@ -37,7 +39,6 @@ const ViewBoard = () => {
     }
   };
 
-  // 댓글 전체 조회
   const fetchComments = async () => {
     try {
       const commentsResponse = await axios.get(`http://localhost:8084/boards/${id}/comments`);
@@ -74,7 +75,6 @@ const ViewBoard = () => {
     navigate(`/updateBoard`, { state: { boardId: id } });
   };
 
-  // 댓글 등록 요청 수정 (employeeId는 쿼리 파라미터, content는 바디에 포함)
   const handleCommentSubmit = async (parentId = null) => {
     try {
       await axios.post(`http://localhost:8084/boards/${id}/comments`, {
@@ -92,14 +92,13 @@ const ViewBoard = () => {
       } else {
         setComment("");
       }
-      fetchComments(); // 댓글 등록 후 댓글만 다시 조회
+      fetchComments(); 
     } catch (error) {
       console.error("Error submitting comment", error);
       alert("댓글 등록에 실패했습니다.");
     }
   };
 
-  // 댓글 삭제 함수 추가
   const handleCommentDelete = async (commentId) => {
     try {
       await axios.delete(`http://localhost:8084/boards/${id}/comments/${commentId}`, {
@@ -108,14 +107,13 @@ const ViewBoard = () => {
         },
       });
       alert("댓글이 삭제되었습니다.");
-      fetchComments(); // 댓글 삭제 후 댓글만 다시 조회
+      fetchComments(); 
     } catch (error) {
       console.error("Error deleting comment", error);
       alert("댓글 삭제에 실패했습니다.");
     }
   };
 
-  // 댓글 수정 함수
   const handleCommentUpdate = async (commentId) => {
     try {
       await axios.patch(`http://localhost:8084/boards/${id}/comments/${commentId}`, {
@@ -127,7 +125,7 @@ const ViewBoard = () => {
       });
       alert("댓글이 수정되었습니다.");
       setEditCommentId(null);
-      fetchComments(); // 댓글 수정 후 댓글만 다시 조회
+      fetchComments();
     } catch (error) {
       console.error("Error updating comment", error);
       alert("댓글 수정에 실패했습니다.");
@@ -194,7 +192,7 @@ const ViewBoard = () => {
             </Button>
             <Button
               variant="outlined"
-              onClick={handleDelete}
+              onClick={handleOpenDeleteModal}
               sx={{
                 color: colors.redAccent[500],
                 borderColor: colors.redAccent[500],
@@ -269,7 +267,7 @@ const ViewBoard = () => {
         </Modal>
 
         <Typography variant="h5" color={colors.greenAccent[500]} fontWeight="bold" mb={2} display="flex" alignItems="center">
-          <CommentIcon sx={{ mr: 1 }} /> 댓글
+          <CommentIcon sx={{ mr: 1 }} /> 댓글 [{comments.length}]
         </Typography>
 
         {comments.length > 0 ? (
@@ -558,6 +556,54 @@ const ViewBoard = () => {
           </Box>
         </Box>
       </Box>
+      <Modal
+      open={openDeleteModal}
+      onClose={handleCloseDeleteModal}
+      sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+    >
+      <Box
+        bgcolor={colors.primary[500]}
+        p={4}
+        borderRadius="8px"
+        display="flex"
+        flexDirection="column"
+        alignItems="center"
+        justifyContent="center"
+      >
+        <Typography variant="h6" color={colors.gray[100]} mb={2}>
+          정말 삭제하시겠습니까?
+        </Typography>
+        <Box display="flex" gap={2}>
+          <Button
+            variant="contained"
+            onClick={handleDelete} // 실제 삭제 처리
+            sx={{
+              color: "#fff",
+              backgroundColor: colors.redAccent[500],
+              "&:hover": {
+                backgroundColor: colors.redAccent[700],
+              },
+            }}
+          >
+            확인
+          </Button>
+          <Button
+            variant="outlined"
+            onClick={handleCloseDeleteModal} // 모달 닫기
+            sx={{
+              color: colors.gray[100],
+              borderColor: colors.gray[100],
+              "&:hover": {
+                backgroundColor: colors.gray[500],
+                color: "#fff",
+              },
+            }}
+          >
+            취소
+          </Button>
+        </Box>
+      </Box>
+    </Modal>
     </Box>
   );
 };

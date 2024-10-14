@@ -1,7 +1,7 @@
 import React from 'react';
 import {Box, Button, Modal, Typography} from "@mui/material";
 
-const DeleteModal = ({ isOpen, onCancel, onSubmit, title, message}) => {
+const DeleteModal = ({ isOpen, onCancel, onSubmit, title}) => {
     return (
         <Modal open={isOpen} onClose={onCancel}>
             <Box sx={{
@@ -17,9 +17,6 @@ const DeleteModal = ({ isOpen, onCancel, onSubmit, title, message}) => {
             }}>
                 <Typography variant="h3" component="h2">
                     {title}
-                </Typography>
-                <Typography variant="body1" sx={{ mt: 2 }}>
-                    {message}
                 </Typography>
                 <Box mt={2}>
                     <Button onClick={onSubmit} variant="contained" color="primary">확인</Button>

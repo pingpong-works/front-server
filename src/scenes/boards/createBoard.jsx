@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Button,
@@ -20,7 +20,8 @@ const CreateBoard = () => {
   const navigate = useNavigate();
 
   const [title, setTitle] = useState("");
-  const [category, setCategory] = useState("공지"); // 초기값 설정
+  const [username, setUsername] = useState("");
+  const [category, setCategory] = useState("일반");
   const [content, setContent] = useState("");
   const [images, setImages] = useState([]);
   const [imagePreviews, setImagePreviews] = useState([]);
@@ -34,9 +35,17 @@ const CreateBoard = () => {
     e.target.value = null;
   };
 
+  useEffect(() => {
+    const storedUsername = localStorage.getItem("username") || "";
+    setUsername(storedUsername);
+
+    if (storedUsername === "admin@gmail.com") {
+      setCategory("공지");
+    }
+  }, []);
+
   const handleSubmit = async () => {
     try {
-      const username = localStorage.getItem("username");
       if ((category === "공지" || category === "식단") && username !== "admin@gmail.com") {
         alert("공지와 식단 카테고리는 관리자만 작성할 수 있습니다.");
         return;
@@ -117,10 +126,18 @@ const CreateBoard = () => {
             },
           }}
         >
-          <MenuItem value="공지">공지</MenuItem>
-          <MenuItem value="식단">식단</MenuItem>
-          <MenuItem value="일반">일반</MenuItem>
-          <MenuItem value="질문">질문</MenuItem>
+          {username === "admin@gmail.com"
+            ? [
+                <MenuItem key="공지" value="공지">공지</MenuItem>,
+                <MenuItem key="식단" value="식단">식단</MenuItem>,
+                <MenuItem key="일반" value="일반">일반</MenuItem>,
+                <MenuItem key="질문" value="질문">질문</MenuItem>
+              ]
+            : [
+                <MenuItem key="일반" value="일반">일반</MenuItem>,
+                <MenuItem key="질문" value="질문">질문</MenuItem>
+              ]
+          }
         </Select>
   
         <TextField
