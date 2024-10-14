@@ -19,22 +19,25 @@ const Waste = () => {
     const navigate = useNavigate();
     const [trashMails, setTrashMails] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [page, setPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [totalElements, setTotalElements] = useState(0);
 
     useEffect(() => {
         const fetchTrashMails = async () => {
             try {
-                // API 호출 URL 수정
-                const response = await axios.get('http://localhost:8083/mail/trash');
-                setTrashMails(response.data);
+                const response = await axios.get(`http://localhost:8083/mail/trash?page=${page}&size=10&sort=sentAt,DESC`);
+                setTrashMails(response.data.data);
+                setTotalPages(response.data.pageInfo.totalPages);
+                setTotalElements(response.data.pageInfo.totalElements);
                 setLoading(false);
             } catch (error) {
                 console.error('휴지통 메일 조회 중 오류 발생: ', error);
                 setLoading(false);
             }
         };
-
         fetchTrashMails();
-    }, []);
+    }, [page]);
 
     if (loading) {
         return (
@@ -69,7 +72,7 @@ const Waste = () => {
                                 fontWeight="bold"
                                 noWrap
                                 sx={{ cursor: 'pointer' }}
-                                onClick={() => navigate(`/read/2/${mail.trashMailId}`)}
+                                onClick={() => navigate(`/read/2/${mail.trashmailId}`)}
                             >
                                 {mail.subject}
                             </Typography>
