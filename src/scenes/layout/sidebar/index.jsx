@@ -307,8 +307,7 @@ const SideBar = () => {
             },
           }}
         >
-          <Item title="조직도" path="/team" icon={<PeopleAltOutlined />} />
-          <Item title="주소록" path="/contacts" icon={<ContactsOutlined />} />
+          <Item title="주소록" path="/team" icon={<PeopleAltOutlined />} />
         </Menu>
       </Box>
     </Sidebar>
