@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react'; 
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, Select, MenuItem, Box, Typography, Table, TableBody, TableRow, TableCell, CircularProgress } from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, Select, MenuItem, Box, Typography, Table, TableBody, TableRow, TableCell, CircularProgress, useTheme } from '@mui/material';
 import ApprovalLineModal from './ApprovalLineModal';
 import sendPostDocumentSubmitRequest from '../request/PostDoumentSubmit';
 import sendPostDocumentSaveRequest from '../request/PostDocumentSave';
 import getDocsTypeAllRequest from '../request/GetDocsType';
 import axios from 'axios'; // 로그인된 사용자 정보를 가져오기 위해 axios 사용
+import { tokens } from "../theme";
 
 const NewDocumentForm = ({ open, handleClose, fetchDocuments }) => {
+    const theme = useTheme();
+    const colors = tokens(theme.palette.mode);
     const [title, setTitle] = useState('');  // 문서 제목
     const [content, setContent] = useState('');  // 문서 내용
     const [customFields, setCustomFields] = useState({});  // 문서의 커스텀 필드
@@ -319,6 +322,9 @@ const NewDocumentForm = ({ open, handleClose, fetchDocuments }) => {
                                         onChange={(e) => handleFieldChange(field, e.target.value)}
                                         error={!!(errors.customFields && errors.customFields[field])}
                                         helperText={errors.customFields && errors.customFields[field]}
+                                        InputLabelProps={{
+                                            shrink: true, // 라벨이 필드와 겹치지 않도록 조정
+                                        }}
                                     />
                                 ) : (
                                     <TextField
@@ -336,7 +342,7 @@ const NewDocumentForm = ({ open, handleClose, fetchDocuments }) => {
                     })}
 
                     {/* 결재라인 설정 */}
-                    <Button variant="contained" onClick={handleOpenApprovalLineModal} sx={{ marginBottom: '20px' }}>
+                    <Button variant="contained" onClick={handleOpenApprovalLineModal} sx={{ marginBottom: '20px', bgcolor: colors.blueAccent[500] }}>
                         결재라인 설정
                     </Button>
                     {errors.workflowId && (
@@ -359,9 +365,9 @@ const NewDocumentForm = ({ open, handleClose, fetchDocuments }) => {
                 </Box>
             </DialogContent>
             <DialogActions>
-                <Button onClick={handleSaveDraft} color="primary">임시 저장</Button>
-                <Button onClick={handleSubmitDocument} color="primary">제출</Button>
-                <Button onClick={handleClose} color="secondary">닫기</Button>
+                <Button onClick={handleSaveDraft} sx={{ color: 'gray', fontWeight: 'bold' }}>임시 저장</Button>
+                <Button onClick={handleSubmitDocument} sx={{ color: colors.blueAccent[500], fontWeight: 'bold' }}>제출</Button>
+                <Button onClick={handleClose} sx={{ color: 'gray', fontWeight: 'bold' }}>닫기</Button>
             </DialogActions>
 
             {/* 결재라인 설정 모달 */}

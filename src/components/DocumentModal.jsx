@@ -166,10 +166,11 @@ const DocumentModal = ({ documentId, handleClose, fetchDocuments }) => {
     return (
         <Modal open={isOpen} onClose={handleCloseModal}>
             <Box sx={{
-                width: "80%",
+                width: "50%",
                 maxHeight: "80vh",
                 overflow: "auto",
                 padding: 4,
+                fontsize: "1 rem",
                 backgroundColor: mode === 'dark' ? colors.primary[300] : theme.palette.background.paper,
                 color: mode === 'dark' ? theme.palette.text.primary : 'black',
                 margin: "100px auto",
@@ -188,7 +189,7 @@ const DocumentModal = ({ documentId, handleClose, fetchDocuments }) => {
                     <CloseIcon />
                 </IconButton>
 
-                <Typography variant="h5" textAlign="center" mb={4} fontWeight="bold" fontSize={30} sx={{ color: mode === 'dark' ? 'white' : 'black' }}>
+                <Typography variant="h5" textAlign="center" mb={4} fontWeight="bold" fontSize={40} sx={{ color: mode === 'dark' ? 'white' : 'black' }}>
                     {documentData.docsTypes.documentTemplate.templateName}
                 </Typography>
 

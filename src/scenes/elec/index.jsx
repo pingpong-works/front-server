@@ -336,7 +336,7 @@ const Elec = () => {
                             backgroundColor: "#1c8adb",
                         },
                         "& .MuiCheckbox-root": {
-                            color: `${colors.blueAccent[700]} !important`,
+                            color: `${colors.blueAccent[100]} !important`,
                         },
                         "& .MuiDataGrid-toolbarContainer .MuiButton-text": {
                             color: `${colors.gray[100]} !important`,
