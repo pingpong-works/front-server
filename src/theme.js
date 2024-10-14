@@ -18,6 +18,7 @@ export const tokens = (mode) => ({
           600: "#525252",
           700: "#3d3d3d",
           800: "#292929",
+          850: "#72768187", //dashboard box색상
           900: "#ffffff",
         },
         primary: {
@@ -80,6 +81,7 @@ export const tokens = (mode) => ({
           600: "#858585",
           700: "#a3a3a3",
           800: "#c2c2c2",
+          850: "#ffffff69",
           900: "#000000",
         },
         primary: {
@@ -175,7 +177,7 @@ export const themeSettings = (mode) => {
               light: colors.gray[100],
             },
             background: {
-              default: '#dbe8f2'//'#dbe8f2',c4d3de
+              default: '#bed1df'//'#dbe8f2',c4d3de
             },
           }),
     },
