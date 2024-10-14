@@ -29,7 +29,10 @@ function Dashboard() {
     employeeId: "",
     name: "",
     employeeRank: "",
+    departmentId: "",
   });
+
+  const [employees, setEmployees] = useState([]);
 
   const cardStyle = {
     bgcolor: colors.gray[850],
@@ -52,11 +55,15 @@ function Dashboard() {
             Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
           },
         });
-        setUserInfo(response.data.data);
-        // 사용자 정보를 가져온 후 출근/퇴근 데이터 불러오기
-        fetchAttendanceData(Number(response.data.data.employeeId));
-        // 월별 근무 시간 통계 데이터 가져오기
-        fetchMonthlyAttendanceStatistics(Number(response.data.data.employeeId));
+        const userData = response.data.data;
+        setUserInfo(userData);
+
+        // departmentId가 유효한지 확인 후 부서별 직원 목록을 가져옵니다.
+        if (userData.departmentId) {
+          fetchDepartmentEmployees(userData.departmentId);
+        } else {
+          console.error("사용자 정보에 departmentId가 없습니다.");
+        }
       } catch (error) {
         console.error("사용자 정보 가져오기 오류:", error);
         setErrorMessage("사용자 정보를 가져오는 데 실패했습니다.");
@@ -66,13 +73,34 @@ function Dashboard() {
     fetchUserInfo();
   }, []);
 
-  //근태기능
+
+  // 부서별 직원 정보 불러오기
+  const fetchDepartmentEmployees = async (departmentId) => {
+    try {
+      const response = await axios.get(
+        `http://localhost:8081/user/employees/departments/${departmentId}`, 
+        {
+          params: {
+            page: 1,
+            size: 100
+          },
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
+        }
+      );
+      setEmployees(response.data.data);
+    } catch (error) {
+      console.error("부서 직원 정보를 가져오는 중 오류 발생:", error);
+    }
+  };
+
   // 출근 수행
   const checkIn = async () => {
     if (isLoading) return;
     setIsLoading(true);
     try {
-      const response = await axios.post("http://localhost:8082/attendances/check-in", null, {
+      await axios.post("http://localhost:8082/attendances/check-in", null, {
         params: {
           employeeId: Number(userInfo.employeeId)
         },
@@ -80,7 +108,7 @@ function Dashboard() {
           Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
         },
       });
-      fetchAttendanceData(userInfo.employeeId);
+      // 출근 후 동작 (필요하면 추가)
     } catch (error) {
       console.error("출근 오류:", error.response?.data || error);
       setErrorMessage("출근에 실패했습니다. 다시 시도해주세요.");
@@ -91,10 +119,10 @@ function Dashboard() {
 
   // 퇴근 수행
   const checkOut = async () => {
-    if (isLoading) return; // Prevent multiple clicks
+    if (isLoading) return;
     setIsLoading(true);
     try {
-      const response = await axios.post("http://localhost:8082/attendances/check-out", null, {
+      await axios.post("http://localhost:8082/attendances/check-out", null, {
         params: {
           employeeId: Number(userInfo.employeeId)
         },
@@ -102,7 +130,7 @@ function Dashboard() {
           Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
         },
       });
-      fetchAttendanceData(userInfo.employeeId);
+      // 퇴근 후 동작 (필요하면 추가)
     } catch (error) {
       console.error("퇴근 오류:", error.response?.data || error);
       setErrorMessage("퇴근에 실패했습니다. 다시 시도해주세요.");
@@ -110,6 +138,47 @@ function Dashboard() {
       setIsLoading(false);
     }
   };
+
+
+  // 직급 변환 함수 추가
+const getKoreanRank = (rank) => {
+  switch(rank) {
+    case 'INTERN':
+      return '인턴';
+    case 'STAFF':
+      return '사원';
+    case 'SENIOR_STAFF':
+      return '주임';
+    case 'ASSISTANT_MANAGER':
+      return '대리';
+    case 'MANAGER':
+      return '과장';
+    case 'SENIOR_MANAGER':
+      return '차장';
+    case 'DIRECTOR':
+      return '부장';
+    default:
+      return rank; // 매칭되지 않는 경우 기본 값으로 반환
+  }
+};
+
+<Box sx={{ mt: "10px" }}>
+  {employees.map((employee) => (
+    <Box key={employee.employeeId} display="flex" justifyContent="space-between" p="10px">
+      <Typography>{employee.name}</Typography>
+      <Typography>{getKoreanRank(employee.employeeRank)}</Typography> {/* 직급을 한국어로 변환 */}
+      <Box
+        sx={{
+          width: "10px",
+          height: "10px",
+          borderRadius: "50%",
+          backgroundColor: employee.status === 'LOGGED_IN' ? colors.greenAccent[500] : colors.gray[500],
+        }}
+      />
+    </Box>
+  ))}
+</Box>
+
 
   return (
     <Box m="20px">
@@ -167,14 +236,43 @@ function Dashboard() {
                 퇴근
               </Button>
             </Box>
-
           </Box>
           <p></p>
           {/* 부서별 팀원 로그인 상태 */}
-          <Box gridColumn={isXlDevices ? "span 4" : isMdDevices ? "span 6" : "span 3"}
+          <Box 
+            gridColumn={isXlDevices ? "span 4" : isMdDevices ? "span 6" : "span 3"}
             gridRow="span 2"
-            sx={{ width: "100%", height: "70%", padding: "30px", backgroundColor: colors.gray[850], borderRadius: "8px" }}>
-            <Typography> 우리 부서 활동</Typography>
+            sx={{ 
+              width: "100%", 
+              height: "200px",  // 높이 설정
+              padding: "10px", 
+              backgroundColor: colors.gray[850], 
+              borderRadius: "8px", 
+              overflowY: "scroll" // 스크롤 기능 추가
+            }}>
+            <Box sx={{ mt: "10px" }}>
+              {/* 헤더 부분 디자인 추가 */}
+                <Box display="flex" justifyContent="space-between" p="10px" sx={{ backgroundColor: colors.gray[700], borderRadius: "4px" }}>
+                  <Typography sx={{ color: colors.primary[100], fontWeight: "bold", fontSize: "1rem", marginLeft: "8px" }}>이름</Typography>
+                  <Typography sx={{ color: colors.primary[100], fontWeight: "bold", fontSize: "1rem", textAlign: "center", width: "100px", marginLeft: "45px" }}>직급</Typography> {/* 오른쪽으로 10px 이동 */}
+                  <Typography sx={{ color: colors.primary[100], fontWeight: "bold", fontSize: "1rem", textAlign: "right" }}>활동중</Typography>
+                </Box>
+              {employees.map((employee) => (
+                <Box key={employee.employeeId} display="flex" justifyContent="space-between" p="10px">
+                  <Typography sx={{ fontSize: "0.95rem", color: colors.gray[50] }}>{employee.name}</Typography>
+                  <Typography sx={{ textAlign: "center", width: "120px", fontSize: "0.95rem", color: colors.gray[50] }}>{getKoreanRank(employee.employeeRank)}</Typography>
+                  <Box
+                    sx={{
+                      width: "10px",
+                      height: "10px",
+                      borderRadius: "50%",
+                      backgroundColor: employee.status === 'LOGGED_IN' ? colors.greenAccent[500] : colors.redAccent[500],
+                    }}
+                  />
+                </Box>
+              ))}
+            </Box>
+
           </Box>
         </Box>
 
