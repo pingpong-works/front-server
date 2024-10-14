@@ -1,5 +1,5 @@
+import React, { useContext, useEffect, useState } from "react";
 import { Avatar, Box, IconButton, Typography, useTheme } from "@mui/material";
-import { useContext, useEffect, useState } from "react";
 import { tokens } from "../../../theme";
 import { Menu, MenuItem, Sidebar, SubMenu } from "react-pro-sidebar";
 import {
@@ -20,10 +20,10 @@ import {
   MailOutline as MailOutlineIcon,
   Logout as LogoutIcon,
 } from "@mui/icons-material";
-import avatar from "../../../assets/images/avatar.png";
 import Item from "./Item";
 import { ToggledContext } from "../../../App";
 import axios from "axios";
+import defaultAvatar from "../../../assets/images/avatar.png"; // 기본 이미지 경로
 
 const SideBar = () => {
   const [collapsed, setCollapsed] = useState(false);
@@ -36,7 +36,11 @@ const SideBar = () => {
     name: "",
     departmentName: "",
     employeeRank: "",
+    profilePicture: "",  // 프로필 사진 추가
+    email: "", // 이메일 추가
   });
+
+  const [avatar, setAvatar] = useState(defaultAvatar);  // 기본 이미지
 
   // API 호출하여 사용자 정보 가져오기
   useEffect(() => {
@@ -47,8 +51,13 @@ const SideBar = () => {
             Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
           },
         });
-        const { name, departmentName, employeeRank } = response.data.data;
-        setUserInfo({ name, departmentName, employeeRank });
+        const { name, departmentName, employeeRank, profilePicture, email } = response.data.data;
+        setUserInfo({ name, departmentName, employeeRank, profilePicture, email });
+        
+        // 프로필 사진이 있으면 설정, 없으면 기본 이미지 사용
+        if (profilePicture) {
+          setAvatar(profilePicture);
+        }
       } catch (error) {
         console.error("Error fetching user info:", error);
       }
@@ -57,33 +66,30 @@ const SideBar = () => {
     fetchUserInfo();
   }, []);
 
-  // 로그아웃 핸들러
+  // isAdmin 체크 시 userInfo.email이 존재할 때만
+  const isAdmin = userInfo.email === "admin@example.com";
+
   const handleLogout = async () => {
     try {
-      // 로그아웃 시 상태를 LOGGED_OUT으로 업데이트하는 API 요청
       await axios.patch(
-        "http://localhost:8081/employees/update-status", // 상태 변경 API 경로
+        "http://localhost:8081/employees/update-status",
         {},
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`, // Authorization 헤더에 토큰 포함
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
           },
         }
       );
-
-      // 토큰 삭제 및 로그인 페이지로 이동
       localStorage.removeItem("accessToken");
       window.location.href = "/login";
     } catch (error) {
       console.error("Error during logout:", error);
-      // 에러 처리 (예: 알림 표시)
     }
   };
 
-  // 테마에 따른 스타일 정의
   const getStyles = (mode) => ({
     menuButton: {
-      backgroundColor: mode === "dark" ? colors.primary[400] : colors.primary[500],
+      backgroundColor: mode === "dark" ? colors.primary[400] : '#edf9ff',
       color: mode === "dark" ? colors.gray[100] : colors.gray[900],
       "&:hover": {
         backgroundColor: mode === "dark" ? "#0c2a40" : "#dbe8f2",
@@ -103,7 +109,7 @@ const SideBar = () => {
 
   return (
     <Sidebar
-      backgroundColor={theme.palette.mode === "dark" ? colors.primary[400] : colors.primary[500]}
+      backgroundColor={theme.palette.mode === "dark" ? colors.primary[400] : "#edf9ff"}
       rootStyles={{
         border: 0,
         height: "100%",
@@ -176,7 +182,7 @@ const SideBar = () => {
         >
           <Avatar
             alt="avatar"
-            src={avatar}
+            src={avatar}  // 프로필 사진 또는 기본 이미지
             sx={{ width: "100px", height: "100px" }}
           />
           <Box sx={{ textAlign: "center" }}>
@@ -190,11 +196,7 @@ const SideBar = () => {
             >
               {userInfo.departmentName} | {userInfo.employeeRank}
             </Typography>
-            {/* 로그아웃 버튼 */}
-            <IconButton
-              onClick={handleLogout}
-              color="inherit"
-            >
+            <IconButton onClick={handleLogout} color="inherit">
               <LogoutIcon />
             </IconButton>
           </Box>
@@ -288,6 +290,9 @@ const SideBar = () => {
           <Item title="캘린더" path="/calendar" icon={<CalendarTodayOutlined />} />
           <Item title="게시판" path="/boards" icon={<ReceiptOutlined />} />
           <Item title="문의사항" path="/faq" icon={<HelpOutlineOutlined />} />
+          {userInfo.email && isAdmin && ( // email이 있을 때만 렌더링
+            <Item title="계정 생성" path="/signup" icon={<PersonOutlined />} />
+          )}
         </Menu>
         <Typography
           variant="h6"
@@ -302,8 +307,7 @@ const SideBar = () => {
             },
           }}
         >
-          <Item title="조직도" path="/team" icon={<PeopleAltOutlined />} />
-          <Item title="주소록" path="/contacts" icon={<ContactsOutlined />} />
+          <Item title="주소록" path="/team" icon={<PeopleAltOutlined />} />
         </Menu>
       </Box>
     </Sidebar>
