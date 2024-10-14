@@ -14,6 +14,7 @@ import {
 } from "@mui/icons-material";
 import { tokens } from "../../theme";
 import { mockTransactions } from "../../data/mockData";
+import DocumentSummaryWithButtons from "../../components/DocumentSummaryWithButtons";
 import axios from "axios";
 
 function Dashboard() {
@@ -31,7 +32,7 @@ function Dashboard() {
   });
 
   const cardStyle = {
-    bgcolor: colors.primary[350],
+    bgcolor: colors.gray[850],
     borderRadius: "8px",
     boxShadow: "0 4px 8px rgba(216, 231, 243, 0.178)",
     padding: "20px",
@@ -112,10 +113,10 @@ function Dashboard() {
 
   return (
     <Box m="20px">
-<Box display="flex" flexDirection="column" alignItems="flex-start" mb="10px">
-  <Typography variant="h3">안녕하세요 {userInfo.name}님 !</Typography>
-  <Header subtitle="오늘도 행복한 하루 되세요" />
-</Box>
+      <Box display="flex" flexDirection="column" alignItems="flex-start" mb="10px">
+        <Typography variant="h1">안녕하세요 {userInfo.name}님 !</Typography>
+        <Header subtitle="오늘도 행복한 하루 되세요" />
+      </Box>
       {/* GRID */}
       <Box
         display="grid"
@@ -135,24 +136,23 @@ function Dashboard() {
           gridColumn={isXlDevices ? "span 4" : isMdDevices ? "span 6" : "span 3"}
           gridRow="span 2"
           sx={{
-            bgcolor: colors.primary[350],
+            bgcolor: colors.gray[850],
             borderRadius: "8px",
             padding: "20px",
             display: "flex",
             flexDirection: "column",
-            alignItems: "center"
+            alignItems: "space-between"
           }}
         >
           <Box>
             {/* 출근/퇴근 버튼 */}
             <Box mt={1} display="flex" justifyContent="center" gap={2}>
-              <div>미리 출근, 늦게 퇴근!</div>
+              <div> 미리 출근 , <br /> 늦게 퇴근 !</div>
               <p></p>
               <Button
                 variant="contained"
-                color="success"
                 onClick={checkIn}
-                sx={{ width: "30%" }}
+                sx={{ width: "30%", backgroundColor: colors.blueAccent[500] }}
                 disabled={isLoading}
               >
                 출근
@@ -161,7 +161,7 @@ function Dashboard() {
                 variant="contained"
                 color="error"
                 onClick={checkOut}
-                sx={{ width: "30%" }}
+                sx={{ width: "30%", backgroundColor: colors.gray[500] }}
                 disabled={isLoading}
               >
                 퇴근
@@ -173,7 +173,7 @@ function Dashboard() {
           {/* 부서별 팀원 로그인 상태 */}
           <Box gridColumn={isXlDevices ? "span 4" : isMdDevices ? "span 6" : "span 3"}
             gridRow="span 2"
-            sx={{ width: "100%", height: "70%", padding: "30px", backgroundColor: "#b5bbca86", borderRadius: "8px" }}>
+            sx={{ width: "100%", height: "70%", padding: "30px", backgroundColor: colors.gray[850], borderRadius: "8px" }}>
             <Typography> 우리 부서 활동</Typography>
           </Box>
         </Box>
@@ -184,19 +184,11 @@ function Dashboard() {
           gridRow="span 2"
           sx={{ ...cardStyle, padding: "30px" }}
         >
-          <Typography
-            variant="h5"
-            fontWeight="600"
-            sx={{ mb: "15px" }}
-          >
-            문서함
+          <Typography variant="h5" fontWeight="300" sx={{ mb: "15px" }} mt={1} >
+            결재 문서 현황
           </Typography>
-          <Box
-            display="flex"
-            alignItems="center"
-            justifyContent="center"
-            height="250px"
-          >
+          <Box display="flex" alignItems= "center" justifyContent= "center" height= "250px" width= "100%">
+            <DocumentSummaryWithButtons />  {/* 문서 요약 컴포넌트 추가 */}
           </Box>
         </Box>
 

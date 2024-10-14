@@ -89,7 +89,7 @@ const SideBar = () => {
 
   const getStyles = (mode) => ({
     menuButton: {
-      backgroundColor: mode === "dark" ? colors.primary[400] : colors.primary[500],
+      backgroundColor: mode === "dark" ? colors.primary[400] : '#edf9ff',
       color: mode === "dark" ? colors.gray[100] : colors.gray[900],
       "&:hover": {
         backgroundColor: mode === "dark" ? "#0c2a40" : "#dbe8f2",
@@ -109,7 +109,7 @@ const SideBar = () => {
 
   return (
     <Sidebar
-      backgroundColor={theme.palette.mode === "dark" ? colors.primary[400] : colors.primary[500]}
+      backgroundColor={theme.palette.mode === "dark" ? colors.primary[400] : "#edf9ff"}
       rootStyles={{
         border: 0,
         height: "100%",
