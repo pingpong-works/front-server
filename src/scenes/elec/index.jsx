@@ -6,6 +6,7 @@ import { tokens } from "../../theme";
 import { useEffect, useState } from "react";
 import TableModal from '../../components/TableModal';
 import DocumentModal from "../../components/DocumentModal";
+import NewDocumentForm from '../../components/NewDocumentForm';
 import axios from 'axios';
 
 const Elec = () => {
@@ -21,6 +22,7 @@ const Elec = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedDocumentId, setSelectedDocumentId] = useState(null);
     const [employeeId, setEmployeeId] = useState(null);
+    const [employeeName, setEmployeeName] = useState(''); // 사용자 이름 추가
     const [selectedRows, setSelectedRows] = useState([]);
     const [isAdmin, setIsAdmin] = useState(false);
 
@@ -30,6 +32,9 @@ const Elec = () => {
         2: null,
     });
 
+    const [showMyDocuments, setShowMyDocuments] = useState(false); // 작성자 문서 보기 상태
+    const [showApproverDocuments, setShowApproverDocuments] = useState(false); // 승인자 문서 보기 상태
+
     const fetchUserInfo = async () => {
         try {
             const response = await axios.get("http://localhost:8081/employees/my-info", {
@@ -37,8 +42,9 @@ const Elec = () => {
                     Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
                 },
             });
-            const { employeeId, role } = response.data.data;
+            const { employeeId, name, role } = response.data.data;
             setEmployeeId(employeeId);
+            setEmployeeName(name); // 사용자 이름 설정
             setIsAdmin(role === 'ADMIN');
         } catch (error) {
             console.error("로그인된 사용자 정보를 가져오는 중 오류 발생:", error);
@@ -47,17 +53,23 @@ const Elec = () => {
 
     const fetchDocuments = async () => {
         try {
-            const response = await getDocumentAllRequest({}, {}, 1, 10, setList, setIsLoading);
+            setIsLoading(true);
+            const response = await getDocumentAllRequest({}, {}, 1, 1000, setList, setIsLoading);
             if (response?.data?.data && Array.isArray(response.data.data)) {
-                setList(response.data.data);
-                setFilteredData(response.data.data);
+                const documents = response.data.data;
+                setList(documents);
+                // 초기 필터링 적용
+                filterDocuments(documents);
+                setIsLoading(false);
             } else {
                 console.error("데이터를 찾을 수 없습니다.");
                 setList([]);
                 setFilteredData([]);
+                setIsLoading(false);
             }
         } catch (err) {
             console.error("오류 발생:", err);
+            setIsLoading(false);
         }
     };
 
@@ -66,10 +78,42 @@ const Elec = () => {
         fetchDocuments();
     }, []);
 
+    const filterDocuments = (documents = list) => {
+        let filtered = documents;
+
+        // 로그인한 사용자가 작성자이거나 승인자인 문서만 필터링
+        filtered = filtered.filter(item =>
+            item.author === employeeName ||
+            (item.workFlow && item.workFlow.approvals &&
+                item.workFlow.approvals.some(approval => approval.employeeId === employeeId))
+        );
+
+        // 결재 상태 필터링
+        if (selectedStatus !== "all") {
+            filtered = filtered.filter(item => item.documentStatus === selectedStatus);
+        }
+
+        // 버튼 필터링
+        if (showMyDocuments && !showApproverDocuments) {
+            filtered = filtered.filter(item => item.author === employeeName);
+        } else if (!showMyDocuments && showApproverDocuments) {
+            filtered = filtered.filter(item =>
+                item.workFlow && item.workFlow.approvals &&
+                item.workFlow.approvals.some(approval => approval.employeeId === employeeId)
+            );
+        }
+        // 둘 다 선택되지 않은 경우에는 작성자이거나 승인자인 문서를 그대로 사용
+
+        setFilteredData(filtered);
+    };
+
+    useEffect(() => {
+        filterDocuments();
+    }, [list, selectedStatus, showMyDocuments, showApproverDocuments]);
+
     const handleStatusChange = (event) => {
         const status = event.target.value;
         setSelectedStatus(status);
-        setFilteredData(status === "all" ? list : list.filter(item => item.documentStatus === status));
     };
 
     const handleDocumentClick = (documentId) => {
@@ -165,7 +209,7 @@ const Elec = () => {
             field: "documentStatus", headerName: "상태", flex: 1, valueGetter: (params) => {
                 switch (params.value) {
                     case "DRAFT": return "임시 저장";
-                    case "IN_PROGRESS": return "결재중";
+                    case "IN_PROGRESS": return "결재 중";
                     case "APPROVED": return "승인 완료";
                     case "REJECTED": return "반려";
                     default: return "전체 보기";
@@ -178,7 +222,7 @@ const Elec = () => {
         <div>
             {isLoading && <p>로딩 중...</p>}
             <Box m="20px">
-                <Header title="전자결재" subtitle="List of Elec for Future Reference" />
+                <Header title="전자결재" subtitle="List of Approval Documents" />
 
                 <Box mb="20px" display="flex" justifyContent="flex-end">
                     <FormControl variant="outlined" sx={{ minWidth: 200 }}>
@@ -198,7 +242,7 @@ const Elec = () => {
                     </FormControl>
                 </Box>
 
-                <Box display="flex" justifyContent="flex-end" mb="10px">
+                <Box display="flex" justifyContent="flex-end" mb="10px" gap={2}>
                     <Button
                         onClick={handleOpenDocumentForm}
                         variant="contained"
@@ -206,7 +250,7 @@ const Elec = () => {
                             width: '200px',
                             height: '50px',
                             fontSize: '15px',
-                            backgroundColor: '#6870fa',
+                            backgroundColor: '#1c8adb',
                             color: colors.gray[200],
                             '&:hover': { backgroundColor: '#b6b6b6ac' },
                         }}
@@ -214,23 +258,66 @@ const Elec = () => {
                         + 결재 작성
                     </Button>
                 </Box>
-                <Box mt="50px" />
+                <Box mt="20px" />
 
-                <Box display="flex" justifyContent="flex-end" mb="10px">
-                        <Button
-                            onClick={handleDeleteDocuments}
-                          //  variant="contained"
-                            sx={{
-                                width: '70px',
-                                height: '30px',
-                                fontSize: '12px',
-                                color: colors.gray[900],
-                                backgroundColor: colors.gray[150]
-                            }}
-                        >
-                            삭제 ({selectedRows.length})
-                        </Button>
-                    </Box>
+                <Box display="flex" justifyContent="flex-end" mb="10px" gap={2}>
+                    {/* 작성자 문서 보기 버튼 */}
+                    <Button
+                        onClick={() => {
+                            setShowMyDocuments(!showMyDocuments);
+                            if (showApproverDocuments && !showMyDocuments) {
+                                setShowApproverDocuments(false);
+                            }
+                        }}
+                        variant={showMyDocuments ? "contained" : "outlined"}
+                        sx={{
+                            width: '100px', height: '40px', border: "1px solid #5c5555ea", color: colors.gray[900],
+                            backgroundColor: showMyDocuments ? '#1c8adb' : '#686ffa0',
+
+                            '&:hover': {
+                                backgroundColor: '#ffffff5d',
+                            },
+                        }}
+                    >
+                        작성 문서함
+                    </Button>
+                    {/* 승인자 문서 보기 버튼 */}
+                    <Button
+                        onClick={() => {
+                            setShowApproverDocuments(!showApproverDocuments);
+                            if (showMyDocuments && !showApproverDocuments) {
+                                setShowMyDocuments(false);
+                            }
+                        }}
+                        variant={showApproverDocuments ? "contained" : "outlined"}
+                        sx={{
+                            width: '100px', height: '40px', border: "1px solid #5c5555ea", color: colors.gray[900],
+                            backgroundColor: showApproverDocuments ? '#1c8adb' : '#686ffa0',
+
+                            '&:hover': {
+                                backgroundColor: '#ffffff5d',
+                            },
+                        }}
+                    >
+                        결재 문서함
+                    </Button>
+                    {/* 삭제 버튼 */}
+                    <Button
+                        onClick={handleDeleteDocuments}
+                        variant="outlined"
+                        sx={{
+                            width: '100px',
+                            height: '40px',
+                            fontSize: '12px',
+                            color: colors.gray[900],
+                            backgroundColor: colors.gray[150],
+                            border: "1px solid #5c5555ea"
+                        }}
+                    >
+                        삭제 ({selectedRows.length})
+                    </Button>
+                </Box>
+
                 <Box
                     mt="10px"
                     height="75vh"
@@ -239,16 +326,17 @@ const Elec = () => {
                         "& .MuiDataGrid-root": { border: "none" },
                         "& .MuiDataGrid-cell": { border: "none" },
                         "& .MuiDataGrid-columnHeaders": {
-                            backgroundColor: colors.blueAccent[500],
+                            backgroundColor: "#1c8adb",
                             borderBottom: "none",
                             color: colors.gray[200],
                         },
                         "& .MuiDataGrid-footerContainer": {
                             borderTop: "none",
-                            backgroundColor: colors.blueAccent[500],
+                            color: colors.gray[200],
+                            backgroundColor: "#1c8adb",
                         },
                         "& .MuiCheckbox-root": {
-                            color: `${colors.greenAccent[200]} !important`,
+                            color: `${colors.blueAccent[100]} !important`,
                         },
                         "& .MuiDataGrid-toolbarContainer .MuiButton-text": {
                             color: `${colors.gray[100]} !important`,
@@ -291,6 +379,15 @@ const Elec = () => {
                 <DocumentModal
                     documentId={selectedDocumentId}
                     handleClose={() => setIsModalOpen(false)}
+                />
+            )}
+
+            {/* NewDocumentForm 렌더링 */}
+            {isDocumentFormOpen && (
+                <NewDocumentForm
+                    open={isDocumentFormOpen}
+                    handleClose={handleCloseDocumentForm}
+                    fetchDocuments={fetchDocuments}
                 />
             )}
 

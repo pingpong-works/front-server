@@ -19,6 +19,8 @@ import {
 import ApprovalLineSetup from './components/ApprovalLineSetup';
 import Login from './scenes/login/login';
 import Mypage from './scenes/mypage/mypage';
+import MyInfoEdit from './scenes/mypage/myinfoedit';
+import ChangePassword from './scenes/mypage/changepassword';
 import { AuthProvider } from './auth/AuthContext'; // AuthProvider 추가
 import CreateBoard from './scenes/boards/createBoard';
 import ViewBoard from './scenes/boards/viewBoard';
@@ -26,7 +28,8 @@ import UpdateBoard from './scenes/boards/updateBoard';
 import MailWrite from "./scenes/mail/mailWrite.jsx";
 import Notification from "./scenes/notification/notification.jsx"
 import SendDetailMail from "./scenes/mail/SendDetailMail.jsx";
-
+import SignUp from './scenes/signup/signup.jsx'
+import AdminRoute from './auth/AdminRoute';
 
 const AppRouter = () => {
   return (
@@ -59,10 +62,14 @@ const AppRouter = () => {
             <Route path="/mailbox/2" element={<Waste />} />
             <Route path="/mailbox/3" element={<Mine />} />
             <Route path="/read/1/:mailId" element={<SendDetailMail />} />
+            <Route path="/read/2/:mailId" element={<SendDetailMail />} />
             <Route path="/faq" element={<FAQ />} />
             <Route path="/approval-line-setup" element={<ApprovalLineSetup />} />
             <Route path="/mypage" element={<Mypage />} />
+            <Route path="/my-info/edit" element={<MyInfoEdit />} />
+            <Route path="/change-password" element={<ChangePassword />} />
             <Route path="/notification" element={<Notification />} />
+            <Route path="/signup" element={<AdminRoute><SignUp /></AdminRoute>} />
           </Route>
         </Routes>
       </Router>

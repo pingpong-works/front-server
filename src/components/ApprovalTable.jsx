@@ -22,7 +22,7 @@ const ApprovalTable = ({ approvalLines, handleApprovalClick }) => {
                             </TableCell>
                         ))
                     ) : (
-                        <TableCell align="center" colSpan={1}>
+                        <TableCell align="center" colSpan={1} sx={{ color:"black"}}>
                             결재라인이 설정되지 않았습니다.
                         </TableCell>
                     )}

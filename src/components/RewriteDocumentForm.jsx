@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, Box, Table, TableBody, TableRow, TableCell } from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, Box, Table, TableBody, TableRow, TableCell, Typography,useTheme } from '@mui/material';
 import ApprovalLineModal from './ApprovalLineModal';
 import sendPostDocumentSubmitRequest from '../request/PostDoumentSubmit';
-import sendPostDocumentSaveRequest from '../request/PostDocumentSave';
 import sendPatchDocumentRequest from '../request/PatchDocument';
 import axios from 'axios';
+import {tokens} from "../theme";
 
 const RewirteDocumentForm = ({ open, handleClose, initialData, isRewriting, fetchDocuments }) => {
   const [title, setTitle] = useState('');
@@ -13,8 +13,11 @@ const RewirteDocumentForm = ({ open, handleClose, initialData, isRewriting, fetc
   const [approvalLines, setApprovalLines] = useState([]);
   const [workflowId, setWorkflowId] = useState(null);
   const [openApprovalLineModal, setOpenApprovalLineModal] = useState(false);
-  const [documentTypeId, setDocumentTypeId] = useState('');  // documentTypeId 추가
+  const [documentTypeId, setDocumentTypeId] = useState('');
   const [employeeId, setEmployeeId] = useState(null);
+  const [errors, setErrors] = useState({}); // 오류 상태 관리
+  const theme = useTheme();
+  const colors = tokens(theme.palette.mode);
 
   // 사용자 정보를 가져오는 함수
   const fetchUserInfo = async () => {
@@ -39,7 +42,7 @@ const RewirteDocumentForm = ({ open, handleClose, initialData, isRewriting, fetc
   // 초기 데이터로 폼 필드 초기화
   useEffect(() => {
     if (initialData) {
-      console.log("Initial Data: ", initialData); // 전체 데이터를 출력하여 초기 데이터 확인
+      console.log("Initial Data: ", initialData);
       setTitle(initialData.title || '');
       setContent(initialData.content || '');
       setCustomFields(initialData.customFields || {});
@@ -49,13 +52,13 @@ const RewirteDocumentForm = ({ open, handleClose, initialData, isRewriting, fetc
       // documentTypeId 초기화
       if (initialData.docsTypes?.id) {
         setDocumentTypeId(initialData.docsTypes.id);
-        console.log("documentTypeId 초기화: ", initialData.docsTypes.id); // documentTypeId 로그 출력
+        console.log("documentTypeId 초기화: ", initialData.docsTypes.id);
       } else {
         console.warn("documentTypeId가 없습니다.");
       }
 
       // documentId 확인
-      if (initialData.documentId) {
+      if (initialData.id) {
         console.log("Document ID exists, this will be a patch request.");
       } else {
         console.log("No Document ID found, this will be a post request.");
@@ -63,12 +66,20 @@ const RewirteDocumentForm = ({ open, handleClose, initialData, isRewriting, fetc
     }
   }, [initialData]);
 
-
   const handleFieldChange = (fieldName, value) => {
     setCustomFields(prev => ({
       ...prev,
       [fieldName]: value,
     }));
+
+    // 오류 메시지 제거
+    if (errors.customFields && errors.customFields[fieldName]) {
+      setErrors(prevErrors => {
+        const newErrors = { ...prevErrors };
+        delete newErrors.customFields[fieldName];
+        return newErrors;
+      });
+    }
   };
 
   const handleOpenApprovalLineModal = () => {
@@ -83,13 +94,53 @@ const RewirteDocumentForm = ({ open, handleClose, initialData, isRewriting, fetc
     setApprovalLines(selectedApprovals);
     setWorkflowId(workflowId);
     setOpenApprovalLineModal(false);
-  };
 
+    // 오류 메시지 제거
+    if (errors.workflowId) {
+      setErrors(prevErrors => {
+        const newErrors = { ...prevErrors };
+        delete newErrors.workflowId;
+        return newErrors;
+      });
+    }
+  };
 
   // 문서 제출 요청
   const handleSubmitDocument = async () => {
+    let newErrors = {};
+
+    if (!title) {
+      newErrors.title = '제목을 입력해주세요.';
+    }
+
+    if (!content) {
+      newErrors.content = '내용을 입력해주세요.';
+    }
+
+    if (!workflowId) {
+      newErrors.workflowId = '결재라인을 설정해주세요.';
+    }
+
+    // 커스텀 필드 검증
+    for (const key in customFields) {
+      if (!customFields[key]) {
+        if (!newErrors.customFields) {
+          newErrors.customFields = {};
+        }
+        newErrors.customFields[key] = '필수 필드입니다.';
+      }
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
+    // 오류가 없으면 오류 상태 초기화
+    setErrors({});
+
     const requestBody = {
-      documentTypeId: documentTypeId,  // documentTypeId 포함
+      documentTypeId: documentTypeId,
       workflowId: Number(workflowId),
       title,
       content,
@@ -97,11 +148,11 @@ const RewirteDocumentForm = ({ open, handleClose, initialData, isRewriting, fetc
       customFields,
     };
 
-    console.log("Request Body (Submit Document):", requestBody); // 요청 내용 출력
+    console.log("Request Body (Submit Document):", requestBody);
 
     // PATCH 요청인지 POST 요청인지 확인하여 구분
-    if (initialData && initialData.id) {  // 여기에서 initialData.id로 수정
-      await sendPatchDocumentRequest(initialData.id, requestBody, () => {  // initialData.id로 수정
+    if (initialData && initialData.id) {
+      await sendPatchDocumentRequest(initialData.id, requestBody, () => {
         console.log("문서 제출 완료 (PATCH 요청)");
         handleClose();
         fetchDocuments();
@@ -115,7 +166,6 @@ const RewirteDocumentForm = ({ open, handleClose, initialData, isRewriting, fetc
     }
   };
 
-
   return (
     <Dialog open={open} onClose={handleClose} fullWidth maxWidth="md">
       <DialogTitle>문서 작성</DialogTitle>
@@ -127,8 +177,15 @@ const RewirteDocumentForm = ({ open, handleClose, initialData, isRewriting, fetc
             fullWidth
             variant="outlined"
             value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            onChange={(e) => {
+              setTitle(e.target.value);
+              if (errors.title) {
+                setErrors(prevErrors => ({ ...prevErrors, title: null }));
+              }
+            }}
             sx={{ marginBottom: '20px' }}
+            error={!!errors.title}
+            helperText={errors.title}
           />
 
           {/* 문서 내용 입력 */}
@@ -139,8 +196,15 @@ const RewirteDocumentForm = ({ open, handleClose, initialData, isRewriting, fetc
             multiline
             rows={6}
             value={content}
-            onChange={(e) => setContent(e.target.value)}
+            onChange={(e) => {
+              setContent(e.target.value);
+              if (errors.content) {
+                setErrors(prevErrors => ({ ...prevErrors, content: null }));
+              }
+            }}
             sx={{ marginBottom: '20px' }}
+            error={!!errors.content}
+            helperText={errors.content}
           />
 
           {/* 커스텀 필드 입력 */}
@@ -152,6 +216,8 @@ const RewirteDocumentForm = ({ open, handleClose, initialData, isRewriting, fetc
                 variant="outlined"
                 value={customFields[field]}
                 onChange={(e) => handleFieldChange(field, e.target.value)}
+                error={!!(errors.customFields && errors.customFields[field])}
+                helperText={errors.customFields && errors.customFields[field]}
               />
             </Box>
           ))}
@@ -160,6 +226,11 @@ const RewirteDocumentForm = ({ open, handleClose, initialData, isRewriting, fetc
           <Button variant="contained" onClick={handleOpenApprovalLineModal} sx={{ marginBottom: '20px' }}>
             결재라인 설정
           </Button>
+          {errors.workflowId && (
+            <Typography color="error" sx={{ marginBottom: '20px' }}>
+              {errors.workflowId}
+            </Typography>
+          )}
 
           {/* 결재라인 테이블 */}
           <Table>
@@ -190,4 +261,3 @@ const RewirteDocumentForm = ({ open, handleClose, initialData, isRewriting, fetc
 };
 
 export default RewirteDocumentForm;
-

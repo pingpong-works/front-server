@@ -1,12 +1,13 @@
-import { 
-  Box, 
-  Typography, 
-  Avatar, 
-  Grid, 
-  Paper, 
-  Button, 
-  Stack, 
-  useTheme, 
+import {
+  Box as MuiBox,
+  Box,
+  Typography,
+  Avatar,
+  Grid,
+  Paper,
+  Button,
+  Stack,
+  useTheme,
   useMediaQuery,
   Snackbar,
   Alert,
@@ -23,6 +24,28 @@ import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import listPlugin from '@fullcalendar/list';
 import { tokens } from "../../theme";
+import AttendanceStatistics from '../../components/AttendanceStatistics'; // 경로 확인 필요
+
+function TabPanel(props) {
+  const { children, value, index, ...other } = props;
+
+  return (
+    <MuiBox
+      role="tabpanel"
+      hidden={value !== index}
+      id={`tabpanel-${index}`}
+      aria-labelledby={`tab-${index}`}
+      {...other}
+      sx={{ width: '100%' }}
+    >
+      {value === index && (
+        <Box p={3}>
+          {children}
+        </Box>
+      )}
+    </MuiBox>
+  );
+}
 
 const Mypage = () => {
   const theme = useTheme();
@@ -49,7 +72,6 @@ const Mypage = () => {
   const [isLoading, setIsLoading] = useState(false); // To handle button loading state
   const [errorMessage, setErrorMessage] = useState(""); // For Snackbar
   const [tabValue, setTabValue] = useState(0); // For managing tab selection
-  const [attendanceStatistics, setAttendanceStatistics] = useState([]); // For storing attendance statistics
 
   const navigate = useNavigate();
 
@@ -65,8 +87,6 @@ const Mypage = () => {
         setUserInfo(response.data.data);
         // 사용자 정보를 가져온 후 출근/퇴근 데이터 불러오기
         fetchAttendanceData(Number(response.data.data.employeeId));
-        // 월별 근무 시간 통계 데이터 가져오기
-        fetchMonthlyAttendanceStatistics(Number(response.data.data.employeeId));
       } catch (error) {
         console.error("사용자 정보 가져오기 오류:", error);
         setErrorMessage("사용자 정보를 가져오는 데 실패했습니다.");
@@ -79,31 +99,20 @@ const Mypage = () => {
   // 출근/퇴근 데이터 가져오기
   const fetchAttendanceData = async (employeeId) => {
     try {
-      console.log("fetchAttendanceData 호출됨, employeeId:", employeeId);
       const response = await axios.get("http://localhost:8082/attendances/my-attendance", {
-        params: {
-          employeeId: employeeId, 
-          page: 1,
-          size: 100, // 적절한 크기로 조정
-        },
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-        },
+        params: { employeeId, page: 1, size: 100 },
+        headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
       });
 
       const events = response.data.data.map(attendance => {
         const checkIn = new Date(attendance.checkInTime);
         const checkOut = attendance.checkOutTime ? new Date(attendance.checkOutTime) : null;
-        const workingHours = attendance.dailyWorkingTime || 'N/A'; // 서버에서 계산된 근무시간 사용
+        const workingHours = attendance.dailyWorkingTime || 'N/A';
 
         return {
           title: `출근: ${checkIn.toLocaleTimeString()} 퇴근: ${checkOut ? checkOut.toLocaleTimeString() : 'N/A'} 근무시간: ${workingHours} 시간`,
           start: checkIn,
           end: checkOut,
-          display: 'block',
-          backgroundColor: colors.primary[500],
-          borderColor: colors.primary[700],
-          textColor: colors.gray[100],
           extendedProps: {
             checkOutTime: checkOut ? checkOut.toLocaleTimeString() : 'N/A',
             workingHours: workingHours,
@@ -112,32 +121,8 @@ const Mypage = () => {
       });
 
       setAttendanceEvents(events);
-      console.log("attendanceEvents 업데이트됨:", events);
     } catch (error) {
       console.error("출근/퇴근 데이터 가져오기 오류:", error);
-      setErrorMessage("출근/퇴근 데이터를 가져오는 데 실패했습니다.");
-    }
-  };
-
-  // 월별 근무 시간 통계 데이터 가져오기
-  const fetchMonthlyAttendanceStatistics = async (employeeId) => {
-    try {
-      const year = new Date().getFullYear();
-      const month = new Date().getMonth() + 1;
-      const response = await axios.get("http://localhost:8082/attendances/monthly", {
-        params: {
-          employeeId: employeeId,
-          year: year,
-          month: month,
-        },
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-        },
-      });
-      setAttendanceStatistics(response.data);
-    } catch (error) {
-      console.error("월별 근무 시간 통계 가져오기 오류:", error);
-      setErrorMessage("월별 근무 시간 통계를 가져오는 데 실패했습니다.");
     }
   };
 
@@ -146,9 +131,9 @@ const Mypage = () => {
     if (isLoading) return; // Prevent multiple clicks
     setIsLoading(true);
     try {
-      const response = await axios.post("http://localhost:8082/attendances/check-in", null, {
-        params: { 
-          employeeId: Number(userInfo.employeeId) 
+      await axios.post("http://localhost:8082/attendances/check-in", null, {
+        params: {
+          employeeId: Number(userInfo.employeeId)
         },
         headers: {
           Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
@@ -168,9 +153,9 @@ const Mypage = () => {
     if (isLoading) return; // Prevent multiple clicks
     setIsLoading(true);
     try {
-      const response = await axios.post("http://localhost:8082/attendances/check-out", null, {
-        params: { 
-          employeeId: Number(userInfo.employeeId) 
+      await axios.post("http://localhost:8082/attendances/check-out", null, {
+        params: {
+          employeeId: Number(userInfo.employeeId)
         },
         headers: {
           Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
@@ -185,11 +170,20 @@ const Mypage = () => {
     }
   };
 
+  // 이벤트 클릭 시 알림창 띄우기
   const handleEventClick = (clickInfo) => {
     const event = clickInfo.event;
     alert(`출근 시간: ${event.start.toLocaleTimeString()}
 퇴근 시간: ${event.extendedProps.checkOutTime}
 총 근무 시간: ${event.extendedProps.workingHours} 시간`);
+  };
+
+  const renderEventContent = (eventInfo) => {
+    return (
+      <div style={{ whiteSpace: 'pre-line' }}>
+        {`[출근] : ${eventInfo.event.start.toLocaleTimeString()}\n [퇴근] : ${eventInfo.event.extendedProps.checkOutTime}\n [근무시간] : ${eventInfo.event.extendedProps.workingHours} hr`}
+      </div>
+    );
   };
 
   const handleTabChange = (event, newValue) => {
@@ -199,7 +193,7 @@ const Mypage = () => {
   return (
     <Box m="20px">
       <Header title="마이페이지" subtitle="My Page" />
-      <Box component={Paper} p={3} mt={2} elevation={3}>
+      <Box component={Paper} p={3} mt={2} elevation={3} sx={{ backgroundColor: colors.gray[350] }}>
         <Grid container spacing={2} justifyContent="center">
           {/* 프로필 사진 및 이름 */}
           <Grid item xs={12} md={3} align="center">
@@ -226,7 +220,7 @@ const Mypage = () => {
               </Button>
               <Button
                 variant="contained"
-                color="secondary"
+                color="primary"
                 onClick={() => navigate("/change-password")}
               >
                 비밀번호 변경
@@ -294,7 +288,7 @@ const Mypage = () => {
             color="success"
             onClick={checkIn}
             sx={{ width: "200px" }}
-            disabled={isLoading} // Disable button while loading
+            disabled={isLoading}
           >
             출근
           </Button>
@@ -303,7 +297,7 @@ const Mypage = () => {
             color="error"
             onClick={checkOut}
             sx={{ width: "200px" }}
-            disabled={isLoading} // Disable button while loading
+            disabled={isLoading}
           >
             퇴근
           </Button>
@@ -312,13 +306,29 @@ const Mypage = () => {
 
       {/* 근태 기록 및 통계 탭 */}
       <Box mt={10}>
-        <Tabs value={tabValue} onChange={handleTabChange} indicatorColor="primary" textColor="primary">
+        <Tabs
+          value={tabValue}
+          onChange={handleTabChange}
+          TabIndicatorProps={{
+            style: { backgroundColor: colors.blueAccent[500] },
+          }}
+          sx={{
+            '& .MuiTab-root': { color: colors.gray[200] },
+            '& .Mui-selected': { color: colors.blueAccent[500] },
+          }}
+        >
           <Tab label="근무 기록" />
-          <Tab label="월별 통계" />
+          <Tab label="근무 통계" />
         </Tabs>
 
-        {tabValue === 0 && (
-          <Box mt={2} component={Paper} p={3} elevation={3}>
+        {/* 탭 패널 적용 */}
+        <TabPanel value={tabValue} index={0}>
+          <Box
+            component={Paper}
+            p={3}
+            elevation={3}
+            sx={{ backgroundColor: colors.gray[350] }}
+          >
             <FullCalendar
               height="75vh"
               plugins={[
@@ -327,46 +337,24 @@ const Mypage = () => {
                 interactionPlugin,
                 listPlugin,
               ]}
-              headerToolbar={{
-                left: `${isSmDevices ? "prev,next" : "prev,next today"}`,
-                center: "title",
-                right: `${isXsDevices
-                  ? ""
-                  : isSmDevices
-                    ? "dayGridMonth,listMonth"
-                    : "dayGridMonth,timeGridWeek,timeGridDay,listMonth"
-                  }`,
-              }}
               initialView="dayGridMonth"
-              editable={false}
-              selectable={false}
-              selectMirror={true}
-              dayMaxEvents={false} // 모든 이벤트를 칸 안에 표시
-              eventClick={handleEventClick}
               events={attendanceEvents}
-              eventTimeFormat={{
-                hour: '2-digit',
-                minute: '2-digit',
-                meridiem: false,
-              }}
+              eventClick={handleEventClick}
+              eventContent={renderEventContent}
             />
           </Box>
-        )}
+        </TabPanel>
 
-        {tabValue === 1 && (
-          <Box mt={2} component={Paper} p={3} elevation={3}>
-            <Typography variant="h6" mb={2}>월별 근무 시간 통계</Typography>
-            <ul>
-              {attendanceStatistics.map((stat, index) => (
-                <li key={index}>
-                  <Typography variant="body1">
-                    {stat.date}: 근무시간 {stat.workingHours}시간, 초과근무 {stat.overtimeHours}시간, 조기퇴근 {stat.earlyLeaveHours}시간
-                  </Typography>
-                </li>
-              ))}
-            </ul>
-          </Box>
-        )}
+        <TabPanel value={tabValue} index={1}>
+          {userInfo.employeeId ? (
+            <AttendanceStatistics
+              employeeId={userInfo.employeeId}
+              year={new Date().getFullYear()}
+            />
+          ) : (
+            <Typography>데이터를 불러오는 중입니다...</Typography>
+          )}
+        </TabPanel>
       </Box>
 
       {/* Snackbar for Error Messages */}

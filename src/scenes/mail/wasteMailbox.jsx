@@ -1,138 +1,95 @@
-import { Box, useTheme, MenuItem, Select, FormControl, InputLabel } from "@mui/material";
-import { Header } from "../../components/index.jsx";
-import { DataGrid, GridToolbar } from "@mui/x-data-grid";
-import { mockDataContacts } from "../../data/mockData.js";
-import { tokens } from "../../theme.js";
-import axios from "axios";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import {
+    Box,
+    Typography,
+    Checkbox,
+    IconButton,
+    CircularProgress,
+    useTheme,
+} from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
+import RestoreIcon from '@mui/icons-material/Restore';
+import { tokens } from '../../theme';
+import { useNavigate } from 'react-router-dom';
 
 const Waste = () => {
     const theme = useTheme();
     const colors = tokens(theme.palette.mode);
+    const navigate = useNavigate();
+    const [trashMails, setTrashMails] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [page, setPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [totalElements, setTotalElements] = useState(0);
 
-    const [list, setList] = useState([]);
-    const [filteredData, setFilteredData] = useState([]);
-    const [selectedStatus, setSelectedStatus] = useState("all");
-    const getStatusCount = () => {
-        axios.post("/elecapp/receivedApp", { memberId: "1" }) // 실제 멤버 ID로 교체 필요
-            .then(res => {
-                setList(res.data);
-                setFilteredData(res.data);
-            })
-            .catch(err => console.error("오류 발생:", err));
-    };
     useEffect(() => {
-        getStatusCount();
-    }, []);
-    const handleStatusChange = (event) => {
-        const status = event.target.value;
-        setSelectedStatus(status);
-        if (status === "all") {
-            setFilteredData(list);
-        } else {
-            setFilteredData(
-                list.filter(item => {
-                    switch (status) {
-                        case "ready":
-                            return item.approveType === 0;
-                        case "ing":
-                            return item.approveType === 2;
-                        case "done":
-                            return item.approveType === 3;
-                        default:
-                            return true;
-                    }
-                })
-            );
-        }
-    };
-    const columns = [
-        {
-            field: "title",
-            headerName: "제목",
-            flex: 1,
-            valueGetter: (params) =>
-                params.row.additionalFields?.title || "휴가신청서",
-        },
-        { field: "writer", headerName: "작성자", flex: 1 },
-        { field: "department", headerName: "부서", flex: 1 },
-        {
-            field: "writeday",
-            headerName: "",
-            flex: 1,
-            valueGetter: (params) =>
-                params.value ? params.value.substring(0, 10) : "N/A",
-        }
+        const fetchTrashMails = async () => {
+            try {
+                const response = await axios.get(`http://localhost:8083/mail/trash?page=${page}&size=10&sort=sentAt,DESC`);
+                setTrashMails(response.data.data);
+                setTotalPages(response.data.pageInfo.totalPages);
+                setTotalElements(response.data.pageInfo.totalElements);
+                setLoading(false);
+            } catch (error) {
+                console.error('휴지통 메일 조회 중 오류 발생: ', error);
+                setLoading(false);
+            }
+        };
+        fetchTrashMails();
+    }, [page]);
 
-    ];
-    return (
-        //읽은 메일 , 안읽은 메일 설정 따로 필요함.
-
-        <Box m="20px">
-            <Header title="전체 메일함" subtitle="List of TotalMail" />
-            <Box mb="20px" display="flex" justifyContent="flex-end">
-                <FormControl variant="outlined" sx={{ minWidth: 200 }}>
-                    <InputLabel id="status-select-label">결재 상태</InputLabel>
-                    <Select
-                        labelId="status-select-label"
-                        value={selectedStatus}
-                        onChange={handleStatusChange}
-                        label="수신 상태"
-                    >
-                        <MenuItem value="all">전체 보기</MenuItem>
-                        <MenuItem value="ready">안 읽은 메일</MenuItem>
-                    </Select>
-                </FormControl>
+    if (loading) {
+        return (
+            <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
+                <CircularProgress />
             </Box>
-            <Box
-                mt="40px"
-                height="75vh"
-                maxWidth="100%"
-                sx={{
-                    "& .MuiDataGrid-root": {
-                        border: "none",
-                    },
-                    "& .MuiDataGrid-cell": {
-                        border: "none",
-                    },
-                    "& .name-column--cell": {
-                        color: colors.greenAccent[300],
-                    },
-                    "& .MuiDataGrid-columnHeaders": {
-                        backgroundColor: colors.blueAccent[700],
-                        borderBottom: "none",
-                    },
-                    "& .MuiDataGrid-virtualScroller": {
-                        backgroundColor: colors.primary[400],
-                    },
-                    "& .MuiDataGrid-footerContainer": {
-                        borderTop: "none",
-                        backgroundColor: colors.blueAccent[700],
-                    },
-                    "& .MuiCheckbox-root": {
-                        color: `${colors.greenAccent[200]} !important`,
-                    },
-                    "& .MuiDataGrid-iconSeparator": {
-                        color: colors.primary[100],
-                    },
-                    "& .MuiDataGrid-toolbarContainer .MuiButton-text": {
-                        color: `${colors.gray[100]} !important`,
-                    },
-                }}
-            >
-                <DataGrid
-                    rows={filteredData}
-                    columns={columns}
-                    components={{ Toolbar: GridToolbar }}
-                    initialState={{
-                        pagination: {
-                            paginationModel: {
-                                pageSize: 10,
-                            },
-                        },
-                    }}
-                    checkboxSelection
-                />
+        );
+    }
+
+    return (
+        <Box p={3}>
+            <Typography variant="h2" mb={2}>휴지통 ({trashMails.length}개)</Typography>
+            <Box display="flex" flexDirection="column">
+                {trashMails.length === 0 ? (
+                    <Typography variant="h5" textAlign="center" color="textSecondary">
+                        휴지통이 비어있습니다.
+                    </Typography>
+                ) : (
+                    trashMails.map((mail) => (
+                        <Box
+                            key={mail.trashMailId}
+                            display="grid"
+                            gridTemplateColumns="40px 200px auto 150px 40px"
+                            alignItems="center"
+                            p={2}
+                            borderBottom="1px solid #ccc"
+                        >
+                            <Checkbox />
+                            <Typography variant="h4" noWrap>{mail.recipientName || mail.recipientEmail}</Typography>
+                            <Typography
+                                variant="h4"
+                                fontWeight="bold"
+                                noWrap
+                                sx={{ cursor: 'pointer' }}
+                                onClick={() => navigate(`/read/2/${mail.trashmailId}`)}
+                            >
+                                {mail.subject}
+                            </Typography>
+                            <Typography variant="body2" color="textSecondary" textAlign="right">
+                                {new Date(mail.sentAt).toLocaleString()}
+                            </Typography>
+                            <Box display="flex" gap={1}>
+                                <IconButton>
+                                    <RestoreIcon />
+                                </IconButton>
+                                <IconButton>
+                                    <DeleteIcon />
+                                </IconButton>
+                            </Box>
+                        </Box>
+                    ))
+                )}
             </Box>
         </Box>
     );

@@ -80,7 +80,7 @@ const MailWrite = () => {
   }, [quillRef]);
 
   return (
-      <Box m="20px">
+      <Box m="50px">
         <Header subject="메일 쓰기" subtitle="" />
 
         <Formik
