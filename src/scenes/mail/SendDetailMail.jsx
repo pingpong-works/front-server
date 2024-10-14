@@ -23,7 +23,12 @@ const SendDetailMail = () => {
     useEffect(() => {
         const fetchMailDetail = async () => {
             try {
-                const response = await axios.get(`http://localhost:8083/mail/sent/${mailId}`);
+                let response;
+                if (mailType === 'sent') {
+                    response = await axios.get(`http://localhost:8083/mail/sent/${mailId}`);
+                } else if (mailType === 'trash') {
+                    response = await axios.get(`http://localhost:8083/mail/trash/${mailId}`);
+                }
                 setMailDetail(response.data.data);
                 setLoading(false);
             } catch (error) {
@@ -33,7 +38,7 @@ const SendDetailMail = () => {
         };
 
         fetchMailDetail();
-    }, [mailId]);
+    }, [mailType, mailId]);
 
     if (loading) {
         return (
