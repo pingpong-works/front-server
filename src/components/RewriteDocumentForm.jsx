@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, Box, Table, TableBody, TableRow, TableCell, Typography } from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, Box, Table, TableBody, TableRow, TableCell, Typography,useTheme } from '@mui/material';
 import ApprovalLineModal from './ApprovalLineModal';
 import sendPostDocumentSubmitRequest from '../request/PostDoumentSubmit';
 import sendPatchDocumentRequest from '../request/PatchDocument';
 import axios from 'axios';
+import {tokens} from "../theme";
 
 const RewirteDocumentForm = ({ open, handleClose, initialData, isRewriting, fetchDocuments }) => {
   const [title, setTitle] = useState('');
@@ -15,6 +16,8 @@ const RewirteDocumentForm = ({ open, handleClose, initialData, isRewriting, fetc
   const [documentTypeId, setDocumentTypeId] = useState('');
   const [employeeId, setEmployeeId] = useState(null);
   const [errors, setErrors] = useState({}); // 오류 상태 관리
+  const theme = useTheme();
+  const colors = tokens(theme.palette.mode);
 
   // 사용자 정보를 가져오는 함수
   const fetchUserInfo = async () => {
