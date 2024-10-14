@@ -43,7 +43,7 @@ const ChatList = ({
 
     const exitChatRoom = (roomId) => {
         axios
-            .delete(`/chat/chatting/delete`, {params: {chatRoomId: roomId, memberId: memberId}})
+            .delete(`/chat/delete`, {params: {chatRoomId: roomId, memberId: memberId}})
             .then(() => {
                 getChatRoomList();
                 setActiveRoom(null);
@@ -54,7 +54,7 @@ const ChatList = ({
     };
 
     const exitAllChatRooms = () => {
-        axios.delete(`/chat/chatting/exitAll`, {params: {memberId: memberId}})
+        axios.delete(`/chat/exit`, {params: {memberId: memberId}})
             .then(() => {
                 getChatRoomList();
                 setActiveRoom(null);
