@@ -20,7 +20,7 @@ const Team = () => {
 
   const fetchEmployees = async () => {
     try {
-      const response = await axios.get(`http://localhost:8081/auth/employees/all?page=${page + 1}&size=${pageSize}`, {
+      const response = await axios.get(`http://localhost:8081/employees/all?page=${page + 1}&size=${pageSize}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
         }
@@ -67,7 +67,7 @@ const Team = () => {
 
   const fetchEmployeeDetails = async (employeeId) => {
     try {
-      const response = await axios.get(`http://localhost:8081/auth/employees/${employeeId}`, {
+      const response = await axios.get(`http://localhost:8081/employees/${employeeId}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
         }
@@ -83,7 +83,7 @@ const Team = () => {
   const deleteEmployee = async () => {
     if (window.confirm("정말로 이 직원을 삭제하시겠습니까?")) {
       try {
-        await axios.delete(`http://localhost:8081/auth/employees/${selectedEmployee.employeeId}`, {
+        await axios.delete(`http://localhost:8081/employees/${selectedEmployee.employeeId}`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
           },
@@ -273,23 +273,25 @@ const Team = () => {
               )}
 
               <Box mt={4} sx={{ display: "flex", justifyContent: "space-between" }}>
-                {/* 직원 삭제 버튼 */}
-                <button
-                  style={{
-                    backgroundColor: colors.blueAccent[500], // 확인 버튼과 동일한 스타일
-                    color: "#fff",
-                    padding: "10px 20px",
-                    borderRadius: "5px",
-                    border: "none",
-                    cursor: "pointer",
-                    transition: "background-color 0.3s ease",
-                  }}
-                  onMouseOver={(e) => e.target.style.backgroundColor = colors.blueAccent[700]} 
-                  onMouseOut={(e) => e.target.style.backgroundColor = colors.blueAccent[500]}
-                  onClick={deleteEmployee}
-                >
-                  직원 삭제
-                </button>
+                {/* 직원 삭제 버튼: 관리자일 때만 보이도록 조건 추가 */}
+                {localStorage.getItem("username") === "admin@pingpong-works.com" && (
+                  <button
+                    style={{
+                      backgroundColor: colors.blueAccent[500], // 확인 버튼과 동일한 스타일
+                      color: "#fff",
+                      padding: "10px 20px",
+                      borderRadius: "5px",
+                      border: "none",
+                      cursor: "pointer",
+                      transition: "background-color 0.3s ease",
+                    }}
+                    onMouseOver={(e) => e.target.style.backgroundColor = colors.blueAccent[700]} 
+                    onMouseOut={(e) => e.target.style.backgroundColor = colors.blueAccent[500]}
+                    onClick={deleteEmployee}
+                  >
+                    직원 삭제
+                  </button>
+                )}
 
                 {/* 확인 버튼 */}
                 <button
