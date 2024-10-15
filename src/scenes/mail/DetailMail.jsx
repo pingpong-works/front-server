@@ -12,10 +12,10 @@ import {
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { tokens } from '../../theme';
 
-const SendDetailMail = () => {
+const DetailMail = () => {
     const theme = useTheme();
     const colors = tokens(theme.palette.mode);
-    const { mailType,mailId , trashMailId } = useParams();
+    const { mailType, mailId } = useParams(); // 단일 mailId 사용
     const navigate = useNavigate();
     const [mailDetail, setMailDetail] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -24,11 +24,16 @@ const SendDetailMail = () => {
         const fetchMailDetail = async () => {
             try {
                 let response;
-                if (mailType === '1') {
+
+                // mailType에 따라 다른 API 호출
+                if (mailType === '1') { // 보낸 메일
                     response = await axios.get(`http://localhost:8083/mail/sent/${mailId}`);
-                } else if (mailType === '2') {
-                    response = await axios.get(`http://localhost:8083/mail/trash/${trashMailId}`);
+                } else if (mailType === '2') { // 휴지통 메일
+                    response = await axios.get(`http://localhost:8083/mail/trash/${mailId}`);
+                } else if (mailType === '0') { // 받은 메일
+                    response = await axios.get(`http://localhost:8083/mail/received/${mailId}`);
                 }
+
                 setMailDetail(response.data.data);
                 setLoading(false);
             } catch (error) {
@@ -38,7 +43,7 @@ const SendDetailMail = () => {
         };
 
         fetchMailDetail();
-    }, [mailType, mailId, trashMailId]);
+    }, [mailType, mailId]);
 
     if (loading) {
         return (
@@ -67,7 +72,7 @@ const SendDetailMail = () => {
                 <IconButton onClick={() => navigate(-1)}>
                     <ArrowBackIcon />
                 </IconButton>
-                <Typography variant="h1"  color="textSecondary" fontWeight="bold">
+                <Typography variant="h1" color="textSecondary" fontWeight="bold">
                     {mailDetail.subject}
                 </Typography>
             </Box>
@@ -80,7 +85,9 @@ const SendDetailMail = () => {
                     <strong>받는 사람:</strong> {mailDetail.recipientName} ({mailDetail.recipientEmail})
                 </Typography>
                 <Typography variant="h5" color="textSecondary" mt={3}>
-                    {new Date(mailDetail.sentAt).toLocaleString()}
+                    {new Date(
+                        mailType === '0' ? mailDetail.receivedAt : mailDetail.sentAt
+                    ).toLocaleString()}
                 </Typography>
             </Box>
 
@@ -93,14 +100,14 @@ const SendDetailMail = () => {
             <Box display="flex" justifyContent="space-between" mt={3}>
                 <Button
                     variant="outlined"
-                    onClick={() => navigate(`/read/1/${parseInt(mailId) - 1}`)}
+                    onClick={() => navigate(`/read/${mailType}/${parseInt(mailId) - 1}`)}
                     disabled={parseInt(mailId) <= 1}
                 >
                     이전 메일
                 </Button>
                 <Button
                     variant="outlined"
-                    onClick={() => navigate(`/read/1/${parseInt(mailId) + 1}`)}
+                    onClick={() => navigate(`/read/${mailType}/${parseInt(mailId) + 1}`)}
                     disabled={parseInt(mailId) >= 617} // 총 메일 개수를 기준으로 설정
                 >
                     다음 메일
@@ -110,4 +117,4 @@ const SendDetailMail = () => {
     );
 };
 
-export default SendDetailMail;
+export default DetailMail;

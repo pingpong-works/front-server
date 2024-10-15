@@ -7,7 +7,6 @@ import Elec from "./elec";
 import Contacts from "./contacts";
 import Mail from "./mail/mailWrite.jsx";
 import Calendar from "./calendar";
-import TotalMail from "./mail/totalMailbox.jsx";
 import Send from "./mail/sendMailbox.jsx";
 import Receive from "./mail/receiveMailbox.jsx";
 import Mine from "./mail/mineMailbox.jsx";
@@ -27,7 +26,6 @@ export {
   Mail,
   Calendar,
   Chat,
-  TotalMail,
   Send,
   Receive,
   Mine,
