@@ -15,7 +15,7 @@ import { tokens } from '../../theme';
 const SendDetailMail = () => {
     const theme = useTheme();
     const colors = tokens(theme.palette.mode);
-    const { mailId } = useParams();
+    const { mailType,mailId , trashMailId } = useParams();
     const navigate = useNavigate();
     const [mailDetail, setMailDetail] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -24,10 +24,10 @@ const SendDetailMail = () => {
         const fetchMailDetail = async () => {
             try {
                 let response;
-                if (mailType === 'sent') {
+                if (mailType === '1') {
                     response = await axios.get(`http://localhost:8083/mail/sent/${mailId}`);
-                } else if (mailType === 'trash') {
-                    response = await axios.get(`http://localhost:8083/mail/trash/${mailId}`);
+                } else if (mailType === '2') {
+                    response = await axios.get(`http://localhost:8083/mail/trash/${trashMailId}`);
                 }
                 setMailDetail(response.data.data);
                 setLoading(false);
@@ -38,7 +38,7 @@ const SendDetailMail = () => {
         };
 
         fetchMailDetail();
-    }, [mailType, mailId]);
+    }, [mailType, mailId, trashMailId]);
 
     if (loading) {
         return (
