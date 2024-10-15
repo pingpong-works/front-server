@@ -32,6 +32,7 @@ import SignUp from './scenes/signup/signup.jsx'
 import Document from './scenes/document/Document.jsx'
 import AdminRoute from './auth/AdminRoute';
 import TemplateForm from './scenes/document/TemplateForm.jsx';
+import Manage from "./scenes/manage/Manage.jsx";
 
 const AppRouter = () => {
   return (
@@ -74,6 +75,7 @@ const AppRouter = () => {
             <Route path="/template-form" element={<TemplateForm />} />
             <Route path="/signup" element={<AdminRoute><SignUp /></AdminRoute>} />
             <Route path="/document" element={<AdminRoute><Document /></AdminRoute>} />
+            <Route path="/manage" element={<AdminRoute><Manage /></AdminRoute>} />
 
           </Route>
         </Routes>

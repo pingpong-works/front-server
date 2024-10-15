@@ -20,6 +20,7 @@ import {
   MailOutline as MailOutlineIcon,
   Logout as LogoutIcon,
   Description,
+  PeopleAltRounded,
 } from "@mui/icons-material";
 import Item from "./Item";
 import { ToggledContext } from "../../../App";
@@ -191,13 +192,17 @@ const SideBar = () => {
             <Typography variant="h3" fontWeight="bold" color={colors.gray[100]}>
               {userInfo.name}
             </Typography>
-            <Typography
-              variant="h6"
-              fontWeight="500"
-              color={colors.blueAccent[450]}
-            >
-              {userInfo.departmentName} | {userInfo.employeeRank}
-            </Typography>
+
+            {!isAdmin && (  // 관리자가 아닌 경우에만 부서명과 직급을 표시
+              <Typography
+                variant="h6"
+                fontWeight="500"
+                color={colors.blueAccent[450]}
+              >
+                {userInfo.departmentName} | {userInfo.employeeRank}
+              </Typography>
+            )}
+
             <IconButton onClick={handleLogout} color="inherit">
               <LogoutIcon />
             </IconButton>
@@ -309,9 +314,13 @@ const SideBar = () => {
           <Item title="주소록" path="/team" icon={<PeopleAltOutlined />} />
           {userInfo.email && isAdmin && ( // email이 있을 때만 렌더링
             <Item title="계정 생성" path="/signup" icon={<PersonOutlined />} />
+            
           )}
           {userInfo.email && isAdmin && ( // email이 있을 때만 렌더링
+            <>
             <Item title="결재 문서 관리" path="/document" icon={<Description />} />
+            <Item title="직원 관리" path="/manage" icon={<PeopleAltRounded />} /> {/* 직원 관리 항목 추가 */}
+            </>
           )}
         </Menu>
       </Box>
