@@ -64,7 +64,7 @@ const SignUp = () => {
 
   const handleSubmit = async () => {
     try {
-      const response = await axios.post("http://localhost:8081/auth/employees", formData, {
+      const response = await axios.post("http://localhost:8081/employees", formData, {
         headers: {
           "Content-Type": "application/json",
         },

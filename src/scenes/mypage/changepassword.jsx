@@ -24,7 +24,7 @@ const ChangePassword = () => {
   
     setIsLoading(true);
     try {
-      await axios.patch("http://localhost:8081/auth/employees/password", {
+      await axios.patch("http://localhost:8081/employees/password", {
         currentPassword: currentPassword,
         newPassword: newPassword,
         confirmNewPassword: confirmNewPassword,
