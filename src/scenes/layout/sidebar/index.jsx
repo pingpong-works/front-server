@@ -21,6 +21,7 @@ import {
   Logout as LogoutIcon,
   Description,
   PeopleAltRounded,
+  Business as BusinessIcon,  // 부서 생성 아이콘 추가
 } from "@mui/icons-material";
 import Item from "./Item";
 import { ToggledContext } from "../../../App";
@@ -313,13 +314,11 @@ const SideBar = () => {
         >
           <Item title="주소록" path="/team" icon={<PeopleAltOutlined />} />
           {userInfo.email && isAdmin && ( // email이 있을 때만 렌더링
-            <Item title="계정 생성" path="/signup" icon={<PersonOutlined />} />
-            
-          )}
-          {userInfo.email && isAdmin && ( // email이 있을 때만 렌더링
             <>
-            <Item title="결재 문서 관리" path="/document" icon={<Description />} />
-            <Item title="직원 관리" path="/manage" icon={<PeopleAltRounded />} /> {/* 직원 관리 항목 추가 */}
+              <Item title="계정 생성" path="/signup" icon={<PersonOutlined />} />
+              <Item title="결재 문서 관리" path="/document" icon={<Description />} />
+              <Item title="직원 관리" path="/manage" icon={<PeopleAltRounded />} />
+              <Item title="부서 생성" path="/department" icon={<BusinessIcon />} /> {/* 부서 생성 항목 추가 */}
             </>
           )}
         </Menu>

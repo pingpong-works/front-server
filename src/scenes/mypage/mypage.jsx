@@ -74,7 +74,8 @@ const Mypage = () => {
   const [tabValue, setTabValue] = useState(0); // For managing tab selection
 
   const navigate = useNavigate();
-
+  const isAdmin = userInfo.email === "admin@pingpong-works.com";
+  
   // 사용자 정보 가져오기
   useEffect(() => {
     const fetchUserInfo = async () => {
@@ -205,10 +206,11 @@ const Mypage = () => {
             <Typography variant="h5" mt={2}>
               {userInfo.name}
             </Typography>
-            <Typography variant="body1" color="textSecondary">
-              {userInfo.departmentName} | {userInfo.employeeRank}
-            </Typography>
-
+            {!isAdmin && (
+              <Typography variant="body1" color="textSecondary">
+                {userInfo.departmentName} | {userInfo.employeeRank}
+              </Typography>
+            )}
             {/* 버튼들 */}
             <Stack spacing={2} mt={3} direction="column">
               <Button
