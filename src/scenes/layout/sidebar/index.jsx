@@ -47,7 +47,7 @@ const SideBar = () => {
   useEffect(() => {
     const fetchUserInfo = async () => {
       try {
-        const response = await axios.get("http://localhost:8081/auth/employees/my-info", {
+        const response = await axios.get("http://localhost:8081/employees/my-info", {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
           },
@@ -73,7 +73,7 @@ const SideBar = () => {
   const handleLogout = async () => {
     try {
       await axios.patch(
-        "http://localhost:8081/auth/employees/update-status",
+        "http://localhost:8081/employees/update-status",
         {},
         {
           headers: {
@@ -82,6 +82,7 @@ const SideBar = () => {
         }
       );
       localStorage.removeItem("accessToken");
+      localStorage.removeItem("username");
       window.location.href = "/login";
     } catch (error) {
       console.error("Error during logout:", error);
