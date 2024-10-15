@@ -5,6 +5,7 @@ import {
     Typography,
     Checkbox,
     IconButton,
+    Button,
     CircularProgress,
     useTheme,
 } from '@mui/material';
@@ -25,19 +26,46 @@ const Waste = () => {
 
     useEffect(() => {
         const fetchTrashMails = async () => {
+            setLoading(true);
             try {
-                const response = await axios.get(`http://localhost:8083/mail/trash?page=${page}&size=10&sort=sentAt,DESC`);
+                const response = await axios.get(
+                    `http://localhost:8083/mail/trash?page=${page}&size=10&sort=deletedAt,DESC`
+                );
                 setTrashMails(response.data.data);
                 setTotalPages(response.data.pageInfo.totalPages);
                 setTotalElements(response.data.pageInfo.totalElements);
-                setLoading(false);
             } catch (error) {
                 console.error('휴지통 메일 조회 중 오류 발생: ', error);
+            } finally {
                 setLoading(false);
             }
         };
         fetchTrashMails();
     }, [page]);
+
+    const handleRestore = async (mailId) => {
+        try {
+            await axios.put(`http://localhost:8083/mail/trash/restore/${mailId}`);
+            setTrashMails(trashMails.filter((mail) => mail.trashMailId !== mailId));
+            setTotalElements((prev) => prev - 1);
+        } catch (error) {
+            console.error('메일 복원 중 오류 발생: ', error);
+        }
+    };
+
+    const handleDelete = async (mailId) => {
+        try {
+            await axios.delete(`http://localhost:8083/mail/trash/${mailId}`);
+            setTrashMails(trashMails.filter((mail) => mail.trashMailId !== mailId));
+            setTotalElements((prev) => prev - 1);
+        } catch (error) {
+            console.error('메일 삭제 중 오류 발생: ', error);
+        }
+    };
+
+    const handlePageChange = (newPage) => {
+        setPage(newPage);
+    };
 
     if (loading) {
         return (
@@ -49,14 +77,14 @@ const Waste = () => {
 
     return (
         <Box p={3}>
-            <Typography variant="h2" mb={2}>휴지통 ({trashMails.length}개)</Typography>
+            <Typography variant="h2" mb={2}>휴지통 (총 {totalElements}개)</Typography>
             <Box display="flex" flexDirection="column">
-                {trashMails.length === 0 ? (
+                {totalElements === 0 ? (
                     <Typography variant="h5" textAlign="center" color="textSecondary">
                         휴지통이 비어있습니다.
                     </Typography>
                 ) : (
-                    trashMails.map((mail) => (
+                    trashMails.map((mail, index) => (
                         <Box
                             key={mail.trashMailId}
                             display="grid"
@@ -72,7 +100,7 @@ const Waste = () => {
                                 fontWeight="bold"
                                 noWrap
                                 sx={{ cursor: 'pointer' }}
-                                onClick={() => navigate(`/read/2/${mail.trashmailId}`)}
+                                onClick={() => navigate(`/read/2/${mail.trashMailId}`)}
                             >
                                 {mail.subject}
                             </Typography>
@@ -80,16 +108,37 @@ const Waste = () => {
                                 {new Date(mail.sentAt).toLocaleString()}
                             </Typography>
                             <Box display="flex" gap={1}>
-                                <IconButton>
+                                <IconButton onClick={() => handleRestore(mail.trashMailId)}>
                                     <RestoreIcon />
                                 </IconButton>
-                                <IconButton>
+                                <IconButton onClick={() => handleDelete(mail.trashMailId)}>
                                     <DeleteIcon />
                                 </IconButton>
                             </Box>
                         </Box>
                     ))
                 )}
+            </Box>
+
+            {/* Pagination */}
+            <Box display="flex" justifyContent="center" mt={3}>
+                {[...Array(totalPages)].map((_, index) => (
+                    <Button
+                        key={index + 1}
+                        onClick={() => handlePageChange(index + 1)}
+                        variant={page === index + 1 ? 'contained' : 'outlined'}
+                        sx={{
+                            mx: 0.5,
+                            backgroundColor: page === index + 1 ? colors.blueAccent[500] : 'transparent',
+                            color: page === index + 1 ? '#fff' : 'inherit',
+                            '&:hover': {
+                                backgroundColor: page === index + 1 ? colors.blueAccent[600] : colors.gray[200],
+                            },
+                        }}
+                    >
+                        {index + 1}
+                    </Button>
+                ))}
             </Box>
         </Box>
     );
