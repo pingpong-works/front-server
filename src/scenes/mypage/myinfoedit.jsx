@@ -28,7 +28,7 @@ const MyInfoEdit = () => {
   useEffect(() => {
     const fetchUserInfo = async () => {
       try {
-        const response = await axios.get("http://localhost:8081/employees/my-info", {
+        const response = await axios.get("http://localhost:8081/auth/employees/my-info", {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
           },
@@ -73,7 +73,7 @@ const MyInfoEdit = () => {
   // 사용자 정보 수정 요청
   const handleSubmit = async () => {
     try {
-      await axios.patch("http://localhost:8081/employees", userInfo, {
+      await axios.patch("http://localhost:8081/auth/employees", userInfo, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
         },

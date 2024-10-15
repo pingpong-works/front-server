@@ -20,7 +20,7 @@ const Team = () => {
 
   const fetchEmployees = async () => {
     try {
-      const response = await axios.get(`http://localhost:8081/employees/all?page=${page + 1}&size=${pageSize}`, {
+      const response = await axios.get(`http://localhost:8081/auth/employees/all?page=${page + 1}&size=${pageSize}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
         }
@@ -67,7 +67,7 @@ const Team = () => {
 
   const fetchEmployeeDetails = async (employeeId) => {
     try {
-      const response = await axios.get(`http://localhost:8081/employees/${employeeId}`, {
+      const response = await axios.get(`http://localhost:8081/auth/employees/${employeeId}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
         }
@@ -83,7 +83,7 @@ const Team = () => {
   const deleteEmployee = async () => {
     if (window.confirm("정말로 이 직원을 삭제하시겠습니까?")) {
       try {
-        await axios.delete(`http://localhost:8081/employees/${selectedEmployee.employeeId}`, {
+        await axios.delete(`http://localhost:8081/auth/employees/${selectedEmployee.employeeId}`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
           },
@@ -121,7 +121,7 @@ const Team = () => {
       renderCell: (params) => (
         <CircleIcon
           style={{
-            color: params.value === "LOGGED_IN" ? colors.greenAccent[500] : colors.gray[500],
+            color: params.value === "로그인" ? colors.greenAccent[500] : colors.gray[500],
           }}
         />
       ),
@@ -243,7 +243,7 @@ const Team = () => {
               </Typography>
 
               {/* 관리자일 때만 보여줄 추가 정보 */}
-              {localStorage.getItem("username") === "admin@example.com" ? (
+              {localStorage.getItem("username") === "admin@pingpong-works.com" ? (
                 <>
                   <Typography variant="body1" sx={{ mb: 1.5, borderBottom: "1px solid #555", paddingBottom: "10px" }}>
                     <strong>긴급 연락처:</strong> {selectedEmployee.emergencyNumber || "없음"}

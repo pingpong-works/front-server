@@ -224,7 +224,7 @@ const ChatRoomContainer = ({profile, activeRoom, onClose, memberId, name, chatRo
 
     // 채팅 히스토리 로드 함수
     const getChatHistory = () => {
-        axios('/chat/chatting/history?chatRoomId=' + chatRoomId)
+        axios('/chat/history?chatRoomId=' + chatRoomId)
             .then(res => {
                 const chatHistory = res.data;
                 console.log("받은 채팅 기록:", chatHistory);

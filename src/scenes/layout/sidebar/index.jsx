@@ -19,6 +19,7 @@ import {
   WavesOutlined,
   MailOutline as MailOutlineIcon,
   Logout as LogoutIcon,
+  Description,
 } from "@mui/icons-material";
 import Item from "./Item";
 import { ToggledContext } from "../../../App";
@@ -46,14 +47,14 @@ const SideBar = () => {
   useEffect(() => {
     const fetchUserInfo = async () => {
       try {
-        const response = await axios.get("http://localhost:8081/employees/my-info", {
+        const response = await axios.get("http://localhost:8081/auth/employees/my-info", {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
           },
         });
         const { name, departmentName, employeeRank, profilePicture, email } = response.data.data;
         setUserInfo({ name, departmentName, employeeRank, profilePicture, email });
-        
+
         // 프로필 사진이 있으면 설정, 없으면 기본 이미지 사용
         if (profilePicture) {
           setAvatar(profilePicture);
@@ -67,12 +68,12 @@ const SideBar = () => {
   }, []);
 
   // isAdmin 체크 시 userInfo.email이 존재할 때만
-  const isAdmin = userInfo.email === "admin@example.com";
+  const isAdmin = userInfo.email === "admin@pingpong-works.com";
 
   const handleLogout = async () => {
     try {
       await axios.patch(
-        "http://localhost:8081/employees/update-status",
+        "http://localhost:8081/auth/employees/update-status",
         {},
         {
           headers: {
@@ -227,49 +228,49 @@ const SideBar = () => {
           }}
         >
           <SubMenu
-              title="메일"
-              label="메일"
-              icon={<MailOutlineIcon />}
-              rootStyles={{
-                ...styles.menuButton,
-              }}
+            title="메일"
+            label="메일"
+            icon={<MailOutlineIcon />}
+            rootStyles={{
+              ...styles.menuButton,
+            }}
           >
-          <Item
-            title="메일 작성"
-            path="/new"
-            colors={colors}
-            icon={<PersonOutlined />}
-          />
-          <Item
-            title="전체 메일함"
-            path="/mailbox/-1"
-            colors={colors}
-            icon={<BarChartOutlined />}
-          />
-          <Item
-            title="받은 메일함"
-            path="/mailbox/0"
-            colors={colors}
-            icon={<DonutLargeOutlined />}
-          />
-          <Item
-            title="보낸 메일함"
-            path="/mailbox/1"
-            colors={colors}
-            icon={<TimelineOutlined />}
-          />
-          <Item
-            title="내게 쓴 메일함"
-            path="/mailbox/3"
-            colors={colors}
-            icon={<WavesOutlined />}
-          />
-          <Item
+            <Item
+              title="메일 작성"
+              path="/new"
+              colors={colors}
+              icon={<PersonOutlined />}
+            />
+            <Item
+              title="전체 메일함"
+              path="/mailbox/-1"
+              colors={colors}
+              icon={<BarChartOutlined />}
+            />
+            <Item
+              title="받은 메일함"
+              path="/mailbox/0"
+              colors={colors}
+              icon={<DonutLargeOutlined />}
+            />
+            <Item
+              title="보낸 메일함"
+              path="/mailbox/1"
+              colors={colors}
+              icon={<TimelineOutlined />}
+            />
+            <Item
+              title="내게 쓴 메일함"
+              path="/mailbox/3"
+              colors={colors}
+              icon={<WavesOutlined />}
+            />
+            <Item
               title="휴지통"
               path="/mailbox/2"
               colors={colors}
               icon={<MapOutlined />}
-          />
+            />
           </SubMenu>
           <Item title="메신저" path="/chat" icon={<ChatBubbleOutline />} />
         </Menu>
@@ -290,9 +291,6 @@ const SideBar = () => {
           <Item title="캘린더" path="/calendar" icon={<CalendarTodayOutlined />} />
           <Item title="게시판" path="/boards" icon={<ReceiptOutlined />} />
           <Item title="문의사항" path="/faq" icon={<HelpOutlineOutlined />} />
-          {userInfo.email && isAdmin && ( // email이 있을 때만 렌더링
-            <Item title="계정 생성" path="/signup" icon={<PersonOutlined />} />
-          )}
         </Menu>
         <Typography
           variant="h6"
@@ -308,6 +306,12 @@ const SideBar = () => {
           }}
         >
           <Item title="주소록" path="/team" icon={<PeopleAltOutlined />} />
+          {userInfo.email && isAdmin && ( // email이 있을 때만 렌더링
+            <Item title="계정 생성" path="/signup" icon={<PersonOutlined />} />
+          )}
+          {userInfo.email && isAdmin && ( // email이 있을 때만 렌더링
+            <Item title="결재 문서 관리" path="/document" icon={<Description />} />
+          )}
         </Menu>
       </Box>
     </Sidebar>

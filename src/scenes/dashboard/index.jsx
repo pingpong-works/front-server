@@ -68,7 +68,7 @@ function Dashboard() {
   useEffect(() => {
     const fetchUserInfo = async () => {
       try {
-        const response = await axios.get("http://localhost:8081/employees/my-info", {
+        const response = await axios.get("http://localhost:8081/auth/employees/my-info", {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
           },
@@ -184,7 +184,7 @@ function Dashboard() {
   const fetchDepartmentEmployees = async (departmentId) => {
     try {
       const response = await axios.get(
-        `http://localhost:8081/user/employees/departments/${departmentId}`,
+        `http://localhost:8081/auth/user/employees/departments/${departmentId}`,
         {
           params: {
             page: 1,
@@ -338,7 +338,7 @@ function Dashboard() {
             width: "10px",
             height: "10px",
             borderRadius: "50%",
-            backgroundColor: employee.status === 'LOGGED_IN' ? colors.greenAccent[500] : colors.gray[500],
+            backgroundColor: employee.status === '로그인' ? colors.greenAccent[500] : colors.gray[500],
           }}
         />
       </Box>
@@ -444,7 +444,7 @@ function Dashboard() {
                         width: "10px",
                         height: "10px",
                         borderRadius: "50%",
-                        backgroundColor: employee.status === 'LOGGED_IN' ? colors.greenAccent[500] : colors.gray[400],
+                        backgroundColor: employee.status === "로그인" ? colors.greenAccent[500] : colors.gray[400],
                       }}
                     />
                   </Box>

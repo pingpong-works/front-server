@@ -29,7 +29,9 @@ import MailWrite from "./scenes/mail/mailWrite.jsx";
 import Notification from "./scenes/notification/notification.jsx"
 import SendDetailMail from "./scenes/mail/SendDetailMail.jsx";
 import SignUp from './scenes/signup/signup.jsx'
+import Document from './scenes/document/Document.jsx'
 import AdminRoute from './auth/AdminRoute';
+import TemplateForm from './components/TemplateForm.jsx';
 
 const AppRouter = () => {
   return (
@@ -69,7 +71,10 @@ const AppRouter = () => {
             <Route path="/my-info/edit" element={<MyInfoEdit />} />
             <Route path="/change-password" element={<ChangePassword />} />
             <Route path="/notification" element={<Notification />} />
+            <Route path="/template-form" element={<TemplateForm />} />
             <Route path="/signup" element={<AdminRoute><SignUp /></AdminRoute>} />
+            <Route path="/document" element={<AdminRoute><Document /></AdminRoute>} />
+
           </Route>
         </Routes>
       </Router>
