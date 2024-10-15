@@ -1,15 +1,40 @@
+// src/components/NewDocumentForm.jsx
 import React, { useState, useEffect } from 'react'; 
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, Select, MenuItem, Box, Typography, Table, TableBody, TableRow, TableCell, CircularProgress, useTheme } from '@mui/material';
+import { 
+    Dialog, 
+    DialogTitle, 
+    DialogContent, 
+    DialogActions, 
+    Button, 
+    TextField, 
+    Select, 
+    MenuItem, 
+    Box, 
+    Typography, 
+    Table, 
+    TableBody, 
+    TableRow, 
+    TableCell, 
+    CircularProgress, 
+    Checkbox, 
+    FormControlLabel, 
+    Radio, 
+    RadioGroup, 
+    FormControl, 
+    FormLabel 
+} from '@mui/material';
 import ApprovalLineModal from './ApprovalLineModal';
-import sendPostDocumentSubmitRequest from '../request/PostDoumentSubmit';
+import sendPostDocumentSubmitRequest from '../request/PostDoumentSubmit'
 import sendPostDocumentSaveRequest from '../request/PostDocumentSave';
 import getDocsTypeAllRequest from '../request/GetDocsType';
-import axios from 'axios'; // 로그인된 사용자 정보를 가져오기 위해 axios 사용
+import axios from 'axios';
+import { useTheme } from '@mui/material/styles';
 import { tokens } from "../theme";
 
 const NewDocumentForm = ({ open, handleClose, fetchDocuments }) => {
     const theme = useTheme();
     const colors = tokens(theme.palette.mode);
+
     const [title, setTitle] = useState('');  // 문서 제목
     const [content, setContent] = useState('');  // 문서 내용
     const [customFields, setCustomFields] = useState({});  // 문서의 커스텀 필드
@@ -39,27 +64,32 @@ const NewDocumentForm = ({ open, handleClose, fetchDocuments }) => {
 
     // 컴포넌트 마운트 시 로그인된 사용자 정보 가져오기
     useEffect(() => {
-        fetchUserInfo();  // 로그인된 사용자 정보를 가져옴
-    }, []);
+        if (open) { // 다이얼로그가 열릴 때만 정보 가져오기
+            fetchUserInfo();  // 로그인된 사용자 정보를 가져옴
+        }
+    }, [open]);
 
     // 초기 상태 설정
     useEffect(() => {
-        setTitle('');
-        setContent('');
-        setCustomFields({});
-        setApprovalLines([]);
-        setWorkflowId(null);
-        setDocumentType('');
-    }, []);
+        if (open) { // 다이얼로그가 열릴 때 초기화
+            setTitle('');
+            setContent('');
+            setCustomFields({});
+            setApprovalLines([]);
+            setWorkflowId(null);
+            setDocumentType('');
+            setErrors({});
+        }
+    }, [open]);
 
     // 문서 타입 불러오기
     useEffect(() => {
         const fetchDocsTypes = async () => {
             try {
                 setIsLoading(true);
-                const response = await getDocsTypeAllRequest(1, 10, setDocsTypes, 'id', 'asc', setIsLoading);  
+              const response = await getDocsTypeAllRequest(1, 10, setDocsTypes, 'id', 'asc', setIsLoading);  
                 console.log('문서타입 GET요청 성공: ', response);
-    
+
                 if (response.data && response.data.length > 0) {
                     // isVisible이 true인 문서 타입만 필터링
                     const visibleDocsTypes = response.data.filter(doc => doc.isVisible === true);
@@ -76,7 +106,7 @@ const NewDocumentForm = ({ open, handleClose, fetchDocuments }) => {
     
         fetchDocsTypes();
     }, []);
-    
+
     // 문서 타입 선택 시 필드 동적 생성
     useEffect(() => {
         if (documentType) {
@@ -85,12 +115,18 @@ const NewDocumentForm = ({ open, handleClose, fetchDocuments }) => {
                 const fields = selectedDocType.documentTemplate.fields;
                 const initialFields = {};
                 fields.forEach(field => {
-                    initialFields[field.fieldName] = '';  // 필드 초기값을 빈 문자열로 설정
+                    if (field.fieldType === 'Checkbox') {
+                        initialFields[field.fieldName] = false; // 체크박스 초기값을 false로 설정
+                    } else if (field.fieldType === 'Radio' || field.fieldType === 'Select') {
+                        initialFields[field.fieldName] = ''; // Radio와 Select의 초기값을 빈 문자열로 설정
+                    } else {
+                        initialFields[field.fieldName] = ''; // 기타 필드 초기값을 빈 문자열로 설정
+                    }
                 });
                 setCustomFields(initialFields);  // 필드를 동적으로 설정
             }
         }
-    }, [documentType]);
+    }, [documentType, docsTypes]);
 
     // 커스텀 필드 값 변경 처리
     const handleFieldChange = (fieldName, value) => {
@@ -146,13 +182,17 @@ const NewDocumentForm = ({ open, handleClose, fetchDocuments }) => {
             customFields,
         };
 
-        console.log(requestBody);
+        console.log("임시 저장 요청:", requestBody);
 
-        await sendPostDocumentSaveRequest(requestBody, () => {
-            console.log("임시 저장 완료");
-            handleClose();
-            fetchDocuments(); // 목록 갱신
-        });
+        try {
+            await sendPostDocumentSaveRequest(requestBody, () => {
+                console.log("임시 저장 완료");
+                handleClose();
+                fetchDocuments(); // 목록 갱신
+            });
+        } catch (error) {
+            console.error("임시 저장 중 오류 발생:", error);
+        }
     };
 
     // 문서 제출 처리
@@ -174,11 +214,17 @@ const NewDocumentForm = ({ open, handleClose, fetchDocuments }) => {
 
         // 커스텀 필드 검증
         for (const key in customFields) {
-            if (!customFields[key]) {
-                if (!newErrors.customFields) {
-                    newErrors.customFields = {};
+            if (customFields[key] === '' || customFields[key] === null || customFields[key] === undefined) {
+                if (docsTypes.length > 0) {
+                    const selectedDocType = docsTypes.find(doc => doc.id === documentType);
+                    const fieldConfig = selectedDocType?.documentTemplate?.fields.find(f => f.fieldName === key);
+                    if (fieldConfig?.fieldType !== 'Checkbox') { // 체크박스는 false도 유효하므로 제외
+                        if (!newErrors.customFields) {
+                            newErrors.customFields = {};
+                        }
+                        newErrors.customFields[key] = '필수 필드입니다.';
+                    }
                 }
-                newErrors.customFields[key] = '필수 필드입니다.';
             }
         }
 
@@ -199,24 +245,17 @@ const NewDocumentForm = ({ open, handleClose, fetchDocuments }) => {
             customFields,
         };
 
-        console.log(requestBody);
-        await sendPostDocumentSubmitRequest(requestBody, () => {
-            console.log("문서 제출 완료");
-            handleClose();
-            fetchDocuments(); // 목록 갱신
-        });
-    };
+        console.log("문서 제출 요청:", requestBody);
 
-    // 입력 필드 값 변경 시 오류 메시지 제거
-    const handleInputChange = (setter) => (e) => {
-        setter(e.target.value);
-        setErrors(prevErrors => {
-            const newErrors = { ...prevErrors };
-            if (newErrors[e.target.name]) {
-                delete newErrors[e.target.name];
-            }
-            return newErrors;
-        });
+        try {
+            await sendPostDocumentSubmitRequest(requestBody, () => {
+                console.log("문서 제출 완료");
+                handleClose();
+                fetchDocuments(); // 목록 갱신
+            });
+        } catch (error) {
+            console.error("문서 제출 중 오류 발생:", error);
+        }
     };
 
     return (
@@ -225,7 +264,7 @@ const NewDocumentForm = ({ open, handleClose, fetchDocuments }) => {
             <DialogContent>
                 <Box>
                     {/* 문서 타입 선택 */}
-                    <Typography variant="h6">문서 타입 선택</Typography>
+                    <Typography variant="h6" gutterBottom>문서 타입 선택</Typography>
                     {isLoading ? (
                         <CircularProgress />
                     ) : (
@@ -250,8 +289,8 @@ const NewDocumentForm = ({ open, handleClose, fetchDocuments }) => {
                                 error={!!errors.documentType}
                             >
                                 <MenuItem value="" disabled>문서 타입 선택</MenuItem>
-                                {docsTypes.map((doc, index) => (
-                                    <MenuItem key={index} value={doc.id}>
+                                {docsTypes.map((doc) => (
+                                    <MenuItem key={doc.id} value={doc.id}>
                                         {doc.type}
                                     </MenuItem>
                                 ))}
@@ -312,12 +351,16 @@ const NewDocumentForm = ({ open, handleClose, fetchDocuments }) => {
 
                     {/* 커스텀 필드들 */}
                     {Object.keys(customFields).map((field, index) => {
-                        const fieldType = docsTypes.find(doc => doc.id === documentType)?.documentTemplate?.fields.find(f => f.fieldName === field)?.fieldType;
+                        const selectedDocType = docsTypes.find(doc => doc.id === documentType);
+                        const fieldConfig = selectedDocType?.documentTemplate?.fields.find(f => f.fieldName === field);
+                        const fieldType = fieldConfig?.fieldType;
+                        const fieldOptions = fieldConfig?.options || []; // 옵션이 있는 필드의 경우 옵션을 가져옴
+
                         return (
                             <Box key={index} sx={{ marginBottom: '20px' }}>
-                                {fieldType === 'Date' ? (
+                                {fieldType === 'LocalDateTime' ? (
                                     <TextField
-                                        type="date"
+                                        type="datetime-local" // 날짜와 시간을 모두 입력받기 위해 변경
                                         label={field}
                                         fullWidth
                                         variant="outlined"
@@ -329,6 +372,68 @@ const NewDocumentForm = ({ open, handleClose, fetchDocuments }) => {
                                             shrink: true, // 라벨이 필드와 겹치지 않도록 조정
                                         }}
                                     />
+                                ) : fieldType === 'Checkbox' ? (
+                                    <Box display="flex" alignItems="center">
+                                        <FormControlLabel
+                                            control={
+                                                <Checkbox
+                                                    checked={customFields[field] || false}
+                                                    onChange={(e) => handleFieldChange(field, e.target.checked)}
+                                                    color="primary"
+                                                />
+                                            }
+                                            label={field}
+                                        />
+                                        {errors.customFields && errors.customFields[field] && (
+                                            <Typography color="error" sx={{ marginLeft: '10px' }}>
+                                                {errors.customFields[field]}
+                                            </Typography>
+                                        )}
+                                    </Box>
+                                ) : fieldType === 'Radio' ? (
+                                    <FormControl component="fieldset" fullWidth error={!!(errors.customFields && errors.customFields[field])}>
+                                        <FormLabel component="legend">{field}</FormLabel>
+                                        <RadioGroup
+                                            value={customFields[field]}
+                                            onChange={(e) => handleFieldChange(field, e.target.value)}
+                                        >
+                                            {fieldOptions.map((option, optIndex) => (
+                                                <FormControlLabel 
+                                                    key={optIndex} 
+                                                    value={option.value} 
+                                                    control={<Radio color="primary" />} 
+                                                    label={option.label} 
+                                                />
+                                            ))}
+                                        </RadioGroup>
+                                        {errors.customFields && errors.customFields[field] && (
+                                            <Typography color="error">
+                                                {errors.customFields[field]}
+                                            </Typography>
+                                        )}
+                                    </FormControl>
+                                ) : fieldType === 'Select' ? (
+                                    <FormControl fullWidth variant="outlined" error={!!(errors.customFields && errors.customFields[field])}>
+                                        <Select
+                                            value={customFields[field]}
+                                            onChange={(e) => handleFieldChange(field, e.target.value)}
+                                            displayEmpty
+                                        >
+                                            <MenuItem value="" disabled>
+                                                {`Select ${field}`}
+                                            </MenuItem>
+                                            {fieldOptions.map((option, optIndex) => (
+                                                <MenuItem key={optIndex} value={option.value}>
+                                                    {option.label}
+                                                </MenuItem>
+                                            ))}
+                                        </Select>
+                                        {errors.customFields && errors.customFields[field] && (
+                                            <Typography color="error">
+                                                {errors.customFields[field]}
+                                            </Typography>
+                                        )}
+                                    </FormControl>
                                 ) : (
                                     <TextField
                                         label={field}
@@ -345,7 +450,11 @@ const NewDocumentForm = ({ open, handleClose, fetchDocuments }) => {
                     })}
 
                     {/* 결재라인 설정 */}
-                    <Button variant="contained" onClick={handleOpenApprovalLineModal} sx={{ marginBottom: '20px', bgcolor: colors.blueAccent[500] }}>
+                    <Button 
+                        variant="contained" 
+                        onClick={handleOpenApprovalLineModal} 
+                        sx={{ marginBottom: '20px', bgcolor: colors.blueAccent[500], '&:hover': { bgcolor: colors.blueAccent[700] } }}
+                    >
                         결재라인 설정
                     </Button>
                     {errors.workflowId && (
