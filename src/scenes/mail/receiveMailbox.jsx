@@ -1,138 +1,119 @@
-import { Box, useTheme, MenuItem, Select, FormControl, InputLabel } from "@mui/material";
-import { Header } from "../../components/index.jsx";
-import { DataGrid, GridToolbar } from "@mui/x-data-grid";
-import { mockDataContacts } from "../../data/mockData.js";
-import { tokens } from "../../theme.js";
-import axios from "axios";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import {
+    Box,
+    Typography,
+    Checkbox,
+    IconButton,
+    Button,
+    CircularProgress,
+    useTheme,
+} from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
+import StarBorderIcon from '@mui/icons-material/StarBorder';
+import StarIcon from '@mui/icons-material/Star';
+import { tokens } from '../../theme';
+import { useNavigate } from 'react-router-dom';
 
 const Receive = () => {
     const theme = useTheme();
     const colors = tokens(theme.palette.mode);
+    const navigate = useNavigate();
+    const [receivedMails, setReceivedMails] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [page, setPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [totalElements, setTotalElements] = useState(0);
 
-    const [list, setList] = useState([]);
-    const [filteredData, setFilteredData] = useState([]);
-    const [selectedStatus, setSelectedStatus] = useState("all");
-    const getStatusCount = () => {
-        axios.post("/elecapp/receivedApp", { memberId: "1" }) // 실제 멤버 ID로 교체 필요
-            .then(res => {
-                setList(res.data);
-                setFilteredData(res.data);
-            })
-            .catch(err => console.error("오류 발생:", err));
-    };
     useEffect(() => {
-        getStatusCount();
-    }, []);
-    const handleStatusChange = (event) => {
-        const status = event.target.value;
-        setSelectedStatus(status);
-        if (status === "all") {
-            setFilteredData(list);
-        } else {
-            setFilteredData(
-                list.filter(item => {
-                    switch (status) {
-                        case "ready":
-                            return item.approveType === 0;
-                        case "ing":
-                            return item.approveType === 2;
-                        case "done":
-                            return item.approveType === 3;
-                        default:
-                            return true;
-                    }
-                })
-            );
+        const fetchReceivedMails = async () => {
+            try {
+                const response = await axios.get(`http://localhost:8083/mail/received?page=${page}&size=10&sort=receivedAt,DESC`);
+                setReceivedMails(response.data.data);
+                setTotalPages(response.data.pageInfo.totalPages);
+                setTotalElements(response.data.pageInfo.totalElements);
+                setLoading(false);
+            } catch (error) {
+                console.error('받은 메일함 조회 중 오류 발생: ', error);
+                setLoading(false);
+            }
+        };
+        fetchReceivedMails();
+    }, [page]);
+
+    const handleDelete = async (mailId) => {
+        try {
+            await axios.delete(`http://localhost:8083/mail/${mailId}?isReceivedMail=true`);
+            // 삭제된 메일을 제외한 나머지 메일들로 상태값 업데이트
+            setReceivedMails(receivedMails.filter(mail => mail.mailId !== mailId));
+            setTotalElements(prevTotal => prevTotal - 1); // 총 메일 수 감소
+        } catch (error) {
+            console.error('메일 삭제 중 오류 발생: ', error);
         }
     };
-    const columns = [
-        {
-            field: "title",
-            headerName: "제목",
-            flex: 1,
-            valueGetter: (params) =>
-                params.row.additionalFields?.title || "휴가신청서",
-        },
-        { field: "writer", headerName: "작성자", flex: 1 },
-        { field: "department", headerName: "부서", flex: 1 },
-        {
-            field: "writeday",
-            headerName: "",
-            flex: 1,
-            valueGetter: (params) =>
-                params.value ? params.value.substring(0, 10) : "N/A",
-        }
 
-    ];
-    return (
-        //읽은 메일 , 안읽은 메일 설정 따로 필요함.
-
-        <Box m="20px">
-            <Header title="전체 메일함" subtitle="List of TotalMail" />
-            <Box mb="20px" display="flex" justifyContent="flex-end">
-                <FormControl variant="outlined" sx={{ minWidth: 200 }}>
-                    <InputLabel id="status-select-label">결재 상태</InputLabel>
-                    <Select
-                        labelId="status-select-label"
-                        value={selectedStatus}
-                        onChange={handleStatusChange}
-                        label="수신 상태"
-                    >
-                        <MenuItem value="all">전체 보기</MenuItem>
-                        <MenuItem value="ready">안 읽은 메일</MenuItem>
-                    </Select>
-                </FormControl>
+    if (loading) {
+        return (
+            <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
+                <CircularProgress />
             </Box>
-            <Box
-                mt="40px"
-                height="75vh"
-                maxWidth="100%"
-                sx={{
-                    "& .MuiDataGrid-root": {
-                        border: "none",
-                    },
-                    "& .MuiDataGrid-cell": {
-                        border: "none",
-                    },
-                    "& .name-column--cell": {
-                        color: colors.greenAccent[300],
-                    },
-                    "& .MuiDataGrid-columnHeaders": {
-                        backgroundColor: colors.blueAccent[700],
-                        borderBottom: "none",
-                    },
-                    "& .MuiDataGrid-virtualScroller": {
-                        backgroundColor: colors.primary[400],
-                    },
-                    "& .MuiDataGrid-footerContainer": {
-                        borderTop: "none",
-                        backgroundColor: colors.blueAccent[700],
-                    },
-                    "& .MuiCheckbox-root": {
-                        color: `${colors.greenAccent[200]} !important`,
-                    },
-                    "& .MuiDataGrid-iconSeparator": {
-                        color: colors.primary[100],
-                    },
-                    "& .MuiDataGrid-toolbarContainer .MuiButton-text": {
-                        color: `${colors.gray[100]} !important`,
-                    },
-                }}
-            >
-                <DataGrid
-                    rows={filteredData}
-                    columns={columns}
-                    components={{ Toolbar: GridToolbar }}
-                    initialState={{
-                        pagination: {
-                            paginationModel: {
-                                pageSize: 10,
+        );
+    }
+
+    return (
+        <Box p={3}>
+            <Typography variant="h2" mb={2}>받은 메일함 (총 {totalElements}개)</Typography>
+            <Box display="flex" flexDirection="column">
+                {receivedMails.map((mail, index) => (
+                    <Box
+                        key={mail.mailId}
+                        display="grid"
+                        gridTemplateColumns="40px 40px 200px auto 150px 40px"
+                        alignItems="center"
+                        p={2}
+                        borderBottom="1px solid #ccc"
+                    >
+                        <Checkbox />
+                        <IconButton>
+                            {mail.isImportant ? <StarIcon /> : <StarBorderIcon />}
+                        </IconButton>
+                        <Typography variant="h4" noWrap>{mail.senderName || mail.senderEmail}</Typography>
+                        <Typography
+                            variant="h4"
+                            fontWeight="bold"
+                            noWrap
+                            sx={{ cursor: 'pointer' }}
+                            onClick={() => navigate(`/read/0/${mail.mailId}`)} // mailType 0: received mail
+                        >
+                            {mail.subject}
+                        </Typography>
+                        <Typography variant="body2" color="textSecondary" textAlign="right">
+                            {new Date(mail.receivedAt).toLocaleString()}
+                        </Typography>
+                        <IconButton onClick={() => handleDelete(mail.mailId)}>
+                            <DeleteIcon />
+                        </IconButton>
+                    </Box>
+                ))}
+            </Box>
+            <Box display="flex" justifyContent="center" mt={3}>
+                {[...Array(totalPages)].map((_, index) => (
+                    <Button
+                        key={index + 1}
+                        onClick={() => setPage(index + 1)}
+                        variant={page === index + 1 ? 'contained' : 'outlined'}
+                        sx={{
+                            mx: 0.5,
+                            backgroundColor: page === index + 1 ? colors.blueAccent[500] : 'transparent',
+                            color: page === index + 1 ? '#fff' : 'inherit',
+                            '&:hover': {
+                                backgroundColor: page === index + 1 ? colors.blueAccent[600] : colors.gray[200],
                             },
-                        },
-                    }}
-                    checkboxSelection
-                />
+                        }}
+                    >
+                        {index + 1}
+                    </Button>
+                ))}
             </Box>
         </Box>
     );

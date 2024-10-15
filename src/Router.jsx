@@ -31,7 +31,7 @@ import SendDetailMail from "./scenes/mail/SendDetailMail.jsx";
 import SignUp from './scenes/signup/signup.jsx'
 import Document from './scenes/document/Document.jsx'
 import AdminRoute from './auth/AdminRoute';
-import TemplateForm from './components/TemplateForm.jsx';
+import TemplateForm from './scenes/document/TemplateForm.jsx';
 
 const AppRouter = () => {
   return (
@@ -63,8 +63,8 @@ const AppRouter = () => {
             <Route path="/mailbox/1" element={<Send />} />
             <Route path="/mailbox/2" element={<Waste />} />
             <Route path="/mailbox/3" element={<Mine />} />
-            <Route path="/read/1/:mailId" element={<SendDetailMail />} />
-            <Route path="/read/2/:mailId" element={<SendDetailMail />} />
+            <Route path="/read/:mailType/:mailId" element={<SendDetailMail />} />
+            <Route path="/read/:mailType/:trashMailId" element={<SendDetailMail />} />
             <Route path="/faq" element={<FAQ />} />
             <Route path="/approval-line-setup" element={<ApprovalLineSetup />} />
             <Route path="/mypage" element={<Mypage />} />

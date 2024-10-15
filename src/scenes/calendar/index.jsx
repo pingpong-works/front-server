@@ -197,7 +197,7 @@ const Calendar = () => {
             />
             <Typography color={colors.gray[100]}>회의실 예약</Typography>
         </Box>
-        </Box>
+      </Box>
 
       <Box display="flex" justifyContent="space-between" gap={2}>
         <Box
@@ -209,7 +209,9 @@ const Calendar = () => {
         >
           <Typography variant="h5">Events</Typography>
           <List>
-            {currentEvents.map((event) => (
+          {currentEvents
+            .filter((event) => event.end > new Date())
+            .map((event) => (
               <ListItem
                 key={event.id}
                 sx={{
