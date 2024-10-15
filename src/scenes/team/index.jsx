@@ -292,6 +292,7 @@ const Team = () => {
                     직원 삭제
                   </button>
                 )}
+
                 {/* 확인 버튼 */}
                 <button
                   style={{
