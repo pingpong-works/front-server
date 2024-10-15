@@ -22,7 +22,7 @@ const Boards = () => {
   const navigate = useNavigate();
 
   const [data, setData] = useState([]);
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(0); 
   const [pageInfo, setPageInfo] = useState({ totalElements: 0, totalPages: 1 });
   const [keyword, setKeyword] = useState("");
   const [searchOption, setSearchOption] = useState("title");
@@ -31,7 +31,7 @@ const Boards = () => {
   const [loading, setLoading] = useState(false);
 
   const fetchData = useCallback(async (page) => {
-    setLoading(true);  // 로딩 상태 시작
+    setLoading(true); 
     try {
       const response = await axios.get("http://localhost:8084/boards", {
         params: {
@@ -40,17 +40,11 @@ const Boards = () => {
           sort: sortOption,
           page: page,
           size: 10,
+          category: category,
         },
       });
 
-      const filteredData = response.data.data.filter((item) => {
-        if (category === "all") {
-          return true;
-        }
-        return item.category === category;
-      });
-
-      const transformedData = filteredData.map((item) => ({
+      const filteredData = response.data.data.map((item) => ({
         id: item.boardId,
         boardId: item.boardId,
         title: `[${item.category}] ${item.title}`,
@@ -60,17 +54,21 @@ const Boards = () => {
         views: item.views,
       }));
 
-      setData(transformedData);
-      setPageInfo({ totalElements: response.data.pageInfo.totalElements, totalPages: response.data.pageInfo.totalPages });
+      setData(filteredData);
+      setPageInfo({
+        totalElements: response.data.pageInfo.totalElements,
+        totalPages: response.data.pageInfo.totalPages,
+      });
     } catch (error) {
       console.error("Error fetching data", error);
     } finally {
-      setLoading(false);  // 로딩 상태 종료
+      setLoading(false);
     }
-  }, [keyword, searchOption, sortOption, category]);
+  }, [sortOption, category]);
 
   const handleSearch = () => {
-    fetchData(1);
+    setPage(0);
+    fetchData(0); 
   };
 
   const handleSearchOptionChange = (event) => {
@@ -79,11 +77,13 @@ const Boards = () => {
 
   const handleCategoryChange = (event) => {
     setCategory(event.target.value);
+    setPage(0);
+    fetchData(0);
   };
 
   useEffect(() => {
     fetchData(page);
-  }, [category, page, fetchData]);
+  }, [page, fetchData]);
 
   const handleRowClick = (params) => {
     navigate(`/viewBoard/${params.id}`);
@@ -126,6 +126,31 @@ const Boards = () => {
     },
   ];
 
+
+  const totalPagesToShow = 10;
+  const currentPageGroup = Math.floor(page / totalPagesToShow);
+
+  const visiblePages = Array.from(
+    { length: Math.min(totalPagesToShow, pageInfo.totalPages - currentPageGroup * totalPagesToShow) },
+    (_, i) => currentPageGroup * totalPagesToShow + i
+  );
+
+  const handlePageClick = (pageNum) => {
+    setPage(pageNum);
+  };
+
+  const handlePreviousPageGroup = () => {
+    if (currentPageGroup > 0) {
+      setPage((currentPageGroup - 1) * totalPagesToShow);
+    }
+  };
+
+  const handleNextPageGroup = () => {
+    if ((currentPageGroup + 1) * totalPagesToShow < pageInfo.totalPages) {
+      setPage((currentPageGroup + 1) * totalPagesToShow);
+    }
+  };
+
   return (
     <Box m="20px">
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
@@ -149,6 +174,7 @@ const Boards = () => {
           작성하기
         </Button>
       </Box>
+
       <Box
         display="flex"
         justifyContent="space-between"
@@ -196,7 +222,7 @@ const Boards = () => {
             onChange={(e) => setKeyword(e.target.value)}
             onKeyPress={(e) => {
               if (e.key === "Enter") {
-                handleSearch();
+                handleSearch(); 
               }
             }}
             sx={{ ml: 2, flex: 1 }}
@@ -209,7 +235,7 @@ const Boards = () => {
 
       <Box
         mt="20px"
-        height="63vh"
+        height="58vh"
         maxWidth="100%"
         sx={{
           "& .MuiDataGrid-root": {
@@ -233,12 +259,6 @@ const Boards = () => {
             borderTop: "none",
             backgroundColor: colors.blueAccent[500],
           },
-          "& .MuiCheckbox-root": {
-            color: `${colors.greenAccent[200]} !important`,
-          },
-          "& .MuiDataGrid-iconSeparator": {
-            color: colors.primary[100],
-          },
         }}
       >
         {loading ? (
@@ -252,23 +272,59 @@ const Boards = () => {
               "& .MuiDataGrid-row:hover": {
                 cursor: "pointer",
               },
-            }}
-            initialState={{
-              pagination: {
-                paginationModel: {
-                  pageSize: 10,
-                },
+              "& .MuiDataGrid-footerContainer": {
+                display: "none",
               },
-            }}
-            pageSizeOptions={[10]}
-            rowCount={pageInfo.totalElements}
-            paginationMode="server"
-            onPaginationModelChange={(model) => {
-              setPage(model.page + 1);
-            }}
+            }}    
             onRowClick={handleRowClick}
           />
+          
         )}
+      </Box>
+      <Box display="flex" justifyContent="center" alignItems="center" mt={2}>
+        <Button
+          disabled={currentPageGroup === 0}
+          onClick={handlePreviousPageGroup}
+          sx={{
+            backgroundColor: colors.primary[500],
+            color: colors.gray[100],
+            "&:hover": {
+              backgroundColor: colors.primary[700],
+            },
+          }}
+        >
+          이전
+        </Button>
+        {visiblePages.map((pageNum) => (
+          <Button
+            key={pageNum}
+            variant={pageNum === page ? "contained" : "outlined"}
+            onClick={() => handlePageClick(pageNum)}
+            sx={{
+              backgroundColor: pageNum === page ? colors.blueAccent[700] : colors.primary[500],
+              color: colors.gray[100],
+              "&:hover": {
+                backgroundColor: pageNum === page ? colors.blueAccent[800] : colors.primary[700],
+              },
+              borderColor: colors.gray[300],
+            }}
+          >
+            {pageNum + 1}
+          </Button>
+        ))}
+        <Button
+          disabled={pageInfo.totalPages <= visiblePages[visiblePages.length - 1] + 1}
+          onClick={handleNextPageGroup}
+          sx={{
+            backgroundColor: colors.primary[500],
+            color: colors.gray[100],
+            "&:hover": {
+              backgroundColor: colors.primary[700],
+            },
+          }}
+        >
+          다음
+        </Button>
       </Box>
     </Box>
   );
