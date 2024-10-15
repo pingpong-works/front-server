@@ -513,6 +513,8 @@ function Dashboard() {
                             borderBottom={`2px solid ${colors.primary[900]}`}
                             p="15px"
                             width="100%"
+                            sx={{ cursor: 'pointer' }}
+                            onClick={() => navigate(`/read/0/${mail.mailId}`)}
                         >
                           <Box>
                             <Typography

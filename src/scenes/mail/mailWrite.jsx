@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import Quill from 'quill';
 import 'quill/dist/quill.snow.css';
-import { Box, Button, useTheme, TextField, useMediaQuery } from "@mui/material";
+import { Box, Button, useTheme, TextField, useMediaQuery, Typography  } from "@mui/material";
 import { Header } from "../../components";
 import { Formik } from "formik";
 import * as yup from "yup";
@@ -81,8 +81,19 @@ const MailWrite = () => {
 
   return (
       <Box m="50px">
-        <Header subject="메일 쓰기" subtitle="" />
-
+        <Box mb={3}> {/* 아래에 margin을 추가 */}
+          <Typography
+              variant="h1"
+              sx={{
+                fontSize: "3.0rem", // 폰트 크기 키우기
+                fontWeight: "bold", // 폰트 두께 조절
+                color: "white", // 텍스트 색상
+                marginBottom: "50px", // 아래 여백 추가
+              }}
+          >
+            메일 쓰기
+          </Typography>
+        </Box>
         <Formik
             onSubmit={handleFormSubmit}
             initialValues={initialValues}

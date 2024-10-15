@@ -85,7 +85,9 @@ const DetailMail = () => {
                     <strong>받는 사람:</strong> {mailDetail.recipientName} ({mailDetail.recipientEmail})
                 </Typography>
                 <Typography variant="h5" color="textSecondary" mt={3}>
-                    {new Date(mailDetail.sentAt).toLocaleString()}
+                    {new Date(
+                        mailType === '0' ? mailDetail.receivedAt : mailDetail.sentAt
+                    ).toLocaleString()}
                 </Typography>
             </Box>
 
