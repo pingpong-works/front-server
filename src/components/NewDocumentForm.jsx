@@ -57,10 +57,13 @@ const NewDocumentForm = ({ open, handleClose, fetchDocuments }) => {
         const fetchDocsTypes = async () => {
             try {
                 setIsLoading(true);
-                const response = await getDocsTypeAllRequest(1, 10, setDocsTypes, 'id', 'asc', setIsLoading);  // 토큰 없이 호출
+                const response = await getDocsTypeAllRequest(1, 10, setDocsTypes, 'id', 'asc', setIsLoading);  
                 console.log('문서타입 GET요청 성공: ', response);
+    
                 if (response.data && response.data.length > 0) {
-                    setDocsTypes(response.data);  // 받아온 데이터를 설정
+                    // isVisible이 true인 문서 타입만 필터링
+                    const visibleDocsTypes = response.data.filter(doc => doc.isVisible === true);
+                    setDocsTypes(visibleDocsTypes);  
                 } else {
                     console.log('문서 타입 데이터가 없습니다.');
                 }
@@ -70,10 +73,10 @@ const NewDocumentForm = ({ open, handleClose, fetchDocuments }) => {
                 setIsLoading(false);
             }
         };
-
+    
         fetchDocsTypes();
     }, []);
-
+    
     // 문서 타입 선택 시 필드 동적 생성
     useEffect(() => {
         if (documentType) {

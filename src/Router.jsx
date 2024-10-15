@@ -31,7 +31,7 @@ import SendDetailMail from "./scenes/mail/SendDetailMail.jsx";
 import SignUp from './scenes/signup/signup.jsx'
 import Document from './scenes/document/Document.jsx'
 import AdminRoute from './auth/AdminRoute';
-import TemplateForm from './components/TemplateForm.jsx';
+import TemplateForm from './scenes/document/TemplateForm.jsx';
 
 const AppRouter = () => {
   return (
