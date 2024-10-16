@@ -332,7 +332,8 @@ const Mypage = () => {
             component={Paper}
             p={3}
             elevation={3}
-            sx={{ backgroundColor: colors.gray[350] }}
+            sx={{ backgroundColor: colors.gray[350],
+             }}
           >
             <FullCalendar
               height="75vh"

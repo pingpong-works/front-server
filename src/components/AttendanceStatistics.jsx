@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   Box,
+  useTheme,
   Paper,
   Typography,
   Table,
@@ -9,8 +10,7 @@ import {
   TableHead,
   TableRow,
   Tabs,
-  Tab,
-  useTheme
+  Tab
 } from '@mui/material';
 import {
   LineChart,
@@ -28,7 +28,8 @@ const AttendanceStatistics = ({ employeeId, year }) => {
   const [statsType, setStatsType] = useState('weekly'); // 'weekly' or 'monthly'
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
-  
+  const theme = useTheme();
+  const colors = tokens(theme.palette.mode);
 
   useEffect(() => {
     if (employeeId && year) {
@@ -57,11 +58,9 @@ const AttendanceStatistics = ({ employeeId, year }) => {
     }
   };
 
-  const theme = useTheme();
-  const colors = tokens(theme.palette.mode);
 
   return (
-    <Box mt={2} component={Paper} p={3} elevation={3}  sx={{ backgroundColor: colors.gray[350] }}>
+    <Box mt={2} component={Paper} p={3} elevation={3} sx={{ backgroundColor: colors.gray[350] }}>
       <Typography variant="h6" mb={2}>
         근무 시간 통계
       </Typography>
@@ -119,28 +118,32 @@ const AttendanceStatistics = ({ employeeId, year }) => {
             data={data}
             margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
           >
-            <CartesianGrid strokeDasharray="3 3" />
+            <CartesianGrid stroke={colors.gray[300]} strokeDasharray="3 3" /> {/* 그리드 라인 색상 변경 */}
             <XAxis
               dataKey={statsType === 'weekly' ? 'week' : 'month'}
               label={{
                 value: statsType === 'weekly' ? '주차' : '월',
                 position: 'insideBottomRight',
                 offset: -5,
+                fill: colors.gray[100],  // X축 텍스트 색상 변경
               }}
+              stroke={colors.gray[100]}  // X축 라인 색상 변경
             />
             <YAxis
               label={{
                 value: '총 근무 시간 (시간)',
                 angle: -90,
                 position: 'insideLeft',
+                fill: colors.gray[100],  // Y축 텍스트 색상 변경
               }}
+              stroke={colors.gray[100]}  // Y축 라인 색상 변경
             />
             <Tooltip />
             <Legend />
             <Line
               type="monotone"
               dataKey="totalWorkingTime"
-              stroke="#8884d8"
+              stroke={colors.blueAccent[500]}  // 라인 색상 변경
               activeDot={{ r: 8 }}
             />
           </LineChart>
