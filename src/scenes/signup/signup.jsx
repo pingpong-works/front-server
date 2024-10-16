@@ -61,19 +61,18 @@ const SignUp = () => {
       ...prevState,
       [name]: value,
     }));
-
+  
     // 비밀번호 정규식 유효성 검사
     if (name === "password") {
-      const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/;
+      const passwordRegex = /^[a-zA-Z0-9!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?`~]{8,15}$/;
       if (!passwordRegex.test(value)) {
-        setPasswordError(
-          "비밀번호는 최소 8자 이상, 대문자, 소문자, 숫자, 특수 문자를 각각 하나 이상 포함해야 합니다."
-        );
+        setPasswordError("비밀번호는 8자 이상 15자 이하의 알파벳, 숫자, 특수문자만 포함할 수 있습니다.");
       } else {
         setPasswordError(""); // 정규식에 맞으면 오류 메시지 초기화
       }
     }
   };
+  
 
   const handleSubmit = async () => {
     if (passwordError) {
