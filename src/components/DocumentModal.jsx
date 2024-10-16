@@ -7,6 +7,7 @@ import ApprovalTable from "./ApprovalTable";
 import getEmployee from "../request/GetEmployee";
 import Swal from "sweetalert2";
 import { tokens } from "../theme";
+import { color } from "@mui/system";
 
 const DocumentModal = ({ documentId, handleClose, fetchDocuments }) => {
     const theme = useTheme();
@@ -106,7 +107,7 @@ const DocumentModal = ({ documentId, handleClose, fetchDocuments }) => {
 
     const handleCloseMessageModal = () => {
         setOpenMessageModal(false);
-         fetchDocumentData(); // 문서 데이터 갱신
+        fetchDocumentData(); // 문서 데이터 갱신
     };
 
     const handleReWrite = () => {
@@ -267,7 +268,7 @@ const DocumentModal = ({ documentId, handleClose, fetchDocuments }) => {
                         sx={{
                             fontWeight: "bold",
                             mb: 2,
-                            color: mode === "dark" ? "black" : "black",
+                            color: mode === "dark" ? "white" : "black",
                         }}
                     >
                         [결재 내역]
@@ -286,8 +287,8 @@ const DocumentModal = ({ documentId, handleClose, fetchDocuments }) => {
                                     key={index}
                                     sx={{
                                         border: `1px solid ${mode === "dark"
-                                                ? theme.palette.grey[700]
-                                                : theme.palette.grey[300]
+                                            ? theme.palette.grey[700]
+                                            : theme.palette.grey[300]
                                             }`,
                                         borderRadius: 2,
                                         padding: 2,
@@ -322,22 +323,77 @@ const DocumentModal = ({ documentId, handleClose, fetchDocuments }) => {
                             ))}
                     </Box>
                 </Box>
-                <Dialog open={openMessageModal} onClose={handleCloseMessageModal}>
-                    <DialogTitle>메시지 입력</DialogTitle>
+                <Dialog
+                    open={openMessageModal}
+                    onClose={handleCloseMessageModal}
+                    sx={{
+                        '& .MuiPaper-root': {
+                            backgroundColor: colors.gray[200], // Dialog 배경색
+                            color: '#333', // 텍스트 색상
+                        },
+                    }}
+                >
+                    <DialogTitle
+                        sx={{
+                            backgroundColor: colors.blueAccent[500], // 제목 배경색
+                            color: '#fff', // 제목 텍스트 색상
+                            mb : 2
+                        }}
+                    >
+                        메시지 입력
+                    </DialogTitle>
                     <DialogContent>
                         <TextField
-                            label="메시지"
                             fullWidth
                             variant="outlined"
                             value={message}
                             onChange={(e) => setMessage(e.target.value)}
+                            sx={{
+                                '& .MuiOutlinedInput-root': {
+                                    color: colors.primary[400],
+                                    '& fieldset': {
+                                        borderColor: colors.blueAccent[500],
+                                    }
+                                },
+                            }}
                         />
                     </DialogContent>
                     <DialogActions>
-                        <Button onClick={() => handleConfirmApproval('APPROVE')}>승인</Button>
-                        <Button onClick={() => handleConfirmApproval('REJECT')}>반려</Button>
-                        <Button onClick={() => handleConfirmApproval('FINALIZE')}>전결</Button>
-                        <Button onClick={handleCloseMessageModal}>취소</Button>
+                        <Button
+                            onClick={() => handleConfirmApproval('APPROVE')}
+                            sx={{
+                               // backgroundColor: colors.blueAccent[500],
+                                color: colors.blueAccent[500],
+                            }}
+                        >
+                            승인
+                        </Button>
+                        <Button
+                            onClick={() => handleConfirmApproval('REJECT')}
+                            sx={{
+                               // backgroundColor: '#050403',
+                                color: '#050403',
+                            }}
+                        >
+                            반려
+                        </Button>
+                        <Button
+                            onClick={() => handleConfirmApproval('FINALIZE')}
+                            sx={{
+                              //  backgroundColor: '#050403',
+                                color:  '#050403',
+                            }}
+                        >
+                            전결
+                        </Button>
+                        <Button
+                            onClick={handleCloseMessageModal}
+                            sx={{
+                                color: '#1976d2',
+                            }}
+                        >
+                            취소
+                        </Button>
                     </DialogActions>
                 </Dialog>
             </Box>
