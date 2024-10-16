@@ -149,21 +149,8 @@ const Manage = () => {
       cellClassName: "name-column--cell",
     },
     { field: "email", headerName: "이메일", flex: 1 },
-    { field: "phoneNumber", headerName: "전화번호", flex: 1 },
     { field: "departmentName", headerName: "부서명", flex: 1 },
     { field: "employeeRank", headerName: "직급", flex: 1 },
-    {
-      field: "status",
-      headerName: "활동 중",
-      flex: 1,
-      renderCell: (params) => (
-        <CircleIcon
-          style={{
-            color: params.value === "로그인" ? colors.greenAccent[500] : colors.gray[500],
-          }}
-        />
-      ),
-    },
   ];
 
   return (
