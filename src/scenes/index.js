@@ -10,7 +10,6 @@ import Calendar from "./calendar";
 import Send from "./mail/sendMailbox.jsx";
 import Receive from "./mail/receiveMailbox.jsx";
 import Mine from "./mail/mineMailbox.jsx";
-import FAQ from "./faq";
 import Waste from "./mail/wasteMailbox.jsx";
 import Chat from "./chat/Chat";
 
@@ -29,6 +28,5 @@ export {
   Send,
   Receive,
   Mine,
-  FAQ,
   Waste,
 };

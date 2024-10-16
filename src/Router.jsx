@@ -11,7 +11,6 @@ import {
   Send,
   Receive,
   Waste,
-  FAQ,
   Calendar,
   Chat,
 } from "./scenes";
@@ -63,7 +62,6 @@ const AppRouter = () => {
             <Route path="/mailbox/2" element={<Waste />} />
             <Route path="/mailbox/3" element={<Mine />} />
             <Route path="/read/:mailType/:mailId" element={<DetailMail />} />
-            <Route path="/faq" element={<FAQ />} />
             <Route path="/approval-line-setup" element={<ApprovalLineSetup />} />
             <Route path="/mypage" element={<Mypage />} />
             <Route path="/my-info/edit" element={<MyInfoEdit />} />
