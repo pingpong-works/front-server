@@ -3,7 +3,6 @@ import { Avatar, Box, IconButton, Typography, useTheme } from "@mui/material";
 import { tokens } from "../../../theme";
 import { Menu, MenuItem, Sidebar, SubMenu } from "react-pro-sidebar";
 import {
-  BarChartOutlined,
   CalendarTodayOutlined,
   ChatBubbleOutline,
   ContactsOutlined,
@@ -28,7 +27,7 @@ import { ToggledContext } from "../../../App";
 import axios from "axios";
 import defaultAvatar from "../../../assets/images/avatar.png"; // 기본 이미지 경로
 
-const SideBar = () => {
+const SideBar = ({onUserInfoUpdate, setUserInfoUpdated }) => {
   const [collapsed, setCollapsed] = useState(false);
   const { toggled, setToggled } = useContext(ToggledContext);
   const theme = useTheme();
@@ -46,28 +45,33 @@ const SideBar = () => {
   const [avatar, setAvatar] = useState(defaultAvatar);  // 기본 이미지
 
   // API 호출하여 사용자 정보 가져오기
+  const fetchUserInfo = async () => {
+    try {
+      const response = await axios.get("http://localhost:8081/employees/my-info", {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+      });
+      const { name, departmentName, employeeRank, profilePicture, email } = response.data.data;
+      setUserInfo({ name, departmentName, employeeRank, profilePicture, email });
+
+      // 프로필 사진이 있으면 설정, 없으면 기본 이미지 사용
+      setAvatar(profilePicture || defaultAvatar);
+    } catch (error) {
+      console.error("Error fetching user info:", error);
+    }
+  };
+
   useEffect(() => {
-    const fetchUserInfo = async () => {
-      try {
-        const response = await axios.get("http://localhost:8081/employees/my-info", {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-          },
-        });
-        const { name, departmentName, employeeRank, profilePicture, email } = response.data.data;
-        setUserInfo({ name, departmentName, employeeRank, profilePicture, email });
-
-        // 프로필 사진이 있으면 설정, 없으면 기본 이미지 사용
-        if (profilePicture) {
-          setAvatar(profilePicture);
-        }
-      } catch (error) {
-        console.error("Error fetching user info:", error);
-      }
-    };
-
-    fetchUserInfo();
+    fetchUserInfo(); 
   }, []);
+
+  useEffect(() => {
+    if (onUserInfoUpdate) {
+      fetchUserInfo(); 
+      setUserInfoUpdated(false);
+    }
+  }, [onUserInfoUpdate]);
 
   // isAdmin 체크 시 userInfo.email이 존재할 때만
   const isAdmin = userInfo.email === "admin@pingpong-works.com";
@@ -110,6 +114,10 @@ const SideBar = () => {
   });
 
   const styles = getStyles(theme.palette.mode);
+
+  const handleImageError = () => {
+    setAvatar(defaultAvatar);
+  };
 
   return (
     <Sidebar
@@ -185,9 +193,10 @@ const SideBar = () => {
           }}
         >
           <Avatar
-            alt="avatar"
+            alt={userInfo.name}
             src={avatar}  // 프로필 사진 또는 기본 이미지
             sx={{ width: "100px", height: "100px" }}
+            onError={handleImageError}
           />
           <Box sx={{ textAlign: "center" }}>
             <Typography variant="h3" fontWeight="bold" color={colors.gray[100]}>
