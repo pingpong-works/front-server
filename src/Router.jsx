@@ -11,10 +11,8 @@ import {
   Send,
   Receive,
   Waste,
-  FAQ,
   Calendar,
   Chat,
-  TotalMail
 } from "./scenes";
 import ApprovalLineSetup from './components/ApprovalLineSetup';
 import Login from './scenes/login/login';
@@ -27,7 +25,7 @@ import ViewBoard from './scenes/boards/viewBoard';
 import UpdateBoard from './scenes/boards/updateBoard';
 import MailWrite from "./scenes/mail/mailWrite.jsx";
 import Notification from "./scenes/notification/notification.jsx"
-import SendDetailMail from "./scenes/mail/SendDetailMail.jsx";
+import DetailMail from "./scenes/mail/DetailMail.jsx";
 import SignUp from './scenes/signup/signup.jsx'
 import Document from './scenes/document/Document.jsx'
 import AdminRoute from './auth/AdminRoute';
@@ -58,16 +56,12 @@ const AppRouter = () => {
             <Route path="/updateBoard" element={<UpdateBoard />} />
             <Route path="/calendar" element={<Calendar />} />
             <Route path="/chat" element={<Chat />} />
-            <Route path="/totalMail" element={<TotalMail />} />
             <Route path="/new" element={<MailWrite />} />
-            <Route path="/mailbox/-1" element={<TotalMail />} />
             <Route path="/mailbox/0" element={<Receive />} />
             <Route path="/mailbox/1" element={<Send />} />
             <Route path="/mailbox/2" element={<Waste />} />
             <Route path="/mailbox/3" element={<Mine />} />
-            <Route path="/read/:mailType/:mailId" element={<SendDetailMail />} />
-            <Route path="/read/:mailType/:trashMailId" element={<SendDetailMail />} />
-            <Route path="/faq" element={<FAQ />} />
+            <Route path="/read/:mailType/:mailId" element={<DetailMail />} />
             <Route path="/approval-line-setup" element={<ApprovalLineSetup />} />
             <Route path="/mypage" element={<Mypage />} />
             <Route path="/my-info/edit" element={<MyInfoEdit />} />

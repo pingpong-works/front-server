@@ -106,6 +106,7 @@ const DocumentModal = ({ documentId, handleClose, fetchDocuments }) => {
 
     const handleCloseMessageModal = () => {
         setOpenMessageModal(false);
+         fetchDocumentData(); // 문서 데이터 갱신
     };
 
     const handleReWrite = () => {

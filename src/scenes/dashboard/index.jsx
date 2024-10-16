@@ -6,7 +6,7 @@ import {
   useTheme,
   List,
   ListItem,
-  ListItemText,
+  ListItemText, CircularProgress,
 } from "@mui/material";
 import {
   Header
@@ -31,6 +31,7 @@ function Dashboard() {
   const isXlDevices = useMediaQuery("(min-width: 1260px)");
   const isMdDevices = useMediaQuery("(min-width: 724px)");
   const [errorMessage, setErrorMessage] = useState("");
+  const [receivedMails, setReceivedMails] = useState([]);
 
   const [data, setData] = useState([]);
   const [page, setPage] = useState(0); 
@@ -63,6 +64,22 @@ function Dashboard() {
     overflow: "hidden",
     justifyContent: "center",
   };
+
+  // 최근 받은 메일 가져오기
+  useEffect(() => {
+    const fetchReceivedMails = async () => {
+      try {
+        const response = await axios.get("http://localhost:8083/mail/received?page=1&size=5&sort=receivedAt,DESC"); // 최근 받은 5개의 메일
+        setReceivedMails(response.data.data);
+        setLoading(false);
+      } catch (error) {
+        console.error("받은 메일함 조회 중 오류 발생: ", error);
+        setLoading(false);
+      }
+    };
+
+    fetchReceivedMails();
+  }, []);
 
   // 사용자 정보 가져오기
   useEffect(() => {
@@ -469,52 +486,64 @@ function Dashboard() {
           </Box>
         </Box>
 
-        {/* 최근 메일함 */}
-        <Box gridColumn={isXlDevices ? "span 4" : isMdDevices ? "span 6" : "span 3"}
-          gridRow="span 2"
-          sx={{ ...cardStyle, maxHeight: "400px", display: "flex", flexDirection: "column" }}>
+        {/* 최근 받은 메일 */}
+        <Box
+            gridColumn={isXlDevices ? "span 4" : isMdDevices ? "span 6" : "span 3"}
+            gridRow="span 2"
+            sx={{ ...cardStyle, maxHeight: "400px", display: "flex", flexDirection: "column" }}
+        >
           <Box borderBottom={`2px solid ${colors.primary[900]}`} p="15px" width="100%" sx={{ position: "sticky", top: 0, zIndex: 1 }}>
             <Typography color={colors.primary[100]} variant="h5" fontWeight="600" display="flex" alignItems="center">
               <Email sx={{ color: colors.primary[100], fontSize: "26px", mr: "10px" }} />
-              Recent Mail
+              최근 받은 메일
             </Typography>
           </Box>
 
-          <Box sx={{ overflowY: "auto", flex: 1 }}>
-            {mockTransactions.map((transaction, index) => (
-              <Box
-                key={`${transaction.txId}-${index}`}
-                display="flex"
-                alignItems="center"
-                justifyContent="space-between"
-                borderBottom={`2px solid ${colors.primary[900]}`}
-                p="15px"
-                width="100%"
-              >
-                <Box>
-                  <Typography
-                    color={colors.primary[100]}
-                    variant="h5"
-                    fontWeight="600"
-                  >
-                    {transaction.txId}
-                  </Typography>
-                  <Typography color={colors.primary[100]}>
-                    {transaction.user}
-                  </Typography>
-                </Box>
-                <Typography color={colors.gray[100]}>
-                  {transaction.date}
-                </Typography>
-                <Box
-                  bgcolor={colors.blueAccent[500]}
-                  p="5px 10px"
-                  borderRadius="4px"
-                >
-                  ${transaction.cost}
-                </Box>
-              </Box>
-            ))}
+          <Box width="100%" sx={{ overflowY: "auto", flex: 1 ,padding: "2px"}}>
+            {loading ? (
+                <CircularProgress />
+            ) : (
+                receivedMails.length > 0 ? (
+                    receivedMails.map((mail, index) => (
+                        <Box
+                            key={`${mail.mailId}-${index}`}
+                            display="flex"
+                            alignItems="center"
+                            justifyContent="space-between"
+                            borderBottom={`2px solid ${colors.primary[900]}`}
+                            p="15px"
+                            width="100%"
+                            sx={{ cursor: 'pointer' }}
+                            onClick={() => navigate(`/read/0/${mail.mailId}`)}
+                        >
+                          <Box>
+                            <Typography
+                                color={colors.primary[100]}
+                                variant="h5"
+                                fontWeight="600"
+                                noWrap
+                            >
+                              {mail.senderName || mail.senderEmail}
+                            </Typography>
+                            <Typography
+                                color={colors.primary[100]}
+                                variant="h5"
+                                fontWeight="600"
+                                noWrap>
+                              {mail.subject}
+                            </Typography>
+                          </Box>
+                          <Typography color={colors.gray[100]}>
+                            {new Date(mail.receivedAt).toLocaleDateString()}
+                          </Typography>
+                        </Box>
+                    ))
+                ) : (
+                    <Typography color={colors.primary[100]} p="15px" textAlign="center">
+                      받은 메일이 없습니다.
+                    </Typography>
+                )
+            )}
           </Box>
         </Box>
         {/* ---------------- Row 2 ---------------- */}

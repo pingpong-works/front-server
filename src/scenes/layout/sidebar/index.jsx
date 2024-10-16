@@ -249,12 +249,6 @@ const SideBar = () => {
               icon={<PersonOutlined />}
             />
             <Item
-              title="전체 메일함"
-              path="/mailbox/-1"
-              colors={colors}
-              icon={<BarChartOutlined />}
-            />
-            <Item
               title="받은 메일함"
               path="/mailbox/0"
               colors={colors}
