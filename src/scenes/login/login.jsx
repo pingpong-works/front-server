@@ -41,13 +41,6 @@ const Login = () => {
         }
     };
 
-    // Enter 키를 눌렀을 때 로그인 처리 함수
-    const handleKeyPress = (e) => {
-        if (e.key === 'Enter') {
-            handleLogin();
-        }
-    };
-
     useEffect(() => {
         const loggedInStatus = localStorage.getItem('accessToken');
         if (loggedInStatus) {
@@ -66,7 +59,6 @@ const Login = () => {
                             type="text"
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
-                            onKeyPress={handleKeyPress} // Enter 키 처리 함수 연결
                         />
                     </div>
                     <div>
@@ -75,7 +67,6 @@ const Login = () => {
                             type="password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            onKeyPress={handleKeyPress} // Enter 키 처리 함수 연결
                         />
                     </div>
                     {errorMessage && <p style={{ color: '#ff2c2c' }}>{errorMessage}</p>}
