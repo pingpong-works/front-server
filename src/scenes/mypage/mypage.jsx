@@ -287,18 +287,20 @@ const Mypage = () => {
         <Box mt={4} display="flex" justifyContent="center" gap={2}>
           <Button
             variant="contained"
-            color="success"
             onClick={checkIn}
-            sx={{ width: "200px" }}
+            sx={{ width: "200px",
+              bgcolor: colors.blueAccent[500]
+             }}
             disabled={isLoading}
           >
             출근
           </Button>
           <Button
             variant="contained"
-            color="error"
             onClick={checkOut}
-            sx={{ width: "200px" }}
+            sx={{ width: "200px" ,
+              bgcolor: colors.primary[300]
+            }}
             disabled={isLoading}
           >
             퇴근
@@ -315,6 +317,7 @@ const Mypage = () => {
             style: { backgroundColor: colors.blueAccent[500] },
           }}
           sx={{
+            color: colors.gray[200] ,
             '& .MuiTab-root': { color: colors.gray[200] },
             '& .Mui-selected': { color: colors.blueAccent[500] },
           }}
@@ -329,7 +332,8 @@ const Mypage = () => {
             component={Paper}
             p={3}
             elevation={3}
-            sx={{ backgroundColor: colors.gray[350] }}
+            sx={{ backgroundColor: colors.gray[350],
+             }}
           >
             <FullCalendar
               height="75vh"
