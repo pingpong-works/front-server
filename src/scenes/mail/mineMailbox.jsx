@@ -9,6 +9,14 @@ import { useEffect, useState } from "react";
 const Mine = () => {
     const theme = useTheme();
     const colors = tokens(theme.palette.mode);
+    const navigate = useNavigate();
+    useEffect(() => {
+      const accessToken = localStorage.getItem('accessToken');
+      if (!accessToken) {
+          alert('로그인이 필요합니다.');
+          navigate('/login');  // 로그인 페이지로 리다이렉트
+      }
+    }, [navigate]);
 
     const [list, setList] = useState([]);
     const [filteredData, setFilteredData] = useState([]);

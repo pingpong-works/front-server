@@ -35,6 +35,13 @@ function TemplateForm() {
     }
   };
 
+  useEffect(() => {
+    const accessToken = localStorage.getItem('accessToken');
+    if (!accessToken) {
+        alert('로그인이 필요합니다.');
+        navigate('/login');  // 로그인 페이지로 리다이렉트
+    }
+  }, [navigate]);
   // 필드 삭제 핸들러
   const handleDeleteField = (index) => {
     const updatedFields = fields.filter((_, i) => i !== index); // 인덱스를 기준으로 삭제

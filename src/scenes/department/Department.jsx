@@ -17,6 +17,14 @@ const Department = () => {
   const [loading, setLoading] = useState(false);
   const [openConfirmDialog, setOpenConfirmDialog] = useState(false); // 재차 확인을 위한 Dialog 상태 관리
 
+  useEffect(() => {
+    const accessToken = localStorage.getItem('accessToken');
+    if (!accessToken) {
+        alert('로그인이 필요합니다.');
+        navigate('/login');  // 로그인 페이지로 리다이렉트
+    }
+  }, [navigate]);
+  
   //   함수
   const handleCreateDepartment = async () => {
     setLoading(true);

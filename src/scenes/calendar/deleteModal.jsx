@@ -2,6 +2,16 @@ import React from 'react';
 import {Box, Button, Modal, Typography} from "@mui/material";
 
 const DeleteModal = ({ isOpen, onCancel, onSubmit, title}) => {
+    const navigate = useNavigate();
+    useEffect(() => {
+      const accessToken = localStorage.getItem('accessToken');
+      if (!accessToken) {
+          alert('로그인이 필요합니다.');
+          navigate('/login');  // 로그인 페이지로 리다이렉트
+      }
+    }, [navigate]);
+
+    
     return (
         <Modal open={isOpen} onClose={onCancel}>
             <Box sx={{
