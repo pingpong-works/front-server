@@ -300,7 +300,6 @@ const SideBar = ({onUserInfoUpdate, setUserInfoUpdated }) => {
           <Item title="전자결재" path="/elec" icon={<ContactsOutlined />} />
           <Item title="캘린더" path="/calendar" icon={<CalendarTodayOutlined />} />
           <Item title="게시판" path="/boards" icon={<ReceiptOutlined />} />
-          <Item title="문의사항" path="/faq" icon={<HelpOutlineOutlined />} />
         </Menu>
         <Typography
           variant="h6"
