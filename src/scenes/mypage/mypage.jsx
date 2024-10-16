@@ -76,6 +76,14 @@ const Mypage = () => {
   const navigate = useNavigate();
   const isAdmin = userInfo.email === "admin@pingpong-works.com";
   
+  useEffect(() => {
+    const accessToken = localStorage.getItem('accessToken');
+    if (!accessToken) {
+        alert('로그인이 필요합니다.');
+        navigate('/login');  // 로그인 페이지로 리다이렉트
+    }
+  }, [navigate]);
+  
   // 사용자 정보 가져오기
   useEffect(() => {
     const fetchUserInfo = async () => {

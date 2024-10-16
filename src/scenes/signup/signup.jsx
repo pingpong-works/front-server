@@ -26,6 +26,14 @@ const SignUp = () => {
   const [successMessage, setSuccessMessage] = useState("");
   const [passwordError, setPasswordError] = useState(""); // 비밀번호 오류 메시지
 
+  useEffect(() => {
+    const accessToken = localStorage.getItem('accessToken');
+    if (!accessToken) {
+        alert('로그인이 필요합니다.');
+        navigate('/login');  // 로그인 페이지로 리다이렉트
+    }
+  }, [navigate]);
+
   // 직급 목록
   const ranks = [
     { value: "INTERN", label: "인턴" },
