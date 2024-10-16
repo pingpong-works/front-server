@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Box, Button, Modal, TextField, Typography, Checkbox, FormControl, InputLabel, MenuItem, Select, FormControlLabel, useTheme } from '@mui/material';
 import axios from 'axios';
 import { tokens } from "../../theme";
-
+import { useNavigate } from "react-router-dom";
 
 
 const AddModal = ({ isOpen, onCancel, onSubmit }) => {

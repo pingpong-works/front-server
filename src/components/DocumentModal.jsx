@@ -7,7 +7,6 @@ import ApprovalTable from "./ApprovalTable";
 import getEmployee from "../request/GetEmployee";
 import Swal from "sweetalert2";
 import { tokens } from "../theme";
-import { color } from "@mui/system";
 
 const DocumentModal = ({ documentId, handleClose, fetchDocuments }) => {
     const theme = useTheme();
@@ -165,6 +164,12 @@ const DocumentModal = ({ documentId, handleClose, fetchDocuments }) => {
         }
     };
 
+    // 날짜 포맷팅 함수
+    const formatDate = (dateString) => {
+        const date = new Date(dateString);
+        return date.toISOString().split('T')[0];  // '2024-10-28T12:02' -> '2024-10-28'
+    };
+
     return (
         <Modal open={isOpen} onClose={handleCloseModal}>
             <Box sx={{
@@ -231,7 +236,7 @@ const DocumentModal = ({ documentId, handleClose, fetchDocuments }) => {
                             <TableCell sx={{ border: `1px solid ${mode === 'dark' ? theme.palette.grey[400] : theme.palette.grey[700]}`, fontWeight: "bold", width: "20%", color: mode === 'dark' ? 'white' : 'black' }}>문서번호</TableCell>
                             <TableCell sx={{ border: `1px solid ${mode === 'dark' ? theme.palette.grey[400] : theme.palette.grey[700]}`, color: mode === 'dark' ? 'white' : 'black' }}>{documentData.documentCode}</TableCell>
                             <TableCell sx={{ border: `1px solid ${mode === 'dark' ? theme.palette.grey[400] : theme.palette.grey[700]}`, fontWeight: "bold", color: mode === 'dark' ? 'white' : 'black' }}>작성일자</TableCell>
-                            <TableCell sx={{ border: `1px solid ${mode === 'dark' ? theme.palette.grey[400] : theme.palette.grey[700]}`, color: mode === 'dark' ? 'white' : 'black' }}>{documentData.createdAt.substring(0, 10)}</TableCell>
+                            <TableCell sx={{ border: `1px solid ${mode === 'dark' ? theme.palette.grey[400] : theme.palette.grey[700]}`, color: mode === 'dark' ? 'white' : 'black' }}>{formatDate(documentData.createdAt)}</TableCell>
                         </TableRow>
                         <TableRow>
                             <TableCell sx={{ border: `1px solid ${mode === 'dark' ? theme.palette.grey[400] : theme.palette.grey[700]}`, fontWeight: "bold", color: mode === 'dark' ? 'white' : 'black' }}>작성자</TableCell>
@@ -246,7 +251,7 @@ const DocumentModal = ({ documentId, handleClose, fetchDocuments }) => {
                                 <TableRow key={index}>
                                     <TableCell sx={{ border: `1px solid ${mode === 'dark' ? theme.palette.grey[400] : theme.palette.grey[700]}`, fontWeight: "bold", color: mode === 'dark' ? 'white' : 'black' }}>{field}</TableCell>
                                     <TableCell colSpan={3} sx={{ border: `1px solid ${mode === 'dark' ? theme.palette.grey[400] : theme.palette.grey[700]}`, color: mode === 'dark' ? 'white' : 'black' }}>
-                                        {documentData.customFields[field]}
+                                        {documentData.customFields[field]?.includes('T') ? formatDate(documentData.customFields[field]) : documentData.customFields[field]}
                                     </TableCell>
                                 </TableRow>
                             ))}

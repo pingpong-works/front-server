@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Button, Modal, TextField, Typography, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import axios from 'axios';
+import { useNavigate } from "react-router-dom";
 
 const UpdateModal = ({ isOpen, eventDetails, onCancel, onSubmit }) => {
 

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Box, Button, Modal, Typography } from '@mui/material';
 import axios from 'axios';
 import { tokens } from '../../theme'; 
+import { useNavigate } from "react-router-dom";
 
 const ViewModal = ({ isOpen, eventDetails, onCancel, onUpdate, onDelete }) => {
   const [purpose, setPurpose] = useState('');
