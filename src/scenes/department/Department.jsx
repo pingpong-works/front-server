@@ -35,6 +35,9 @@ const Department = () => {
       );
       setSuccessMessage("부서가 성공적으로 생성되었습니다.");
       setDepartmentName(""); // 입력 필드 초기화
+
+      // 부서가 생성되면 /department-management 페이지로 이동
+      navigate("/department-management");
     } catch (error) {
       setErrorMessage("부서 생성 중 오류가 발생했습니다.");
     } finally {

@@ -32,6 +32,7 @@ import AdminRoute from './auth/AdminRoute';
 import TemplateForm from './scenes/document/TemplateForm.jsx';
 import Manage from "./scenes/manage/Manage.jsx";
 import Department from "./scenes/department/Department.jsx";
+import DepartmentManagement from "./scenes/department/DepartmentManagement.jsx";
 
 const AppRouter = () => {
   return (
@@ -72,6 +73,7 @@ const AppRouter = () => {
             <Route path="/document" element={<AdminRoute><Document /></AdminRoute>} />
             <Route path="/manage" element={<AdminRoute><Manage /></AdminRoute>} />
             <Route path="/department" element={<AdminRoute><Department /></AdminRoute>} />
+            <Route path="/department-management" element={<AdminRoute><DepartmentManagement /></AdminRoute>} />
 
           </Route>
         </Routes>
