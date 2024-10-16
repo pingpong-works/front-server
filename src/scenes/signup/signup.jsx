@@ -92,7 +92,7 @@ const SignUp = () => {
       });
       setSuccessMessage("계정이 성공적으로 생성되었습니다.");
       setTimeout(() => {
-        navigate("/mypage"); // 성공 후 마이페이지로 이동
+        navigate("/team"); // 성공 후 마이페이지로 이동
       }, 2000);
     } catch (error) {
       setErrorMessage("계정 생성에 실패했습니다.");

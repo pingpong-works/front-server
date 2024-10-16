@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Box, Typography, useTheme, Modal, TextField, Button, Select, MenuItem } from "@mui/material";
+import { Box, Typography, useTheme, Modal, TextField, Button, Select, MenuItem, FormControl, InputLabel } from "@mui/material";
 import { Header } from "../../components";
 import { DataGrid } from "@mui/x-data-grid";
 import { tokens } from "../../theme";
@@ -94,10 +94,8 @@ const Manage = () => {
         '부장': 'DIRECTOR'
       };
   
-      // 매핑된 직급 적용
       const mappedRank = rankMapping[employeeData.employeeRank] || employeeData.employeeRank;
   
-      // 기존 직급을 포함한 직원 정보를 상태에 저장
       setSelectedEmployee({
         ...employeeData,
         employeeRank: mappedRank, // 모달에 표시될 기존 직급
@@ -160,19 +158,21 @@ const Manage = () => {
       {/* 부서 선택 드롭다운 */}
       <Box mb={3}>
         <Typography variant="h6">부서를 선택하세요:</Typography>
-        <Select
-          value={selectedDepartment}
-          onChange={(e) => setSelectedDepartment(e.target.value)}
-          displayEmpty
-          fullWidth
-        >
-          <MenuItem value="">전체 부서</MenuItem>
-          {departments.map((dept) => (
-            <MenuItem key={dept.id} value={dept.id}>
-              {dept.name}
-            </MenuItem>
-          ))}
-        </Select>
+        <FormControl sx={{ minWidth: 200, marginBottom: "20px", fullWidth: true }}>
+          <Select
+            value={selectedDepartment}
+            onChange={(e) => setSelectedDepartment(e.target.value)}
+            displayEmpty
+            fullWidth
+          >
+            <MenuItem value="">전체 부서</MenuItem>
+            {departments.map((dept) => (
+              <MenuItem key={dept.id} value={dept.id}>
+                {dept.name}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
       </Box>
 
       <Box
