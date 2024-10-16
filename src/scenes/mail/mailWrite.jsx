@@ -89,20 +89,28 @@ const MailWrite = () => {
   }, [quillRef]);
 
   return (
-      <Box m="50px">
-        <Box mb={3}> {/* 아래에 margin을 추가 */}
+      <Box m="20px">
+        <Box mb={3}> 
           <Typography
-              variant="h1"
+              variant="h2"
               sx={{
-                fontSize: "3.0rem", // 폰트 크기 키우기
-                fontWeight: "bold", // 폰트 두께 조절
-                color: "white", // 텍스트 색상
-                marginBottom: "50px", // 아래 여백 추가
+              
+                fontWeight: "bold", 
+                color: "white", 
+                marginBottom: "20px", 
               }}
           >
-            메일 쓰기
+            메일 작성
           </Typography>
         </Box>
+        <Box
+        sx={{
+          backgroundColor: theme.palette.mode === 'dark' ? '#b6cef9a4' : '#f5f5f5', 
+          padding: '20px',
+          borderRadius: '10px',
+          boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.1)' 
+        }}
+      >
         <Formik
             onSubmit={handleFormSubmit}
             initialValues={initialValues}
@@ -182,7 +190,7 @@ const MailWrite = () => {
                 {/*    helperText={touched.body && errors.body}*/}
                 {/*    sx={{ mb: 2 }}*/}
                 {/*/>*/}
-                <Button variant="contained" color="secondary" component="label" startIcon={<AttachFileIcon />} sx={{ mb: 2 }}>
+                <Button variant="contained" component="label" startIcon={<AttachFileIcon />} sx={{ mb: 2, bgcolor: colors.blueAccent[500] }}>
                   파일첨부
                   <input type="file" hidden />
                 </Button>
@@ -191,17 +199,18 @@ const MailWrite = () => {
                 <div ref={quillRef} style={{ height: '300px', marginBottom: '20px', border: '1px solid #ccc', borderRadius: '5px' }} />
 
                 <Box display="flex" alignItems="center" justifyContent="flex-end" gap="10px" mt="20px">
-                  <Button type="submit" color="third" variant="contained">
+                  <Button type="submit" sx={{bgcolor:colors.gray[500]}} variant="contained">
                     임시저장
                   </Button>
-                  <Button type="submit" color="third" variant="contained">
+                  <Button type="submit"  variant="contained">
                     보내기
-                  </Button>
-                </Box>
-              </form>
+                    </Button>
+              </Box>
+            </form>
           )}
         </Formik>
       </Box>
+    </Box>
   );
 };
 

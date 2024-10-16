@@ -30,6 +30,10 @@ import getDocsTypeAllRequest from '../request/GetDocsType';
 import axios from 'axios';
 import { useTheme } from '@mui/material/styles';
 import { tokens } from "../theme";
+import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker'; 
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'; 
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'; 
+import dayjs from 'dayjs'; 
 
 const NewDocumentForm = ({ open, handleClose, fetchDocuments }) => {
     const theme = useTheme();
@@ -37,7 +41,7 @@ const NewDocumentForm = ({ open, handleClose, fetchDocuments }) => {
 
     const [title, setTitle] = useState('');  // 문서 제목
     const [content, setContent] = useState('');  // 문서 내용
-    const [customFields, setCustomFields] = useState({});  // 문서의 커스텀 필드
+    const [customFields, setCustomFields] = useState({dayTime:dayjs});  // 문서의 커스텀 필드
     const [approvalLines, setApprovalLines] = useState([]);  // 결재라인
     const [workflowId, setWorkflowId] = useState(null);  // 결재라인 워크플로우 ID
     const [openApprovalLineModal, setOpenApprovalLineModal] = useState(false);  // 결재라인 모달 상태
