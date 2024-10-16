@@ -90,14 +90,14 @@ const MailWrite = () => {
 
   return (
       <Box m="20px">
-        <Box mb={3}> {/* 아래에 margin을 추가 */}
+        <Box mb={3}> 
           <Typography
               variant="h2"
               sx={{
               
-                fontWeight: "bold", // 폰트 두께 조절
-                color: "white", // 텍스트 색상
-                marginBottom: "20px", // 아래 여백 추가
+                fontWeight: "bold", 
+                color: "white", 
+                marginBottom: "20px", 
               }}
           >
             메일 작성
@@ -105,10 +105,10 @@ const MailWrite = () => {
         </Box>
         <Box
         sx={{
-          backgroundColor: theme.palette.mode === 'dark' ? '#b6cef9a4' : '#f5f5f5', // 다크모드 및 라이트모드 배경색 설정
+          backgroundColor: theme.palette.mode === 'dark' ? '#b6cef9a4' : '#f5f5f5', 
           padding: '20px',
-          borderRadius: '10px', // 모서리를 둥글게
-          boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.1)' // 박스에 그림자 추가
+          borderRadius: '10px',
+          boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.1)' 
         }}
       >
         <Formik

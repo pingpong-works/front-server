@@ -69,7 +69,8 @@ const Send = () => {
 
     return (
         <Box p={3}>
-            <Typography variant="h2" mb={2}>보낸 메일함 (총 {totalElements}개)</Typography>
+            <Typography variant="h2" mb={2}>보낸 메일함 </Typography>
+            <Typography variant="h5" mb={2}>총 {totalElements}개</Typography>
             <Box display="flex" flexDirection="column">
                 {sentMails.map((mail, index) => (
                     <Box
@@ -77,7 +78,7 @@ const Send = () => {
                         display="grid"
                         gridTemplateColumns="40px 40px 200px auto 150px 40px"
                         alignItems="center"
-                        p={2}
+                        p={1}
                         borderBottom="1px solid #ccc"
                     >
                         <Checkbox />
