@@ -8,6 +8,7 @@ import TableModal from '../../components/TableModal';
 import DocumentModal from "../../components/DocumentModal";
 import NewDocumentForm from '../../components/NewDocumentForm';
 import axios from 'axios';
+import { useNavigate } from "react-router-dom";
 
 const Elec = () => {
     const theme = useTheme();
@@ -26,6 +27,7 @@ const Elec = () => {
     const [selectedRows, setSelectedRows] = useState([]);
     const [isAdmin, setIsAdmin] = useState(false);
     const navigate = useNavigate();
+
     useEffect(() => {
       const accessToken = localStorage.getItem('accessToken');
       if (!accessToken) {

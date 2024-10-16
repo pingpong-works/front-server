@@ -17,6 +17,7 @@ import { tokens } from "../../theme";
 import { Header } from "../../components";
 import { formatDate } from "@fullcalendar/core";
 import useModal from "./useModal";
+import { useNavigate } from "react-router-dom";
 
 const Calendar = () => {
   const theme = useTheme();

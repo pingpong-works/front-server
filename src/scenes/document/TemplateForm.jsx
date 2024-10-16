@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { tokens } from "../../theme";
 import { Button, TextField, Box, Typography, useTheme, MenuItem, Select, FormControl, InputLabel, IconButton } from "@mui/material";
@@ -87,9 +87,19 @@ function TemplateForm() {
           label="템플릿 이름"
           variant="outlined"
           fullWidth
+          sx={{
+            marginBottom: "20px",
+            '& .MuiOutlinedInput-root': {
+              '&:hover fieldset': {
+                borderColor: 'gray', // 호버 시 테두리 색상 유지
+              },
+              '&.Mui-focused fieldset': {
+                borderColor: 'gray', // 포커스 시 테두리 색상 유지
+              },
+            }
+          }}
           value={templateName}
           onChange={(e) => setTemplateName(e.target.value)}
-          sx={{ marginBottom: "20px" }}
         />
 
         {/* 필드 추가 입력 */}
@@ -97,6 +107,16 @@ function TemplateForm() {
           <TextField
             label="필드 이름"
             variant="outlined"
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                '&:hover fieldset': {
+                  borderColor: 'gray', // 호버 시 테두리 색상 유지
+                },
+                '&.Mui-focused fieldset': {
+                  borderColor: 'gray', // 포커스 시 테두리 색상 유지
+                },
+              }
+            }}
             value={newFieldName}
             onChange={(e) => setNewFieldName(e.target.value)}
           />
@@ -107,6 +127,17 @@ function TemplateForm() {
               labelId="field-type-label"
               value={newFieldType}
               label="필드 타입"
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  '&:hover fieldset': {
+                    color: 'gray',
+                    borderColor: 'gray',
+                  },
+                  '&.Mui-focused fieldset': {
+                    borderColor: 'gray',
+                  },
+                }
+              }}
               onChange={(e) => setNewFieldType(e.target.value)}
             >
               {fieldTypes.map((type, index) => (

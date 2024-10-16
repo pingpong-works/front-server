@@ -1,8 +1,11 @@
 import React from 'react';
 import {Box, Button, Modal, Typography} from "@mui/material";
+import { useNavigate } from "react-router-dom";
 
 const DeleteModal = ({ isOpen, onCancel, onSubmit, title}) => {
+    
     const navigate = useNavigate();
+    
     useEffect(() => {
       const accessToken = localStorage.getItem('accessToken');
       if (!accessToken) {
