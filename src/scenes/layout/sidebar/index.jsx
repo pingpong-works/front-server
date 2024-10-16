@@ -1,7 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import { Avatar, Box, IconButton, Typography, useTheme } from "@mui/material";
 import { tokens } from "../../../theme";
-import { Link } from "react-router-dom";
 import { Menu, MenuItem, Sidebar, SubMenu } from "react-pro-sidebar";
 import {
   CalendarTodayOutlined,
