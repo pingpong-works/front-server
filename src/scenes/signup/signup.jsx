@@ -219,7 +219,7 @@ const SignUp = () => {
             <Button
               variant="contained"
               color="secondary"
-              onClick={() => navigate("/")}
+              onClick={() => navigate("/team")}
               sx={{
                 minWidth: "150px",
               }}
