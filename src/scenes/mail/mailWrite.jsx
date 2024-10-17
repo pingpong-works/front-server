@@ -121,7 +121,7 @@ const MailWrite = () => {
               sx={{
               
                 fontWeight: "bold", 
-                color: "white", 
+                color: colors.primary[100],
                 marginBottom: "20px", 
               }}
           >
@@ -198,9 +198,9 @@ const MailWrite = () => {
                 <div ref={quillRef} style={{ height: '300px', marginBottom: '20px', border: '1px solid #ccc', borderRadius: '5px' }} />
 
                 <Box display="flex" alignItems="center" justifyContent="flex-end" gap="10px" mt="20px">
-                  <Button type="submit" sx={{bgcolor:colors.gray[500]}} variant="contained">
-                    임시저장
-                  </Button>
+                  {/*<Button type="submit" sx={{bgcolor:colors.gray[500]}} variant="contained">*/}
+                  {/*  임시저장*/}
+                  {/*</Button>*/}
                   <Button type="submit"  variant="contained">
                     보내기
                     </Button>

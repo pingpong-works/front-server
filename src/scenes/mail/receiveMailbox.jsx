@@ -8,6 +8,7 @@ import {
     Button,
     CircularProgress,
     useTheme,
+    TextField,
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import StarBorderIcon from '@mui/icons-material/StarBorder';
@@ -24,30 +25,35 @@ const Receive = () => {
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [totalElements, setTotalElements] = useState(0);
-    
-    useEffect(() => {
-      const accessToken = localStorage.getItem('accessToken');
-      if (!accessToken) {
-          alert('로그인이 필요합니다.');
-          navigate('/login');  // 로그인 페이지로 리다이렉트
-      }
-    }, [navigate]);
+    const [search, setSearch] = useState(''); // 검색어 상태 추가
 
     useEffect(() => {
-        const fetchReceivedMails = async () => {
-            try {
-                const response = await axios.get(`http://localhost:8083/mail/received?page=${page}&size=10&sort=receivedAt,DESC`);
-                setReceivedMails(response.data.data);
-                setTotalPages(response.data.pageInfo.totalPages);
-                setTotalElements(response.data.pageInfo.totalElements);
-                setLoading(false);
-            } catch (error) {
-                console.error('받은 메일함 조회 중 오류 발생: ', error);
-                setLoading(false);
-            }
-        };
-        fetchReceivedMails();
-    }, [page]);
+        const accessToken = localStorage.getItem('accessToken');
+        if (!accessToken) {
+            alert('로그인이 필요합니다.');
+            navigate('/login');  // 로그인 페이지로 리다이렉트
+        }
+    }, [navigate]);
+
+    // 메일 데이터 가져오는 함수
+    const fetchReceivedMails = async (searchQuery = '') => {
+        try {
+            const response = await axios.get(
+                `http://localhost:8083/mail/received?page=${page}&size=10&sort=receivedAt,DESC&search=${searchQuery}`
+            );
+            setReceivedMails(response.data.data);
+            setTotalPages(response.data.pageInfo.totalPages);
+            setTotalElements(response.data.pageInfo.totalElements);
+            setLoading(false);
+        } catch (error) {
+            console.error('받은 메일함 조회 중 오류 발생: ', error);
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchReceivedMails(search); // 검색어가 변경될 때마다 데이터를 불러옴
+    }, [page, search]); // page나 search 값이 바뀔 때마다 호출
 
     const handleDelete = async (mailId) => {
         try {
@@ -71,25 +77,48 @@ const Receive = () => {
     return (
         <Box p={3}>
             <Typography
-              variant="h2"
-              sx={{
-                fontWeight: "bold",
-                color: "white", 
-                marginBottom: "20px", 
-              }}
-          >받은 메일함</Typography>
-          <Typography variant="h4"  sx={{  ml:"5px", mb: "20px", }} > 총 {totalElements} 개</Typography>
+                variant="h2"
+                sx={{
+                    fontWeight: "bold",
+                    color: colors.primary[100],
+                    marginBottom: "20px",
+                }}
+            >
+                받은 메일함
+            </Typography>
+            <Typography variant="h4"  sx={{  ml:"5px", mb: "20px", }} >
+                총 {totalElements} 개
+            </Typography>
+
+            {/* 검색 입력 필드 추가 */}
+            <Box display="flex" mb={2}>
+                <TextField
+                    label="검색"
+                    variant="outlined"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)} // 검색어 상태 업데이트
+                    sx={{ width: "300px", marginRight: "10px" }}
+                />
+                <Button
+                    variant="contained"
+                    onClick={() => fetchReceivedMails(search)} // 검색 버튼 클릭 시 호출
+                >
+                    검색
+                </Button>
+            </Box>
+
             <Box display="flex" flexDirection="column">
                 {receivedMails.map((mail, index) => (
-                    <Box sx={{ bgcolor : colors.gray[350]}}
-                        key={mail.mailId}
-                        display="grid"
-                        borderRadius={4}
-                        gridTemplateColumns="30px 60px 250px auto 250px 30px"
-                        alignItems="center"
-                        p={2}
-                        borderBottom="1px solid #cccccc87"
-                        
+                    <Box sx={{
+                        bgcolor : colors.gray[450]}}
+                         key={mail.mailId}
+                         display="grid"
+                         borderRadius={1}
+                         gridTemplateColumns="30px 60px 250px auto 250px 30px"
+                         alignItems="center"
+                         p={1}
+                         borderBottom="1px solid #cccccc87"
+
                     >
                         <Checkbox />
                         <IconButton>
@@ -100,7 +129,11 @@ const Receive = () => {
                             variant="h6"
                             fontWeight="bold"
                             noWrap
-                            sx={{ cursor: 'pointer' }}
+                            sx={{
+                                cursor: 'pointer',
+                                fontWeight: mail.isRead ? 'normal' : 'bold', // 읽었으면 'normal', 읽지 않았으면 'bold'
+                                color: mail.isRead ? 'gray' : 'black', // 읽었으면 회색, 읽지 않았으면 검정색
+                            }}
                             onClick={() => navigate(`/read/0/${mail.mailId}`)} // mailType 0: received mail
                         >
                             {mail.subject}
@@ -114,6 +147,7 @@ const Receive = () => {
                     </Box>
                 ))}
             </Box>
+
             <Box display="flex" justifyContent="center" mt={3}>
                 {[...Array(totalPages)].map((_, index) => (
                     <Button

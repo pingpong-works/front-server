@@ -21,7 +21,7 @@ import {
   PeopleAltRounded,
   DirectionsCar,
   MeetingRoom,
-  Business as BusinessIcon,
+  Business as BusinessIcon, DraftsOutlined, SendOutlined, InboxOutlined, CreateOutlined, DeleteOutline,
 } from "@mui/icons-material";
 import Item from "./Item";
 import { ToggledContext } from "../../../App";
@@ -257,31 +257,31 @@ const SideBar = ({onUserInfoUpdate, setUserInfoUpdated }) => {
               title="메일 작성"
               path="/new"
               colors={colors}
-              icon={<PersonOutlined />}
+              icon={<CreateOutlined  />}
             />
             <Item
               title="받은 메일함"
               path="/mailbox/0"
               colors={colors}
-              icon={<DonutLargeOutlined />}
+              icon={<InboxOutlined  />}
             />
             <Item
               title="보낸 메일함"
               path="/mailbox/1"
               colors={colors}
-              icon={<TimelineOutlined />}
+              icon={<SendOutlined  />}
             />
             <Item
               title="내게 쓴 메일함"
               path="/mailbox/3"
               colors={colors}
-              icon={<WavesOutlined />}
+              icon={<DraftsOutlined  />}
             />
             <Item
               title="휴지통"
               path="/mailbox/2"
               colors={colors}
-              icon={<MapOutlined />}
+              icon={<DeleteOutline  />}
             />
           </SubMenu>
           <Item title="메신저" path="/chat" icon={<ChatBubbleOutline />} />

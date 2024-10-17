@@ -80,56 +80,59 @@ const DetailMail = () => {
     }
 
     return (
-        <Box p={5} sx={{bgcolor : colors.gray[350], borderRadius: "10px", width: "90%"}}>
-            <Box display="flex" alignItems="center" mb={5}>
-                <IconButton onClick={() => navigate(-1)}>
-                    <ArrowBackIcon />
-                </IconButton>
-                <Typography variant="h2" color="textSecondary" fontWeight="bold">
-                    {mailDetail.subject}
-                </Typography>
-            </Box>
+        <Box display="flex" justifyContent="center">
+            <Box
+                p={5} sx={{bgcolor : colors.gray[350], borderRadius: "10px", width: "85%"}}>
+                <Box display="flex" alignItems="center" mb={5}>
+                    <IconButton onClick={() => navigate(-1)}>
+                        <ArrowBackIcon />
+                    </IconButton>
+                    <Typography variant="h2" color="textSecondary" fontWeight="bold">
+                        {mailDetail.subject}
+                    </Typography>
+                </Box>
 
-            <Box mb={5}>
-                <Typography variant="h5" color="textSecondary" mt={3}>
-                    <strong>보낸 사람:</strong> {mailDetail.senderName} ({mailDetail.senderEmail})
-                </Typography>
-                <Typography variant="h5" color="textSecondary" mt={3}>
-                    <strong>받는 사람:</strong> {mailDetail.recipientName} ({mailDetail.recipientEmail})
-                </Typography>
-                <Typography variant="h5" color="textSecondary" mt={3}>
-                    {new Date(
-                        mailType === '0' ? mailDetail.receivedAt : mailDetail.sentAt
-                    ).toLocaleString()}
-                </Typography>
-            </Box>
+                <Box mb={5}>
+                    <Typography variant="h5" color="textSecondary" mt={3}>
+                        <strong>보낸 사람:</strong> {mailDetail.senderName} ({mailDetail.senderEmail})
+                    </Typography>
+                    <Typography variant="h5" color="textSecondary" mt={3}>
+                        <strong>받는 사람:</strong> {mailDetail.recipientName} ({mailDetail.recipientEmail})
+                    </Typography>
+                    <Typography variant="h5" color="textSecondary" mt={3}>
+                        {new Date(
+                            mailType === '0' ? mailDetail.receivedAt : mailDetail.sentAt
+                        ).toLocaleString()}
+                    </Typography>
+                </Box>
 
-            <Box p={2} border="1px solid #ccc" borderRadius="5px" bgcolor={colors.primary[400]}>
-                {/* Quill 에디터로 작성된 HTML 콘텐츠를 안전하게 렌더링 */}
-                <Typography
-                    variant="h3"
-                    dangerouslySetInnerHTML={renderMailBody(mailDetail.body)}  // HTML 콘텐츠 렌더링
-                    sx={{ whiteSpace: 'pre-wrap' }} // 줄바꿈 유지
-                />
-            </Box>
+                <Box p={2} border="1px solid #ccc" borderRadius="5px" bgcolor={colors.primary[400]}>
+                    {/* Quill 에디터로 작성된 HTML 콘텐츠를 안전하게 렌더링 */}
+                    <Typography
+                        variant="h3"
+                        dangerouslySetInnerHTML={renderMailBody(mailDetail.body)}  // HTML 콘텐츠 렌더링
+                        sx={{ whiteSpace: 'pre-wrap' }} // 줄바꿈 유지
+                    />
+                </Box>
 
-            <Box display="flex" justifyContent="flex-end"  gap={2} mt={3}>
-                <Button
-                    variant="outlined"
-                    sx={{bgcolor: colors.primary[100]}}
-                    onClick={() => navigate(`/read/${mailType}/${parseInt(mailId) - 1}`)}
-                    disabled={parseInt(mailId) <= 1}
-                >
-                    이전 메일
-                </Button>
-                <Button
-                    variant="outlined"
-                    sx = {{bgcolor: colors.gray[100]}}
-                    onClick={() => navigate(`/read/${mailType}/${parseInt(mailId) + 1}`)}
-                    disabled={parseInt(mailId) >= 617} // 총 메일 개수를 기준으로 설정
-                >
-                    다음 메일
-                </Button>
+                <Box display="flex" justifyContent="flex-end"  gap={2} mt={3}>
+                    <Button
+                        variant="outlined"
+                        sx={{bgcolor: colors.gray[200]}}
+                        onClick={() => navigate(`/read/${mailType}/${parseInt(mailId) - 1}`)}
+                        disabled={parseInt(mailId) <= 1}
+                    >
+                        이전 메일
+                    </Button>
+                    <Button
+                        variant="outlined"
+                        sx = {{bgcolor: colors.gray[200]}}
+                        onClick={() => navigate(`/read/${mailType}/${parseInt(mailId) + 1}`)}
+                        disabled={parseInt(mailId) >= 617} // 총 메일 개수를 기준으로 설정
+                    >
+                        다음 메일
+                    </Button>
+                </Box>
             </Box>
         </Box>
     );

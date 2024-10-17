@@ -53,7 +53,7 @@ const createCarModal = ({ open, onClose, onCarAdded }) => {
     "image/webp",
     "image/svg+xml",
   ];
-  const maxFileSize = 100 * 1024 * 1024; // 100MB
+  const maxFileSize = 10 * 1024 * 1024;
 
   // 이미지 업로드 처리
   const handleImageUpload = (e) => {
