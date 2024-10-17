@@ -4,6 +4,7 @@ import DeleteModal from "./deleteModal.jsx";
 import ViewModal from "./viewModal.jsx";
 import UpdateModal from "./updateModal.jsx";
 import axios from 'axios';
+import { useNavigate } from "react-router-dom";
 
 const useModal = (fetchEvents) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -12,6 +13,7 @@ const useModal = (fetchEvents) => {
   const [modalType, setModalType] = useState('view');
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const navigate = useNavigate();
+  
   useEffect(() => {
     const accessToken = localStorage.getItem('accessToken');
     if (!accessToken) {

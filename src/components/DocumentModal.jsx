@@ -1,13 +1,11 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { useTheme, Box, Modal, Typography, Table, TableBody, TableCell, TableRow, IconButton, Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField } from "@mui/material";
+import { useTheme, Box, Modal, Typography, Table, TableBody, TableCell, TableRow, IconButton, Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Snackbar, Alert } from "@mui/material";
 import CloseIcon from '@mui/icons-material/Close';
 import RewirteDocumentForm from './RewriteDocumentForm';
 import ApprovalTable from "./ApprovalTable";
 import getEmployee from "../request/GetEmployee";
-import Swal from "sweetalert2";
 import { tokens } from "../theme";
-import { color } from "@mui/system";
 
 const DocumentModal = ({ documentId, handleClose, fetchDocuments }) => {
     const theme = useTheme();
@@ -20,6 +18,11 @@ const DocumentModal = ({ documentId, handleClose, fetchDocuments }) => {
     const [openRewirteDocumentForm, setOpenRewirteDocumentForm] = useState(false);
     const [selectedApprovalId, setSelectedApprovalId] = useState(null);
     const [message, setMessage] = useState('');
+
+    // Snackbar 관련 상태
+    const [openSnackbar, setOpenSnackbar] = useState(false);
+    const [snackbarMessage, setSnackbarMessage] = useState('');
+    const [snackbarSeverity, setSnackbarSeverity] = useState('success'); // 'success', 'error' 등
 
     useEffect(() => {
         const fetchUserInfo = async () => {
@@ -95,13 +98,9 @@ const DocumentModal = ({ documentId, handleClose, fetchDocuments }) => {
             setSelectedApprovalId(currentApprover.id);
             setOpenMessageModal(true);
         } else {
-            Swal.fire({
-                title: "결재 오류",
-                text: "현재 결재 순서가 아닙니다.",
-                icon: "error",
-                confirmButtonText: "확인",
-                backdrop: false,
-            });
+            setSnackbarMessage('현재 결재 순서가 아닙니다.');
+            setSnackbarSeverity('error');
+            setOpenSnackbar(true);
         }
     };
 
@@ -146,23 +145,23 @@ const DocumentModal = ({ documentId, handleClose, fetchDocuments }) => {
                     workFlow: updatedWorkflow
                 }));
                 setOpenMessageModal(false);
-                Swal.fire({
-                    title: "결재 완료",
-                    text: "결재가 성공적으로 처리되었습니다.",
-                    icon: "success",
-                    confirmButtonText: "확인",
-                });
+                setSnackbarMessage('결재가 성공적으로 처리되었습니다.');
+                setSnackbarSeverity('success');
+                setOpenSnackbar(true);
                 await fetchDocumentData(); // Refresh document data
             }
         } catch (error) {
             console.error("Error during approval:", error);
-            Swal.fire({
-                title: "결재 오류",
-                text: "결재 처리 중 오류가 발생했습니다.",
-                icon: "error",
-                confirmButtonText: "확인",
-            });
+            setSnackbarMessage('결재 처리 중 오류가 발생했습니다.');
+            setSnackbarSeverity('error');
+            setOpenSnackbar(true);
         }
+    };
+
+    // 날짜 포맷팅 함수
+    const formatDate = (dateString) => {
+        const date = new Date(dateString);
+        return date.toISOString().split('T')[0];  // '2024-10-28T12:02' -> '2024-10-28'
     };
 
     return (
@@ -231,7 +230,7 @@ const DocumentModal = ({ documentId, handleClose, fetchDocuments }) => {
                             <TableCell sx={{ border: `1px solid ${mode === 'dark' ? theme.palette.grey[400] : theme.palette.grey[700]}`, fontWeight: "bold", width: "20%", color: mode === 'dark' ? 'white' : 'black' }}>문서번호</TableCell>
                             <TableCell sx={{ border: `1px solid ${mode === 'dark' ? theme.palette.grey[400] : theme.palette.grey[700]}`, color: mode === 'dark' ? 'white' : 'black' }}>{documentData.documentCode}</TableCell>
                             <TableCell sx={{ border: `1px solid ${mode === 'dark' ? theme.palette.grey[400] : theme.palette.grey[700]}`, fontWeight: "bold", color: mode === 'dark' ? 'white' : 'black' }}>작성일자</TableCell>
-                            <TableCell sx={{ border: `1px solid ${mode === 'dark' ? theme.palette.grey[400] : theme.palette.grey[700]}`, color: mode === 'dark' ? 'white' : 'black' }}>{documentData.createdAt.substring(0, 10)}</TableCell>
+                            <TableCell sx={{ border: `1px solid ${mode === 'dark' ? theme.palette.grey[400] : theme.palette.grey[700]}`, color: mode === 'dark' ? 'white' : 'black' }}>{formatDate(documentData.createdAt)}</TableCell>
                         </TableRow>
                         <TableRow>
                             <TableCell sx={{ border: `1px solid ${mode === 'dark' ? theme.palette.grey[400] : theme.palette.grey[700]}`, fontWeight: "bold", color: mode === 'dark' ? 'white' : 'black' }}>작성자</TableCell>
@@ -246,7 +245,7 @@ const DocumentModal = ({ documentId, handleClose, fetchDocuments }) => {
                                 <TableRow key={index}>
                                     <TableCell sx={{ border: `1px solid ${mode === 'dark' ? theme.palette.grey[400] : theme.palette.grey[700]}`, fontWeight: "bold", color: mode === 'dark' ? 'white' : 'black' }}>{field}</TableCell>
                                     <TableCell colSpan={3} sx={{ border: `1px solid ${mode === 'dark' ? theme.palette.grey[400] : theme.palette.grey[700]}`, color: mode === 'dark' ? 'white' : 'black' }}>
-                                        {documentData.customFields[field]}
+                                        {documentData.customFields[field]?.includes('T') ? formatDate(documentData.customFields[field]) : documentData.customFields[field]}
                                     </TableCell>
                                 </TableRow>
                             ))}
@@ -337,7 +336,7 @@ const DocumentModal = ({ documentId, handleClose, fetchDocuments }) => {
                         sx={{
                             backgroundColor: colors.blueAccent[500], // 제목 배경색
                             color: '#fff', // 제목 텍스트 색상
-                            mb : 2
+                            mb: 2
                         }}
                     >
                         메시지 입력
@@ -362,7 +361,6 @@ const DocumentModal = ({ documentId, handleClose, fetchDocuments }) => {
                         <Button
                             onClick={() => handleConfirmApproval('APPROVE')}
                             sx={{
-                               // backgroundColor: colors.blueAccent[500],
                                 color: colors.blueAccent[500],
                             }}
                         >
@@ -371,7 +369,6 @@ const DocumentModal = ({ documentId, handleClose, fetchDocuments }) => {
                         <Button
                             onClick={() => handleConfirmApproval('REJECT')}
                             sx={{
-                               // backgroundColor: '#050403',
                                 color: '#050403',
                             }}
                         >
@@ -380,8 +377,7 @@ const DocumentModal = ({ documentId, handleClose, fetchDocuments }) => {
                         <Button
                             onClick={() => handleConfirmApproval('FINALIZE')}
                             sx={{
-                              //  backgroundColor: '#050403',
-                                color:  '#050403',
+                                color: '#050403',
                             }}
                         >
                             전결
@@ -396,6 +392,17 @@ const DocumentModal = ({ documentId, handleClose, fetchDocuments }) => {
                         </Button>
                     </DialogActions>
                 </Dialog>
+
+                {/* Snackbar 컴포넌트 추가 */}
+                <Snackbar
+                    open={openSnackbar}
+                    autoHideDuration={6000}
+                    onClose={() => setOpenSnackbar(false)}
+                >
+                    <Alert onClose={() => setOpenSnackbar(false)} severity={snackbarSeverity} sx={{ width: '100%' }}>
+                        {snackbarMessage}
+                    </Alert>
+                </Snackbar>
             </Box>
         </Modal >
     );

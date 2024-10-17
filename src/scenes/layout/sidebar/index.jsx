@@ -3,13 +3,11 @@ import { Avatar, Box, IconButton, Typography, useTheme } from "@mui/material";
 import { tokens } from "../../../theme";
 import { Menu, MenuItem, Sidebar, SubMenu } from "react-pro-sidebar";
 import {
-  BarChartOutlined,
   CalendarTodayOutlined,
   ChatBubbleOutline,
   ContactsOutlined,
   DashboardOutlined,
   DonutLargeOutlined,
-  HelpOutlineOutlined,
   MapOutlined,
   MenuOutlined,
   PeopleAltOutlined,
@@ -21,12 +19,12 @@ import {
   Logout as LogoutIcon,
   Description,
   PeopleAltRounded,
-  Business as BusinessIcon,  // 부서 생성 아이콘 추가
+  Business as BusinessIcon,
 } from "@mui/icons-material";
 import Item from "./Item";
 import { ToggledContext } from "../../../App";
 import axios from "axios";
-import defaultAvatar from "../../../assets/images/avatar.png"; // 기본 이미지 경로
+import defaultAvatar from "../../../assets/images/avatar.png";
 
 const SideBar = () => {
   const [collapsed, setCollapsed] = useState(false);
@@ -156,13 +154,12 @@ const SideBar = () => {
                   alt="PingPong"
                 />
                 <Typography
-                  component="a"
-                  href="/dashboard"
+                  onClick={() => navigate("/dashboard")}  // onClick 이벤트 추가
                   variant="h4"
                   fontWeight="bold"
                   textTransform="capitalize"
                   color={colors.blueAccent[450]}
-                  style={{ textDecoration: 'none' }}
+                  style={{ textDecoration: 'none', cursor: 'pointer' }}  // cursor 스타일 추가
                 >
                   PingPong
                 </Typography>
