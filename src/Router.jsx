@@ -35,6 +35,7 @@ import Department from "./scenes/department/Department.jsx";
 import Car from "./scenes/resource/car/car.jsx";
 import Room from "./scenes/resource/room/room.jsx";
 import DepartmentManagement from "./scenes/department/DepartmentManagement.jsx";
+import SelfMail from "./scenes/mail/mineMailbox.jsx";
 
 const AppRouter = () => {
   return (
@@ -63,7 +64,7 @@ const AppRouter = () => {
             <Route path="/mailbox/0" element={<Receive />} />
             <Route path="/mailbox/1" element={<Send />} />
             <Route path="/mailbox/2" element={<Waste />} />
-            <Route path="/mailbox/3" element={<Mine />} />
+            <Route path="/mailbox/3" element={<SelfMail />} />
             <Route path="/read/:mailType/:mailId" element={<DetailMail />} />
             <Route path="/approval-line-setup" element={<ApprovalLineSetup />} />
             <Route path="/mypage" element={<Mypage />} />
