@@ -101,7 +101,11 @@ const Receive = () => {
                             variant="h6"
                             fontWeight="bold"
                             noWrap
-                            sx={{ cursor: 'pointer' }}
+                            sx={{
+                                cursor: 'pointer',
+                                fontWeight: mail.isRead ? 'normal' : 'bold', // 읽었으면 'normal', 읽지 않았으면 'bold'
+                                color: mail.isRead ? 'gray' : 'black', // 읽었으면 회색, 읽지 않았으면 검정색
+                            }}
                             onClick={() => navigate(`/read/0/${mail.mailId}`)} // mailType 0: received mail
                         >
                             {mail.subject}
