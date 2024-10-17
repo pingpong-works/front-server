@@ -19,9 +19,9 @@ import {
   Logout as LogoutIcon,
   Description,
   PeopleAltRounded,
-  Business as BusinessIcon,  // 부서 생성 아이콘 추가
   DirectionsCar,
   MeetingRoom,
+  Business as BusinessIcon,
 } from "@mui/icons-material";
 import Item from "./Item";
 import { ToggledContext } from "../../../App";
