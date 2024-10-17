@@ -121,7 +121,7 @@ const MailWrite = () => {
               sx={{
               
                 fontWeight: "bold", 
-                color: "white", 
+                color: colors.primary[100],
                 marginBottom: "20px", 
               }}
           >
