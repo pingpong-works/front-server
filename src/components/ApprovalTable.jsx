@@ -39,8 +39,8 @@ const ApprovalTable = ({ approvalLines, handleApprovalClick }) => {
                             >
                                 <Box
                                     sx={{
-                                        width: '50px',
-                                        height: '50px',
+                                        width: '70px',
+                                        height: '70px',
                                         display: 'flex',
                                         justifyContent: 'center',
                                         alignItems: 'center',
@@ -66,7 +66,7 @@ const ApprovalTable = ({ approvalLines, handleApprovalClick }) => {
                                                         : REJECT
                                                 }
                                                 alt={approver.approvalStatus}
-                                                style={{ width: '40px', height: '40px'}}
+                                                style={{ width: '70px', height: '70px'}}
                                             />
                                         )
                                     ) : (

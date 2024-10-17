@@ -23,16 +23,58 @@ const CreateBoard = () => {
   const [username, setUsername] = useState("");
   const [category, setCategory] = useState("일반");
   const [content, setContent] = useState("");
-  const [images, setImages] = useState([]);
+  const [imagesToUpload, setImagesToUpload] = useState([]);
   const [imagePreviews, setImagePreviews] = useState([]);
+
+  useEffect(() => {
+    const accessToken = localStorage.getItem('accessToken');
+    if (!accessToken) {
+        alert('로그인이 필요합니다.');
+        navigate('/login');  // 로그인 페이지로 리다이렉트
+    }
+  }, [navigate]);
+
+  const allowedFileTypes = [
+    "image/jpeg",
+    "image/png",
+    "image/gif",
+    "image/bmp",
+    "image/webp",
+    "image/svg+xml",
+  ];
+
+  const maxFileSize = 100 * 1024 * 1024;
 
   const handleImageUpload = (e) => {
     const files = Array.from(e.target.files);
-    const newImagePreviews = files.map((file) => URL.createObjectURL(file));
-    setImages([...images, ...files]);
-    setImagePreviews([...imagePreviews, ...newImagePreviews]);
+    const validFiles = files.filter((file) => {
+      if (file.size > maxFileSize) {
+        alert(`10MB를 초과하여 업로드할 수 없습니다.`);
+        return false;
+      }
+      if (!allowedFileTypes.includes(file.type)) {
+        alert(`허용되지 않는 파일 형식입니다.`);
+        return false;
+      }
+      return true;
+    });
+
+    if (validFiles.length === 0) {
+      return;
+    }
+
+    const newImagePreviews = validFiles.map((file) => URL.createObjectURL(file));
+    setImagesToUpload((prev) => [...prev, ...validFiles]);
+    setImagePreviews((prev) => [...prev, ...newImagePreviews]);
 
     e.target.value = null;
+  };
+
+  const handleImageRemove = (index) => {
+    const updatedImages = imagesToUpload.filter((_, i) => i !== index);
+    const updatedPreviews = imagePreviews.filter((_, i) => i !== index);
+    setImagesToUpload(updatedImages);
+    setImagePreviews(updatedPreviews);
   };
 
   useEffect(() => {
@@ -51,24 +93,34 @@ const CreateBoard = () => {
         return;
       }
 
-      const imageLinks = images.map((image) => image);
-  
+      const uploadedImageUrls = [];
+      for (const file of imagesToUpload) {
+        const formData = new FormData();
+        formData.append("multipartFile", file);
+        const response = await axios.post("http://localhost:8084/images", formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
+        uploadedImageUrls.push(response.data);
+      }
+
       const postData = {
-        title: title,
-        category: category,
-        content: content,
-        images: imageLinks,
+        title,
+        category,
+        content,
+        imageUrls: uploadedImageUrls,
       };
-  
+
       const response = await axios.post("http://localhost:8084/boards", postData, {
         params: {
-          employeeId: 1, 
+          employeeId: 1,
         },
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
       });
-  
+
       if (response.status === 201) {
         alert("게시글이 성공적으로 작성되었습니다.");
         navigate("/boards");
@@ -79,11 +131,21 @@ const CreateBoard = () => {
     }
   };
 
+
   return (
     <Box m="20px">
       <Header title="Boards" subtitle="Create Board" />
-  
-      <Box mt="20px" display="flex" flexDirection="column" gap={2} maxWidth="100%" bgcolor={colors.primary[400]} p={3} borderRadius="8px">
+
+      <Box
+        mt="20px"
+        display="flex"
+        flexDirection="column"
+        gap={2}
+        maxWidth="100%"
+        bgcolor={colors.primary[400]}
+        p={3}
+        borderRadius="8px"
+      >
         <TextField
           label="제목"
           variant="outlined"
@@ -105,7 +167,7 @@ const CreateBoard = () => {
             },
           }}
         />
-  
+
         <Select
           label="카테고리"
           value={category}
@@ -128,18 +190,29 @@ const CreateBoard = () => {
         >
           {username === "admin@gmail.com"
             ? [
-                <MenuItem key="공지" value="공지">공지</MenuItem>,
-                <MenuItem key="식단" value="식단">식단</MenuItem>,
-                <MenuItem key="일반" value="일반">일반</MenuItem>,
-                <MenuItem key="질문" value="질문">질문</MenuItem>
+                <MenuItem key="공지" value="공지">
+                  공지
+                </MenuItem>,
+                <MenuItem key="식단" value="식단">
+                  식단
+                </MenuItem>,
+                <MenuItem key="일반" value="일반">
+                  일반
+                </MenuItem>,
+                <MenuItem key="질문" value="질문">
+                  질문
+                </MenuItem>,
               ]
             : [
-                <MenuItem key="일반" value="일반">일반</MenuItem>,
-                <MenuItem key="질문" value="질문">질문</MenuItem>
-              ]
-          }
+                <MenuItem key="일반" value="일반">
+                  일반
+                </MenuItem>,
+                <MenuItem key="질문" value="질문">
+                  질문
+                </MenuItem>,
+              ]}
         </Select>
-  
+
         <TextField
           label="내용"
           variant="outlined"
@@ -163,7 +236,7 @@ const CreateBoard = () => {
             },
           }}
         />
-  
+
         <Button
           variant="outlined"
           component="label"
@@ -176,10 +249,23 @@ const CreateBoard = () => {
           }}
         >
           이미지 업로드
-          <input type="file" multiple hidden onChange={handleImageUpload} />
+          <input
+            type="file"
+            multiple
+            hidden
+            onChange={handleImageUpload}
+            accept={allowedFileTypes.join(",")}
+          />
         </Button>
-  
-        <Box display="flex" flexWrap="wrap" gap={2} mt={2} maxWidth="100%" justifyContent="center">
+
+        <Box
+          display="flex"
+          flexWrap="wrap"
+          gap={2}
+          mt={2}
+          maxWidth="100%"
+          justifyContent="center"
+        >
           {imagePreviews.map((preview, index) => (
             <Box
               key={index}
@@ -213,7 +299,7 @@ const CreateBoard = () => {
             </Box>
           ))}
         </Box>
-  
+
         <Box display="flex" justifyContent="flex-end" mt={3}>
           <Button
             variant="outlined"

@@ -8,6 +8,7 @@ import TableModal from '../../components/TableModal';
 import DocumentModal from "../../components/DocumentModal";
 import NewDocumentForm from '../../components/NewDocumentForm';
 import axios from 'axios';
+import { useNavigate } from "react-router-dom";
 
 const Elec = () => {
     const theme = useTheme();
@@ -25,6 +26,15 @@ const Elec = () => {
     const [employeeName, setEmployeeName] = useState(''); // 사용자 이름 추가
     const [selectedRows, setSelectedRows] = useState([]);
     const [isAdmin, setIsAdmin] = useState(false);
+    const navigate = useNavigate();
+
+    useEffect(() => {
+      const accessToken = localStorage.getItem('accessToken');
+      if (!accessToken) {
+          alert('로그인이 필요합니다.');
+          navigate('/login');  // 로그인 페이지로 리다이렉트
+      }
+    }, [navigate]);
 
     const [approvalStatus, setApprovalStatus] = useState({
         0: null,
@@ -42,10 +52,10 @@ const Elec = () => {
                     Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
                 },
             });
-            const { employeeId, name, role } = response.data.data;
+            const { employeeId, name, email } = response.data.data;
             setEmployeeId(employeeId);
             setEmployeeName(name); // 사용자 이름 설정
-            setIsAdmin(role === 'ADMIN');
+            setIsAdmin(email === 'admin@pingpong-works.com');
         } catch (error) {
             console.error("로그인된 사용자 정보를 가져오는 중 오류 발생:", error);
         }
@@ -77,16 +87,17 @@ const Elec = () => {
         fetchUserInfo();
         fetchDocuments();
     }, []);
-
     const filterDocuments = (documents = list) => {
         let filtered = documents;
 
-        // 로그인한 사용자가 작성자이거나 승인자인 문서만 필터링
-        filtered = filtered.filter(item =>
-            item.author === employeeName ||
-            (item.workFlow && item.workFlow.approvals &&
-                item.workFlow.approvals.some(approval => approval.employeeId === employeeId))
-        );
+        if (!isAdmin) {
+            // 관리자가 아닐 경우에만 작성자 또는 승인자 필터 적용
+            filtered = filtered.filter(item =>
+                item.author === employeeName ||
+                (item.workFlow && item.workFlow.approvals &&
+                    item.workFlow.approvals.some(approval => approval.employeeId === employeeId))
+            );
+        }
 
         // 결재 상태 필터링
         if (selectedStatus !== "all") {
@@ -94,22 +105,24 @@ const Elec = () => {
         }
 
         // 버튼 필터링
-        if (showMyDocuments && !showApproverDocuments) {
-            filtered = filtered.filter(item => item.author === employeeName);
-        } else if (!showMyDocuments && showApproverDocuments) {
-            filtered = filtered.filter(item =>
-                item.workFlow && item.workFlow.approvals &&
-                item.workFlow.approvals.some(approval => approval.employeeId === employeeId)
-            );
+        if (!isAdmin) { // 관리자가 아닐 경우에만 필터링
+            if (showMyDocuments && !showApproverDocuments) {
+                filtered = filtered.filter(item => item.author === employeeName);
+            } else if (!showMyDocuments && showApproverDocuments) {
+                filtered = filtered.filter(item =>
+                    item.workFlow && item.workFlow.approvals &&
+                    item.workFlow.approvals.some(approval => approval.employeeId === employeeId)
+                );
+            }
+            // 관리자인 경우 버튼 필터링을 적용하지 않거나 필요에 따라 조정
         }
-        // 둘 다 선택되지 않은 경우에는 작성자이거나 승인자인 문서를 그대로 사용
 
         setFilteredData(filtered);
     };
 
     useEffect(() => {
         filterDocuments();
-    }, [list, selectedStatus, showMyDocuments, showApproverDocuments]);
+    }, [list, selectedStatus, showMyDocuments, showApproverDocuments, isAdmin]);
 
     const handleStatusChange = (event) => {
         const status = event.target.value;
@@ -242,7 +255,7 @@ const Elec = () => {
                     </FormControl>
                 </Box>
 
-                <Box display="flex" justifyContent="flex-end" mb="10px" gap={2}>
+                      <Box display="flex" justifyContent="flex-end" mb="10px" gap={2}>
                     <Button
                         onClick={handleOpenDocumentForm}
                         variant="contained"
@@ -262,45 +275,49 @@ const Elec = () => {
 
                 <Box display="flex" justifyContent="flex-end" mb="10px" gap={2}>
                     {/* 작성자 문서 보기 버튼 */}
-                    <Button
-                        onClick={() => {
-                            setShowMyDocuments(!showMyDocuments);
-                            if (showApproverDocuments && !showMyDocuments) {
-                                setShowApproverDocuments(false);
-                            }
-                        }}
-                        variant={showMyDocuments ? "contained" : "outlined"}
-                        sx={{
-                            width: '100px', height: '40px', border: "1px solid #5c5555ea", color: colors.gray[900],
-                            backgroundColor: showMyDocuments ? '#1c8adb' : '#686ffa0',
+                    {!isAdmin && (
+                        <>
+                            <Button
+                                onClick={() => {
+                                    setShowMyDocuments(!showMyDocuments);
+                                    if (showApproverDocuments && !showMyDocuments) {
+                                        setShowApproverDocuments(false);
+                                    }
+                                }}
+                                variant={showMyDocuments ? "contained" : "outlined"}
+                                sx={{
+                                    width: '100px', height: '40px', border: "1px solid #5c5555ea", color: colors.gray[900],
+                                    backgroundColor: showMyDocuments ? '#1c8adb' : '#686ffa0',
 
-                            '&:hover': {
-                                backgroundColor: '#ffffff5d',
-                            },
-                        }}
-                    >
-                        작성 문서함
-                    </Button>
-                    {/* 승인자 문서 보기 버튼 */}
-                    <Button
-                        onClick={() => {
-                            setShowApproverDocuments(!showApproverDocuments);
-                            if (showMyDocuments && !showApproverDocuments) {
-                                setShowMyDocuments(false);
-                            }
-                        }}
-                        variant={showApproverDocuments ? "contained" : "outlined"}
-                        sx={{
-                            width: '100px', height: '40px', border: "1px solid #5c5555ea", color: colors.gray[900],
-                            backgroundColor: showApproverDocuments ? '#1c8adb' : '#686ffa0',
+                                    '&:hover': {
+                                        backgroundColor: '#ffffff5d',
+                                    },
+                                }}
+                            >
+                                작성 문서함
+                            </Button>
+                            {/* 승인자 문서 보기 버튼 */}
+                            <Button
+                                onClick={() => {
+                                    setShowApproverDocuments(!showApproverDocuments);
+                                    if (showMyDocuments && !showApproverDocuments) {
+                                        setShowMyDocuments(false);
+                                    }
+                                }}
+                                variant={showApproverDocuments ? "contained" : "outlined"}
+                                sx={{
+                                    width: '100px', height: '40px', border: "1px solid #5c5555ea", color: colors.gray[900],
+                                    backgroundColor: showApproverDocuments ? '#1c8adb' : '#686ffa0',
 
-                            '&:hover': {
-                                backgroundColor: '#ffffff5d',
-                            },
-                        }}
-                    >
-                        결재 문서함
-                    </Button>
+                                    '&:hover': {
+                                        backgroundColor: '#ffffff5d',
+                                    },
+                                }}
+                            >
+                                결재 문서함
+                            </Button>
+                        </>
+                    )}
                     {/* 삭제 버튼 */}
                     <Button
                         onClick={handleDeleteDocuments}
@@ -382,7 +399,6 @@ const Elec = () => {
                 />
             )}
 
-            {/* NewDocumentForm 렌더링 */}
             {isDocumentFormOpen && (
                 <NewDocumentForm
                     open={isDocumentFormOpen}

@@ -21,10 +21,17 @@ const ViewBoard = () => {
   const [openImageModal, setOpenImageModal] = useState(false);
   const [selectedImage, setSelectedImage] = useState("");
   const [editCommentId, setEditCommentId] = useState(null);
-  const navigate = useNavigate();
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
   const handleOpenDeleteModal = () => setOpenDeleteModal(true);
   const handleCloseDeleteModal = () => setOpenDeleteModal(false);
+  const navigate = useNavigate();
+  useEffect(() => {
+    const accessToken = localStorage.getItem('accessToken');
+    if (!accessToken) {
+        alert('로그인이 필요합니다.');
+        navigate('/login');  // 로그인 페이지로 리다이렉트
+    }
+  }, [navigate]);
 
   const fetchBoardDetails = async () => {
     try {

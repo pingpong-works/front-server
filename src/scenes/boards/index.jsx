@@ -30,6 +30,14 @@ const Boards = () => {
   const [sortOption, setSortOption] = useState("createdAt_desc");
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    const accessToken = localStorage.getItem('accessToken');
+    if (!accessToken) {
+        alert('로그인이 필요합니다.');
+        navigate('/login');  // 로그인 페이지로 리다이렉트
+    }
+  }, [navigate]);
+
   const fetchData = useCallback(async (page) => {
     setLoading(true); 
     try {
@@ -163,11 +171,11 @@ const Boards = () => {
           sx={{
             height: "50px",
             padding: "0 20px",
-            backgroundColor: colors.greenAccent[500],
+            backgroundColor: colors.blueAccent[500],
             fontSize: "16px",
             fontWeight: "bold",
             "&:hover": {
-              backgroundColor: colors.greenAccent[700],
+              backgroundColor: colors.blueAccent[700],
             },
           }}
         >

@@ -17,6 +17,7 @@ import { tokens } from "../../theme";
 import { Header } from "../../components";
 import { formatDate } from "@fullcalendar/core";
 import useModal from "./useModal";
+import { useNavigate } from "react-router-dom";
 
 const Calendar = () => {
   const theme = useTheme();
@@ -24,6 +25,14 @@ const Calendar = () => {
   const isMdDevices = useMediaQuery("(max-width:920px)");
   const isSmDevices = useMediaQuery("(max-width:600px)");
   const [currentEvents, setCurrentEvents] = useState([]);
+  const navigate = useNavigate();
+  useEffect(() => {
+    const accessToken = localStorage.getItem('accessToken');
+    if (!accessToken) {
+        alert('로그인이 필요합니다.');
+        navigate('/login');  // 로그인 페이지로 리다이렉트
+    }
+  }, [navigate]);
 
   const fetchEvents = async () => {
     try {

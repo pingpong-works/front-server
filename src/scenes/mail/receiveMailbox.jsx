@@ -24,6 +24,14 @@ const Receive = () => {
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [totalElements, setTotalElements] = useState(0);
+    
+    useEffect(() => {
+      const accessToken = localStorage.getItem('accessToken');
+      if (!accessToken) {
+          alert('로그인이 필요합니다.');
+          navigate('/login');  // 로그인 페이지로 리다이렉트
+      }
+    }, [navigate]);
 
     useEffect(() => {
         const fetchReceivedMails = async () => {
@@ -62,24 +70,34 @@ const Receive = () => {
 
     return (
         <Box p={3}>
-            <Typography variant="h2" mb={2}>받은 메일함 (총 {totalElements}개)</Typography>
+            <Typography
+              variant="h2"
+              sx={{
+                fontWeight: "bold",
+                color: "white", 
+                marginBottom: "20px", 
+              }}
+          >받은 메일함</Typography>
+          <Typography variant="h4"  sx={{  ml:"5px", mb: "20px", }} > 총 {totalElements} 개</Typography>
             <Box display="flex" flexDirection="column">
                 {receivedMails.map((mail, index) => (
-                    <Box
+                    <Box sx={{ bgcolor : colors.gray[350]}}
                         key={mail.mailId}
                         display="grid"
-                        gridTemplateColumns="40px 40px 200px auto 150px 40px"
+                        borderRadius={4}
+                        gridTemplateColumns="30px 60px 250px auto 250px 30px"
                         alignItems="center"
                         p={2}
-                        borderBottom="1px solid #ccc"
+                        borderBottom="1px solid #cccccc87"
+                        
                     >
                         <Checkbox />
                         <IconButton>
                             {mail.isImportant ? <StarIcon /> : <StarBorderIcon />}
                         </IconButton>
-                        <Typography variant="h4" noWrap>{mail.senderName || mail.senderEmail}</Typography>
+                        <Typography variant="h6" noWrap>{mail.senderName || mail.senderEmail}</Typography>
                         <Typography
-                            variant="h4"
+                            variant="h6"
                             fontWeight="bold"
                             noWrap
                             sx={{ cursor: 'pointer' }}
@@ -87,7 +105,7 @@ const Receive = () => {
                         >
                             {mail.subject}
                         </Typography>
-                        <Typography variant="body2" color="textSecondary" textAlign="right">
+                        <Typography variant="h6" color="textSecondary" textAlign="right">
                             {new Date(mail.receivedAt).toLocaleString()}
                         </Typography>
                         <IconButton onClick={() => handleDelete(mail.mailId)}>
@@ -107,7 +125,7 @@ const Receive = () => {
                             backgroundColor: page === index + 1 ? colors.blueAccent[500] : 'transparent',
                             color: page === index + 1 ? '#fff' : 'inherit',
                             '&:hover': {
-                                backgroundColor: page === index + 1 ? colors.blueAccent[600] : colors.gray[200],
+                                backgroundColor: page === index + 1 ? colors.blueAccent[200] : colors.gray[200],
                             },
                         }}
                     >

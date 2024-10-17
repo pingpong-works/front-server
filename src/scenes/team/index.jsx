@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom"; // 페이지 이동을 위한 useNavigate 추가
 import axios from "axios";
-import { Box, Typography, useTheme, Modal } from "@mui/material";
+import { Box, Typography, useTheme, Modal, MenuItem, Select, FormControl } from "@mui/material";
 import { Header } from "../../components";
 import { DataGrid } from "@mui/x-data-grid";
 import { tokens } from "../../theme";
@@ -9,6 +10,7 @@ import CircleIcon from '@mui/icons-material/Circle';
 const Team = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
+  const navigate = useNavigate(); // 페이지 이동을 위한 navigate 함수 초기화
 
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -17,10 +19,39 @@ const Team = () => {
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedIds, setSelectedIds] = useState([]);
+  const [departments, setDepartments] = useState([]);
+  const [selectedDepartment, setSelectedDepartment] = useState("");
 
+  useEffect(() => {
+    const accessToken = localStorage.getItem('accessToken');
+    if (!accessToken) {
+        alert('로그인이 필요합니다.');
+        navigate('/login');  // 로그인 페이지로 리다이렉트
+    }
+  }, [navigate]);
+  
+  // 부서 목록 가져오기
+  const fetchDepartments = async () => {
+    try {
+      const response = await axios.get("http://localhost:8081/departments/all", {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+        }
+      });
+      setDepartments(response.data);
+    } catch (error) {
+      console.error("부서 정보를 가져오는 중 오류가 발생했습니다:", error);
+    }
+  };
+
+  // 직원 목록 가져오기 (부서별 필터링 포함)
   const fetchEmployees = async () => {
     try {
-      const response = await axios.get(`http://localhost:8081/employees/all?page=${page + 1}&size=${pageSize}`, {
+      const url = selectedDepartment
+        ? `http://localhost:8081/admin/employees/departments/${selectedDepartment}?page=${page + 1}&size=${pageSize}`
+        : `http://localhost:8081/employees/all?page=${page + 1}&size=${pageSize}`;
+
+      const response = await axios.get(url, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
         }
@@ -33,35 +64,14 @@ const Team = () => {
         email: employee.email,
         phoneNumber: employee.phoneNumber,
         departmentName: employee.departmentName,
-        employeeRank: translateRank(employee.employeeRank),
+        employeeRank: employee.employeeRank,
         status: employee.status
       }));
 
       setEmployees(formattedEmployees);
       setLoading(false);
     } catch (error) {
-      console.error("Error fetching employees:", error);
-    }
-  };
-
-  const translateRank = (rank) => {
-    switch (rank) {
-      case "INTERN":
-        return "인턴";
-      case "STAFF":
-        return "사원";
-      case "SENIOR_STAFF":
-        return "주임";
-      case "ASSISTANT_MANAGER":
-        return "대리";
-      case "MANAGER":
-        return "과장";
-      case "SENIOR_MANAGER":
-        return "차장";
-      case "DIRECTOR":
-        return "부장";
-      default:
-        return rank;
+      console.error("직원 목록을 가져오는 중 오류가 발생했습니다:", error);
     }
   };
 
@@ -76,7 +86,7 @@ const Team = () => {
       setSelectedEmployee(response.data.data);
       setIsModalOpen(true);
     } catch (error) {
-      console.error("Error fetching employee details:", error);
+      console.error("직원 상세 정보를 가져오는 중 오류가 발생했습니다:", error);
     }
   };
 
@@ -92,15 +102,28 @@ const Team = () => {
         setIsModalOpen(false);
         fetchEmployees();
       } catch (error) {
-        console.error("직원 삭제 중 오류가 발생했습니다.", error);
+        console.error("직원 삭제 중 오류가 발생했습니다:", error);
         alert("직원 삭제 중 오류가 발생했습니다.");
       }
     }
   };
 
   useEffect(() => {
-    fetchEmployees();
-  }, [page, pageSize]);
+    fetchDepartments(); // 부서 목록 로드
+    fetchEmployees(); // 직원 목록 로드
+  }, [page, pageSize, selectedDepartment]); // 선택된 부서가 변경될 때마다 재로드
+
+  const handleDepartmentChange = (event) => {
+    setSelectedDepartment(event.target.value);
+  };
+
+  // 계정 생성 버튼 클릭 시 /signup 페이지로 이동
+  const handleCreateAccountClick = () => {
+    navigate("/signup");
+  };
+
+  // 로그인한 사용자가 관리자(admin@pingpong-works.com)인지 확인
+  const isAdmin = localStorage.getItem("username") === "admin@pingpong-works.com";
 
   const columns = [
     { field: "id", headerName: "ID" },
@@ -130,7 +153,45 @@ const Team = () => {
 
   return (
     <Box m="20px">
+      <Box display={"flex"} justifyContent="space-between" alignItems="center" mb = {-4}>
       <Header title="주소록" subtitle="전체 직원 목록" />
+      <button
+            style={{
+              backgroundColor: colors.blueAccent[500],
+              color: "#fff",
+              padding: "10px 20px",
+              borderRadius: "5px",
+              border: "none",
+              cursor: "pointer",
+              transition: "background-color 0.3s ease",
+            }}
+            onMouseOver={(e) => (e.target.style.backgroundColor = colors.blueAccent[700])}
+            onMouseOut={(e) => (e.target.style.backgroundColor = colors.blueAccent[500])}
+            onClick={handleCreateAccountClick}
+          >
+            계정 생성
+          </button>
+      </Box>
+      {isAdmin && (
+        <Box display="flex" justifyContent="flex-end" mb={2}>
+        </Box>
+      )}
+
+      {/* 부서 선택 필터 */}
+      <FormControl sx={{ minWidth: 200, marginTop: "20px" }}>
+        <Select
+          value={selectedDepartment}
+          onChange={handleDepartmentChange}
+          displayEmpty
+        >
+          <MenuItem value="">전체 부서</MenuItem>
+          {departments.map((dept) => (
+            <MenuItem key={dept.id} value={dept.id}>
+              {dept.name}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
 
       <Box
         mt="40px"
@@ -177,7 +238,7 @@ const Team = () => {
           onPageSizeChange={(newPageSize) => setPageSize(newPageSize)}
           checkboxSelection
           onSelectionModelChange={(newSelection) => {
-            setSelectedIds(newSelection);  // 체크박스 선택 시 ID 업데이트
+            setSelectedIds(newSelection); // 체크박스 선택 시 ID 업데이트
           }}
           onRowClick={(params) => fetchEmployeeDetails(params.row.id)}
         />
@@ -203,11 +264,11 @@ const Team = () => {
         >
           {selectedEmployee ? (
             <Box>
-              <Typography 
-                variant="h5" 
-                component="h2" 
-                gutterBottom 
-                sx={{ textAlign: "center", fontWeight: "bold", fontSize: "20px", mb: 3 }} 
+              <Typography
+                variant="h5"
+                component="h2"
+                gutterBottom
+                sx={{ textAlign: "center", fontWeight: "bold", fontSize: "20px", mb: 3 }}
               >
                 직원 정보
               </Typography>
@@ -216,16 +277,15 @@ const Team = () => {
                 <img
                   src={selectedEmployee.profilePicture || "/src/assets/images/avatar.png"}
                   alt="프로필"
-                  style={{ 
-                    width: 80, 
-                    height: 80, 
-                    borderRadius: "50%", 
-                    objectFit: "cover", 
+                  style={{
+                    width: 80,
+                    height: 80,
+                    borderRadius: "50%",
+                    objectFit: "cover",
                   }}
                 />
               </Box>
 
-              {/* 필드들 사이에 구분선 추가 */}
               <Typography variant="body1" sx={{ mb: 1.5, borderBottom: "1px solid #555", paddingBottom: "10px" }}>
                 <strong>이름:</strong> {selectedEmployee.name}
               </Typography>
@@ -242,8 +302,8 @@ const Team = () => {
                 <strong>직급:</strong> {selectedEmployee.employeeRank}
               </Typography>
 
-              {/* 관리자일 때만 보여줄 추가 정보 */}
-              {localStorage.getItem("username") === "admin@pingpong-works.com" ? (
+              {/* 관리자 전용 정보 */}
+              {isAdmin && (
                 <>
                   <Typography variant="body1" sx={{ mb: 1.5, borderBottom: "1px solid #555", paddingBottom: "10px" }}>
                     <strong>긴급 연락처:</strong> {selectedEmployee.emergencyNumber || "없음"}
@@ -261,23 +321,14 @@ const Team = () => {
                     <strong>상태:</strong> {selectedEmployee.status === "LOGGED_IN" ? "로그인 상태" : "로그아웃 상태"}
                   </Typography>
                 </>
-              ) : (
-                <>
-                  <Typography variant="body1" sx={{ mb: 1.5, borderBottom: "1px solid #555", paddingBottom: "10px" }}>
-                    <strong>내선 번호:</strong> {selectedEmployee.extensionNumber}
-                  </Typography>
-                  <Typography variant="body1" sx={{ mb: 1.5, borderBottom: "1px solid #555", paddingBottom: "10px" }}>
-                    <strong>긴급 연락처:</strong> {selectedEmployee.emergencyNumber || "없음"}
-                  </Typography>
-                </>
               )}
 
               <Box mt={4} sx={{ display: "flex", justifyContent: "space-between" }}>
-                {/* 직원 삭제 버튼: 관리자일 때만 보이도록 조건 추가 */}
-                {localStorage.getItem("username") === "admin@pingpong-works.com" && (
+                {/* 직원 삭제 버튼 (관리자 전용) */}
+                {isAdmin && (
                   <button
                     style={{
-                      backgroundColor: colors.blueAccent[500], // 확인 버튼과 동일한 스타일
+                      backgroundColor: colors.blueAccent[500],
                       color: "#fff",
                       padding: "10px 20px",
                       borderRadius: "5px",
@@ -285,8 +336,8 @@ const Team = () => {
                       cursor: "pointer",
                       transition: "background-color 0.3s ease",
                     }}
-                    onMouseOver={(e) => e.target.style.backgroundColor = colors.blueAccent[700]} 
-                    onMouseOut={(e) => e.target.style.backgroundColor = colors.blueAccent[500]}
+                    onMouseOver={(e) => (e.target.style.backgroundColor = colors.blueAccent[700])}
+                    onMouseOut={(e) => (e.target.style.backgroundColor = colors.blueAccent[500])}
                     onClick={deleteEmployee}
                   >
                     직원 삭제
@@ -296,7 +347,7 @@ const Team = () => {
                 {/* 확인 버튼 */}
                 <button
                   style={{
-                    backgroundColor: colors.blueAccent[500], // 기존 확인 버튼 색상 고정
+                    backgroundColor: colors.blueAccent[500],
                     color: "#fff",
                     padding: "10px 20px",
                     borderRadius: "5px",
@@ -304,8 +355,8 @@ const Team = () => {
                     cursor: "pointer",
                     transition: "background-color 0.3s ease",
                   }}
-                  onMouseOver={(e) => e.target.style.backgroundColor = colors.blueAccent[700]} 
-                  onMouseOut={(e) => e.target.style.backgroundColor = colors.blueAccent[500]}
+                  onMouseOver={(e) => (e.target.style.backgroundColor = colors.blueAccent[700])}
+                  onMouseOut={(e) => (e.target.style.backgroundColor = colors.blueAccent[500])}
                   onClick={() => setIsModalOpen(false)}
                 >
                   확인
@@ -322,3 +373,5 @@ const Team = () => {
 };
 
 export default Team;
+
+

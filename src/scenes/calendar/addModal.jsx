@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Box, Button, Modal, TextField, Typography, Checkbox, FormControl, InputLabel, MenuItem, Select, FormControlLabel, useTheme } from '@mui/material';
 import axios from 'axios';
 import { tokens } from "../../theme";
+import { useNavigate } from "react-router-dom";
+
 
 const AddModal = ({ isOpen, onCancel, onSubmit }) => {
   const [inputValues, setInputValues] = useState({
@@ -16,6 +18,15 @@ const AddModal = ({ isOpen, onCancel, onSubmit }) => {
   });
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
+
+  const navigate = useNavigate();
+  useEffect(() => {
+    const accessToken = localStorage.getItem('accessToken');
+    if (!accessToken) {
+        alert('로그인이 필요합니다.');
+        navigate('/login');  // 로그인 페이지로 리다이렉트
+    }
+  }, [navigate]);
 
   const [availableOptions, setAvailableOptions] = useState([]);
 

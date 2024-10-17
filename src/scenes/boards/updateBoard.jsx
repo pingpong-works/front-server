@@ -18,15 +18,34 @@ const UpdateBoard = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const { boardId } = location.state; // 이전 페이지에서 넘겨받은 boardId
+  const { boardId } = location.state;
 
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("");
   const [content, setContent] = useState("");
-  const [images, setImages] = useState([]);
+  const [imagesToUpload, setImagesToUpload] = useState([]);
+  const [originalImages, setOriginalImages] = useState([]);
+  const [imagesToDelete, setImagesToDelete] = useState([]);
   const [imagePreviews, setImagePreviews] = useState([]);
-  const [imagesToDelete, setImagesToDelete] = useState([]); // 삭제할 이미지 리스트 상태 추가
 
+
+  useEffect(() => {
+    const accessToken = localStorage.getItem('accessToken');
+    if (!accessToken) {
+        alert('로그인이 필요합니다.');
+        navigate('/login');  // 로그인 페이지로 리다이렉트
+    }
+  }, [navigate]);
+
+
+  useEffect(() => {
+    const accessToken = localStorage.getItem('accessToken');
+    if (!accessToken) {
+        alert('로그인이 필요합니다.');
+        navigate('/login');  // 로그인 페이지로 리다이렉트
+    }
+  }, [navigate]);
+  
   // 게시글 데이터 가져오기
   useEffect(() => {
     const fetchBoardData = async () => {
@@ -37,7 +56,7 @@ const UpdateBoard = () => {
         setTitle(boardData.title);
         setCategory(boardData.category);
         setContent(boardData.content);
-        setImages(boardData.imageUrls || []);
+        setOriginalImages(boardData.imageUrls || []);
         setImagePreviews(boardData.imageUrls || []);
       } catch (error) {
         console.error("게시글 정보를 불러오는데 실패했습니다", error);
@@ -53,35 +72,44 @@ const UpdateBoard = () => {
   const handleImageUpload = (e) => {
     const files = Array.from(e.target.files);
     const newImagePreviews = files.map((file) => URL.createObjectURL(file));
-    setImages([...images, ...files]);
-    setImagePreviews([...imagePreviews, ...newImagePreviews]);
+    setImagesToUpload((prev) => [...prev, ...files]);
+    setImagePreviews((prev) => [...prev, ...newImagePreviews]);
 
     e.target.value = null;
   };
 
   const handleImageRemove = (index) => {
-    // 기존 이미지인지 확인 후 삭제 리스트에 추가
-    if (typeof images[index] === "string") {
-      setImagesToDelete([...imagesToDelete, images[index]]);
+    const imageUrl = originalImages[index];
+
+    if (typeof imageUrl === "string") {
+      setImagesToDelete((prev) => [...prev, imageUrl]);
     }
 
-    // 이미지 및 미리보기 리스트에서 제거
-    const newImages = [...images];
-    const newImagePreviews = [...imagePreviews];
-    newImages.splice(index, 1);
-    newImagePreviews.splice(index, 1);
-    setImages(newImages);
-    setImagePreviews(newImagePreviews);
+    setOriginalImages((prev) => prev.filter((_, i) => i !== index));
+    setImagePreviews((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleSubmit = async () => {
     try {
+      const uploadedImageUrls = [];
+
+      for (const file of imagesToUpload) {
+        const formData = new FormData();
+        formData.append("multipartFile", file);
+        const response = await axios.post("http://localhost:8084/images", formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
+        uploadedImageUrls.push(response.data);
+      }
+
       const updatedData = {
-        title: title,
-        category: category,
-        content: content,
-        images: images.filter((image) => typeof image !== "string"), // 파일 객체만 남김
-        imagesToDelete: imagesToDelete, // 삭제할 이미지 리스트를 본문에 포함
+        title,
+        category,
+        content,
+        imageUrls: [...uploadedImageUrls],
+        imagesToDelete: [...imagesToDelete],
       };
 
       const response = await axios.patch(`http://localhost:8084/boards/${boardId}`, updatedData, {
@@ -89,13 +117,18 @@ const UpdateBoard = () => {
           employeeId: 1,
         },
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
       });
 
       if (response.status === 200) {
         alert("게시글이 성공적으로 수정되었습니다.");
-        navigate(`/viewBoard/${boardId}`)
+
+        for (const imageUrl of imagesToDelete) {
+          await axios.delete(`http://localhost:8084/images?imageUrl=${imageUrl}`);
+        }
+
+        navigate(`/viewBoard/${boardId}`);
       }
     } catch (error) {
       console.error("게시글 수정 실패", error);

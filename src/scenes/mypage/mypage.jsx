@@ -25,6 +25,7 @@ import interactionPlugin from '@fullcalendar/interaction';
 import listPlugin from '@fullcalendar/list';
 import { tokens } from "../../theme";
 import AttendanceStatistics from '../../components/AttendanceStatistics'; // 경로 확인 필요
+import defaultAvatar from "../../assets/images/avatar.png";
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -74,7 +75,16 @@ const Mypage = () => {
   const [tabValue, setTabValue] = useState(0); // For managing tab selection
 
   const navigate = useNavigate();
-
+  const isAdmin = userInfo.email === "admin@pingpong-works.com";
+  
+  useEffect(() => {
+    const accessToken = localStorage.getItem('accessToken');
+    if (!accessToken) {
+        alert('로그인이 필요합니다.');
+        navigate('/login');  // 로그인 페이지로 리다이렉트
+    }
+  }, [navigate]);
+  
   // 사용자 정보 가져오기
   useEffect(() => {
     const fetchUserInfo = async () => {
@@ -199,16 +209,17 @@ const Mypage = () => {
           <Grid item xs={12} md={3} align="center">
             <Avatar
               alt={userInfo.name}
-              src={userInfo.profilePicture || "/path-to-default-avatar.png"}
+              src={userInfo.profilePicture || defaultAvatar}
               sx={{ width: 120, height: 120 }}
             />
             <Typography variant="h5" mt={2}>
               {userInfo.name}
             </Typography>
-            <Typography variant="body1" color="textSecondary">
-              {userInfo.departmentName} | {userInfo.employeeRank}
-            </Typography>
-
+            {!isAdmin && (
+              <Typography variant="body1" color="textSecondary">
+                {userInfo.departmentName} | {userInfo.employeeRank}
+              </Typography>
+            )}
             {/* 버튼들 */}
             <Stack spacing={2} mt={3} direction="column">
               <Button
@@ -285,18 +296,20 @@ const Mypage = () => {
         <Box mt={4} display="flex" justifyContent="center" gap={2}>
           <Button
             variant="contained"
-            color="success"
             onClick={checkIn}
-            sx={{ width: "200px" }}
+            sx={{ width: "200px",
+              bgcolor: colors.blueAccent[500]
+             }}
             disabled={isLoading}
           >
             출근
           </Button>
           <Button
             variant="contained"
-            color="error"
             onClick={checkOut}
-            sx={{ width: "200px" }}
+            sx={{ width: "200px" ,
+              bgcolor: colors.primary[300]
+            }}
             disabled={isLoading}
           >
             퇴근
@@ -313,6 +326,7 @@ const Mypage = () => {
             style: { backgroundColor: colors.blueAccent[500] },
           }}
           sx={{
+            color: colors.gray[200] ,
             '& .MuiTab-root': { color: colors.gray[200] },
             '& .Mui-selected': { color: colors.blueAccent[500] },
           }}
@@ -327,7 +341,8 @@ const Mypage = () => {
             component={Paper}
             p={3}
             elevation={3}
-            sx={{ backgroundColor: colors.gray[350] }}
+            sx={{ backgroundColor: colors.gray[350],
+             }}
           >
             <FullCalendar
               height="75vh"

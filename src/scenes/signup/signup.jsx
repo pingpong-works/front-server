@@ -24,6 +24,15 @@ const SignUp = () => {
   const [departments, setDepartments] = useState([]);
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const [passwordError, setPasswordError] = useState(""); // 비밀번호 오류 메시지
+
+  useEffect(() => {
+    const accessToken = localStorage.getItem('accessToken');
+    if (!accessToken) {
+        alert('로그인이 필요합니다.');
+        navigate('/login');  // 로그인 페이지로 리다이렉트
+    }
+  }, [navigate]);
 
   // 직급 목록
   const ranks = [
@@ -60,9 +69,29 @@ const SignUp = () => {
       ...prevState,
       [name]: value,
     }));
+  
+    // 비밀번호 정규식 유효성 검사
+    if (name === "password") {
+      const passwordRegex = /^[a-zA-Z0-9!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?`~]{8,15}$/;
+      if (!passwordRegex.test(value)) {
+        setPasswordError("비밀번호는 8자 이상 15자 이하의 알파벳, 숫자, 특수문자만 포함할 수 있습니다.");
+      } else {
+        setPasswordError(""); // 정규식에 맞으면 오류 메시지 초기화
+      }
+    }
   };
+  
 
   const handleSubmit = async () => {
+    if (passwordError) {
+      setErrorMessage("비밀번호가 올바르지 않습니다.");
+      return;
+    }
+    if (formData.password !== formData.confirmPassword) {
+      setErrorMessage("비밀번호와 비밀번호 확인이 일치하지 않습니다.");
+      return;
+    }
+
     try {
       const response = await axios.post("http://localhost:8081/employees", formData, {
         headers: {
@@ -71,7 +100,7 @@ const SignUp = () => {
       });
       setSuccessMessage("계정이 성공적으로 생성되었습니다.");
       setTimeout(() => {
-        navigate("/mypage"); // 성공 후 마이페이지로 이동
+        navigate("/team"); // 성공 후 마이페이지로 이동
       }, 2000);
     } catch (error) {
       setErrorMessage("계정 생성에 실패했습니다.");
@@ -121,6 +150,8 @@ const SignUp = () => {
             value={formData.password}
             onChange={handleInputChange}
             fullWidth
+            error={!!passwordError} // 오류가 있으면 error 상태로 표시
+            helperText={passwordError} // 오류 메시지 표시
           />
           <TextField
             label="비밀번호 확인"
@@ -196,7 +227,7 @@ const SignUp = () => {
             <Button
               variant="contained"
               color="secondary"
-              onClick={() => navigate("/")}
+              onClick={() => navigate("/team")}
               sx={{
                 minWidth: "150px",
               }}

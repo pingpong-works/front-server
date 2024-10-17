@@ -11,7 +11,6 @@ import {
   Send,
   Receive,
   Waste,
-  FAQ,
   Calendar,
   Chat,
 } from "./scenes";
@@ -32,6 +31,10 @@ import Document from './scenes/document/Document.jsx'
 import AdminRoute from './auth/AdminRoute';
 import TemplateForm from './scenes/document/TemplateForm.jsx';
 import Manage from "./scenes/manage/Manage.jsx";
+import Department from "./scenes/department/Department.jsx";
+import Car from "./scenes/resource/car/car.jsx";
+import Room from "./scenes/resource/room/room.jsx";
+import DepartmentManagement from "./scenes/department/DepartmentManagement.jsx";
 
 const AppRouter = () => {
   return (
@@ -62,7 +65,6 @@ const AppRouter = () => {
             <Route path="/mailbox/2" element={<Waste />} />
             <Route path="/mailbox/3" element={<Mine />} />
             <Route path="/read/:mailType/:mailId" element={<DetailMail />} />
-            <Route path="/faq" element={<FAQ />} />
             <Route path="/approval-line-setup" element={<ApprovalLineSetup />} />
             <Route path="/mypage" element={<Mypage />} />
             <Route path="/my-info/edit" element={<MyInfoEdit />} />
@@ -72,6 +74,11 @@ const AppRouter = () => {
             <Route path="/signup" element={<AdminRoute><SignUp /></AdminRoute>} />
             <Route path="/document" element={<AdminRoute><Document /></AdminRoute>} />
             <Route path="/manage" element={<AdminRoute><Manage /></AdminRoute>} />
+            <Route path="/department" element={<AdminRoute><Department /></AdminRoute>} />
+            <Route path="/car" element={<AdminRoute><Car /></AdminRoute>} />
+            <Route path="/room" element={<AdminRoute><Room /></AdminRoute>} />
+
+            <Route path="/department-management" element={<AdminRoute><DepartmentManagement /></AdminRoute>} />
 
           </Route>
         </Routes>

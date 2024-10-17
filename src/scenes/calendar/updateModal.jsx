@@ -1,8 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Button, Modal, TextField, Typography, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import axios from 'axios';
+import { useNavigate } from "react-router-dom";
 
 const UpdateModal = ({ isOpen, eventDetails, onCancel, onSubmit }) => {
+
+  const navigate = useNavigate();
+  useEffect(() => {
+    const accessToken = localStorage.getItem('accessToken');
+    if (!accessToken) {
+        alert('로그인이 필요합니다.');
+        navigate('/login');  // 로그인 페이지로 리다이렉트
+    }
+  }, [navigate]);
+
   const [inputValues, setInputValues] = useState({
     title: '',
     start: '',

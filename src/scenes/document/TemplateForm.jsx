@@ -1,15 +1,15 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { tokens } from "../../theme";
 import { Button, TextField, Box, Typography, useTheme, MenuItem, Select, FormControl, InputLabel, IconButton } from "@mui/material";
-import CloseIcon from '@mui/icons-material/Close'; 
-import { useNavigate } from "react-router-dom"; 
+import CloseIcon from '@mui/icons-material/Close';
+import { useNavigate } from "react-router-dom";
 
 function TemplateForm() {
 
-    const theme = useTheme();
-    const colors = tokens(theme.palette.mode);
-    const navigate = useNavigate(); // useNavigate 사용
+  const theme = useTheme();
+  const colors = tokens(theme.palette.mode);
+  const navigate = useNavigate(); // useNavigate 사용
 
   // 필드 상태 관리
   const [templateName, setTemplateName] = useState("");
@@ -19,14 +19,13 @@ function TemplateForm() {
   const [newFieldName, setNewFieldName] = useState("");
   const [newFieldType, setNewFieldType] = useState("");
 
-  // 필드 타입 목록 (JavaScript 기본 타입)
+  // 필드 타입 목록
   const fieldTypes = [
     { label: "텍스트", value: "String" },
     { label: "숫자", value: "Number" },
-    { label: "날짜", value: "Date" },
-    { label: "체크박스", value: "checkbox" }
+    { label: "날짜 및 시간", value: "LocalDateTime" },
+    { label: "체크박스", value: "Checkbox" }
   ];
-
   // 필드 추가 핸들러
   const handleAddField = () => {
     if (newFieldName && newFieldType) {
@@ -36,11 +35,18 @@ function TemplateForm() {
     }
   };
 
-    // 필드 삭제 핸들러
-    const handleDeleteField = (index) => {
-      const updatedFields = fields.filter((_, i) => i !== index); // 인덱스를 기준으로 삭제
-      setFields(updatedFields);
-    };
+  useEffect(() => {
+    const accessToken = localStorage.getItem('accessToken');
+    if (!accessToken) {
+        alert('로그인이 필요합니다.');
+        navigate('/login');  // 로그인 페이지로 리다이렉트
+    }
+  }, [navigate]);
+  // 필드 삭제 핸들러
+  const handleDeleteField = (index) => {
+    const updatedFields = fields.filter((_, i) => i !== index); // 인덱스를 기준으로 삭제
+    setFields(updatedFields);
+  };
 
   // POST 요청 전송 핸들러
   const handleSubmit = async () => {
@@ -50,47 +56,67 @@ function TemplateForm() {
     };
 
     try {
-        // 첫 번째 POST 요청: 템플릿 생성
-        const response = await axios.post("http://localhost:8082/templates", templateData);
-        console.log("템플릿 생성 성공:", response);
-  
-        // 두 번째 POST 요청: docs-types에 템플릿 정보 전송
-        const docsTypeData = {
-          templateId: response.data.id,
-          type: `${templateName} ver_${response.data.version}`
-        };
-        
-        const docsTypeResponse = await axios.post("http://localhost:8082/docs-types", docsTypeData);
-        console.log("docs-type 생성 성공:", docsTypeResponse.data);
+      // 첫 번째 POST 요청: 템플릿 생성
+      const response = await axios.post("http://localhost:8082/templates", templateData);
+      console.log("템플릿 생성 성공:", response);
 
-        // 생성이 성공한 후 Document 페이지로 이동
-        navigate("/document");  
-  
-      } catch (error) {
-        console.error("전송 중 오류 발생:", error);
-      }
-    };
+      // 두 번째 POST 요청: docs-types에 템플릿 정보 전송
+      const docsTypeData = {
+        templateId: response.data.id,
+        type: `${templateName} ver_${response.data.version}`
+      };
+
+      const docsTypeResponse = await axios.post("http://localhost:8082/docs-types", docsTypeData);
+      console.log("docs-type 생성 성공:", docsTypeResponse.data);
+
+      // 생성이 성공한 후 Document 페이지로 이동
+      navigate("/document");
+
+    } catch (error) {
+      console.error("전송 중 오류 발생:", error);
+    }
+  };
 
   return (
-    <Box sx={{ bgcolor: colors.gray[350]}}>    
-        <Box sx={{ padding: "20px", maxWidth: "600px", margin: "0 auto" }}>
-      <Typography variant="h4" gutterBottom>템플릿 생성</Typography>
-      <Box m="40px"></Box>
-      {/* 템플릿 이름 입력 */}
-      <TextField
-        label="템플릿 이름"
-        variant="outlined"
-        fullWidth
-        value={templateName}
-        onChange={(e) => setTemplateName(e.target.value)}
-        sx={{ marginBottom: "20px" }}
-      />
+    <Box sx={{ bgcolor: colors.gray[350] }}>
+      <Box sx={{ padding: "20px", maxWidth: "600px", margin: "0 auto" }}>
+        <Typography variant="h4" gutterBottom>템플릿 생성</Typography>
+        <Box m="40px"></Box>
+        {/* 템플릿 이름 입력 */}
+        <TextField
+          label="템플릿 이름"
+          variant="outlined"
+          fullWidth
+          sx={{
+            marginBottom: "20px",
+            '& .MuiOutlinedInput-root': {
+              '&:hover fieldset': {
+                borderColor: 'gray', // 호버 시 테두리 색상 유지
+              },
+              '&.Mui-focused fieldset': {
+                borderColor: 'gray', // 포커스 시 테두리 색상 유지
+              },
+            }
+          }}
+          value={templateName}
+          onChange={(e) => setTemplateName(e.target.value)}
+        />
 
-          {/* 필드 추가 입력 */}
+        {/* 필드 추가 입력 */}
         <Box display="flex" gap={2} marginBottom={2}>
           <TextField
             label="필드 이름"
             variant="outlined"
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                '&:hover fieldset': {
+                  borderColor: 'gray', // 호버 시 테두리 색상 유지
+                },
+                '&.Mui-focused fieldset': {
+                  borderColor: 'gray', // 포커스 시 테두리 색상 유지
+                },
+              }
+            }}
             value={newFieldName}
             onChange={(e) => setNewFieldName(e.target.value)}
           />
@@ -101,6 +127,17 @@ function TemplateForm() {
               labelId="field-type-label"
               value={newFieldType}
               label="필드 타입"
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  '&:hover fieldset': {
+                    color: 'gray',
+                    borderColor: 'gray',
+                  },
+                  '&.Mui-focused fieldset': {
+                    borderColor: 'gray',
+                  },
+                }
+              }}
               onChange={(e) => setNewFieldType(e.target.value)}
             >
               {fieldTypes.map((type, index) => (
@@ -124,7 +161,7 @@ function TemplateForm() {
                 <li key={index} style={{ display: "flex", alignItems: "center" }}>
                   {field.fieldName} - {fieldTypes.find(type => type.value === field.fieldType)?.label || field.fieldType}
                   <IconButton onClick={() => handleDeleteField(index)} aria-label="delete">
-                    <CloseIcon /> 
+                    <CloseIcon />
                   </IconButton>
                 </li>
               ))}

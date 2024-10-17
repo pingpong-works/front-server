@@ -20,6 +20,13 @@ const DetailMail = () => {
     const navigate = useNavigate();
     const [mailDetail, setMailDetail] = useState(null);
     const [loading, setLoading] = useState(true);
+    useEffect(() => {
+      const accessToken = localStorage.getItem('accessToken');
+      if (!accessToken) {
+          alert('로그인이 필요합니다.');
+          navigate('/login');  // 로그인 페이지로 리다이렉트
+      }
+    }, [navigate]);
 
     useEffect(() => {
         const fetchMailDetail = async () => {
@@ -73,21 +80,21 @@ const DetailMail = () => {
     }
 
     return (
-        <Box p={5}>
+        <Box p={5} sx={{bgcolor : colors.gray[350], borderRadius: "10px", width: "90%"}}>
             <Box display="flex" alignItems="center" mb={5}>
                 <IconButton onClick={() => navigate(-1)}>
                     <ArrowBackIcon />
                 </IconButton>
-                <Typography variant="h1" color="textSecondary" fontWeight="bold">
+                <Typography variant="h2" color="textSecondary" fontWeight="bold">
                     {mailDetail.subject}
                 </Typography>
             </Box>
 
             <Box mb={5}>
-                <Typography variant="h3" color="textSecondary" mt={3}>
+                <Typography variant="h5" color="textSecondary" mt={3}>
                     <strong>보낸 사람:</strong> {mailDetail.senderName} ({mailDetail.senderEmail})
                 </Typography>
-                <Typography variant="h3" color="textSecondary" mt={3}>
+                <Typography variant="h5" color="textSecondary" mt={3}>
                     <strong>받는 사람:</strong> {mailDetail.recipientName} ({mailDetail.recipientEmail})
                 </Typography>
                 <Typography variant="h5" color="textSecondary" mt={3}>
@@ -106,9 +113,10 @@ const DetailMail = () => {
                 />
             </Box>
 
-            <Box display="flex" justifyContent="space-between" mt={3}>
+            <Box display="flex" justifyContent="flex-end"  gap={2} mt={3}>
                 <Button
                     variant="outlined"
+                    sx={{bgcolor: colors.primary[100]}}
                     onClick={() => navigate(`/read/${mailType}/${parseInt(mailId) - 1}`)}
                     disabled={parseInt(mailId) <= 1}
                 >
@@ -116,6 +124,7 @@ const DetailMail = () => {
                 </Button>
                 <Button
                     variant="outlined"
+                    sx = {{bgcolor: colors.gray[100]}}
                     onClick={() => navigate(`/read/${mailType}/${parseInt(mailId) + 1}`)}
                     disabled={parseInt(mailId) >= 617} // 총 메일 개수를 기준으로 설정
                 >
