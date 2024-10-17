@@ -42,13 +42,7 @@ const MyInfoEdit = () => {
   const [successMessage, setSuccessMessage] = useState("");
   const [imageToUpload, setImageToUpload] = useState(null);
 
-  useEffect(() => {
-    const accessToken = localStorage.getItem('accessToken');
-    if (!accessToken) {
-        alert('로그인이 필요합니다.');
-        navigate('/login');  // 로그인 페이지로 리다이렉트
-    }
-  }, [navigate]);
+  const maxFileSize = 10 * 1024 * 1024; 
 
   useEffect(() => {
     const accessToken = localStorage.getItem('accessToken');
@@ -57,7 +51,7 @@ const MyInfoEdit = () => {
         navigate('/login');  // 로그인 페이지로 리다이렉트
     }
   }, [navigate]);
-  
+
   // 사용자 정보 가져오기
   useEffect(() => {
     const fetchUserInfo = async () => {
@@ -95,6 +89,11 @@ const MyInfoEdit = () => {
   const handleProfilePictureChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      if (file.size > maxFileSize) {
+        setErrorMessage("이미지 크기는 10MB를 초과할 수 없습니다.");
+        return;
+      }
+
       const reader = new FileReader();
       reader.onloadend = () => {
         setProfileImage(reader.result);
@@ -147,7 +146,6 @@ const MyInfoEdit = () => {
       setErrorMessage("정보 수정에 실패했습니다.");
     }
   };
-
 
   return (
     <Box m="20px" display="flex" justifyContent="center">

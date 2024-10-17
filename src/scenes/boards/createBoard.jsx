@@ -25,14 +25,35 @@ const CreateBoard = () => {
   const [content, setContent] = useState("");
   const [imagesToUpload, setImagesToUpload] = useState([]);
   const [imagePreviews, setImagePreviews] = useState([]);
+  const [userInfo, setUserInfo] = useState(null); // 유저 정보 상태 추가
 
   useEffect(() => {
     const accessToken = localStorage.getItem('accessToken');
     if (!accessToken) {
-        alert('로그인이 필요합니다.');
-        navigate('/login');  // 로그인 페이지로 리다이렉트
+      alert('로그인이 필요합니다.');
+      navigate('/login'); // 로그인 페이지로 리다이렉트
+    } else {
+      fetchUserInfo(accessToken); // 사용자 정보 가져오기
     }
   }, [navigate]);
+
+  const fetchUserInfo = async (token) => {
+    try {
+      const response = await axios.get("http://localhost:8081/employees/my-info", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setUserInfo(response.data.data); // 유저 정보 저장
+      setUsername(response.data.data.email); // 사용자 이메일 설정
+
+      if (response.data.data.email === "admin@pingpong-works.com") {
+        setCategory("공지");
+      }
+    } catch (error) {
+      alert("사용자 정보를 가져오는 데 실패했습니다.");
+    }
+  };
 
   const allowedFileTypes = [
     "image/jpeg",
@@ -43,7 +64,7 @@ const CreateBoard = () => {
     "image/svg+xml",
   ];
 
-  const maxFileSize = 100 * 1024 * 1024;
+  const maxFileSize = 10 * 1024 * 1024;
 
   const handleImageUpload = (e) => {
     const files = Array.from(e.target.files);
@@ -77,19 +98,27 @@ const CreateBoard = () => {
     setImagePreviews(updatedPreviews);
   };
 
-  useEffect(() => {
-    const storedUsername = localStorage.getItem("username") || "";
-    setUsername(storedUsername);
-
-    if (storedUsername === "admin@gmail.com") {
-      setCategory("공지");
-    }
-  }, []);
-
   const handleSubmit = async () => {
+    if (!userInfo) return; // 유저 정보가 없으면 실행하지 않음
+
     try {
-      if ((category === "공지" || category === "식단") && username !== "admin@gmail.com") {
+      if ((category === "공지" || category === "식단") && username !== "admin@pingpong-works.com") {
         alert("공지와 식단 카테고리는 관리자만 작성할 수 있습니다.");
+        return;
+      }
+
+      if (!title) {
+        alert("제목을 입력해주세요.");
+        return;
+      }
+  
+      if (!content) {
+        alert("내용을 입력해주세요.");
+        return;
+      }
+  
+      if (!category) {
+        alert("카테고리를 선택해주세요.");
         return;
       }
 
@@ -114,7 +143,7 @@ const CreateBoard = () => {
 
       const response = await axios.post("http://localhost:8084/boards", postData, {
         params: {
-          employeeId: 1,
+          employeeId: userInfo.employeeId, // 동적으로 employeeId 사용
         },
         headers: {
           "Content-Type": "application/json",
@@ -126,15 +155,13 @@ const CreateBoard = () => {
         navigate("/boards");
       }
     } catch (error) {
-      console.error("게시글 작성 실패", error);
       alert("게시글 작성에 실패했습니다.");
     }
   };
 
-
   return (
     <Box m="20px">
-      <Header title="Boards" subtitle="Create Board" />
+      <Header title="게시판 작성" />
 
       <Box
         mt="20px"
@@ -188,7 +215,7 @@ const CreateBoard = () => {
             },
           }}
         >
-          {username === "admin@gmail.com"
+          {username === "admin@pingpong-works.com"
             ? [
                 <MenuItem key="공지" value="공지">
                   공지

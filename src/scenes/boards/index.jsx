@@ -68,7 +68,7 @@ const Boards = () => {
         totalPages: response.data.pageInfo.totalPages,
       });
     } catch (error) {
-      console.error("Error fetching data", error);
+      alert("게시글 정보를 가져오는 데 실패했습니다.");
     } finally {
       setLoading(false);
     }
@@ -162,7 +162,7 @@ const Boards = () => {
   return (
     <Box m="20px">
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-        <Header title="Boards" subtitle={`List of Boards`} />
+        <Header title="게시판"/>
         <Button
           variant="contained"
           color="primary"
