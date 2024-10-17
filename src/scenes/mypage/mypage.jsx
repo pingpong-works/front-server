@@ -25,6 +25,7 @@ import interactionPlugin from '@fullcalendar/interaction';
 import listPlugin from '@fullcalendar/list';
 import { tokens } from "../../theme";
 import AttendanceStatistics from '../../components/AttendanceStatistics'; // 경로 확인 필요
+import defaultAvatar from "../../assets/images/avatar.png";
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -208,7 +209,7 @@ const Mypage = () => {
           <Grid item xs={12} md={3} align="center">
             <Avatar
               alt={userInfo.name}
-              src={userInfo.profilePicture || "/path-to-default-avatar.png"}
+              src={userInfo.profilePicture || defaultAvatar}
               sx={{ width: 120, height: 120 }}
             />
             <Typography variant="h5" mt={2}>

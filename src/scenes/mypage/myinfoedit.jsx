@@ -1,13 +1,29 @@
 import React, { useState, useEffect } from "react";
-import { Box, Button, TextField, Typography, useTheme, Grid, Avatar, Snackbar, Alert, Stack } from "@mui/material";
+import {
+  Box,
+  Button,
+  TextField,
+  Typography,
+  useTheme,
+  Avatar,
+  Snackbar,
+  Alert,
+  Stack,
+  Grid,
+  IconButton,
+} from "@mui/material";
 import axios from "axios";
 import { tokens } from "../../theme";
 import { useNavigate } from "react-router-dom";
+import defaultAvatar from "../../assets/images/avatar.png";
+import CloseIcon from "@mui/icons-material/Close";
+import { useOutletContext } from "react-router-dom";
 
 const MyInfoEdit = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const navigate = useNavigate();
+  const { handleUserInfoUpdate } = useOutletContext();
 
   const [userInfo, setUserInfo] = useState({
     name: "",
@@ -20,9 +36,19 @@ const MyInfoEdit = () => {
   });
 
   const [loading, setLoading] = useState(true);
-  const [profileImage, setProfileImage] = useState("");
+  const [profileImage, setProfileImage] = useState(defaultAvatar);
+  const [originalProfileImage, setOriginalProfileImage] = useState(defaultAvatar);
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const [imageToUpload, setImageToUpload] = useState(null);
+
+  useEffect(() => {
+    const accessToken = localStorage.getItem('accessToken');
+    if (!accessToken) {
+        alert('로그인이 필요합니다.');
+        navigate('/login');  // 로그인 페이지로 리다이렉트
+    }
+  }, [navigate]);
 
   useEffect(() => {
     const accessToken = localStorage.getItem('accessToken');
@@ -42,8 +68,13 @@ const MyInfoEdit = () => {
           },
         });
         const { name, phoneNumber, extensionNumber, emergencyNumber, address, vehicleNumber, profilePicture } = response.data.data;
+
         setUserInfo({ name, phoneNumber, extensionNumber, emergencyNumber, address, vehicleNumber, profilePicture });
-        setProfileImage(profilePicture);
+
+        const imageToDisplay = profilePicture || defaultAvatar;
+        setProfileImage(imageToDisplay);
+        setOriginalProfileImage(imageToDisplay);
+
         setLoading(false);
       } catch (error) {
         setErrorMessage("사용자 정보를 불러오는 데 실패했습니다.");
@@ -53,7 +84,6 @@ const MyInfoEdit = () => {
     fetchUserInfo();
   }, []);
 
-  // 입력값 변경 처리
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setUserInfo((prevState) => ({
@@ -62,36 +92,62 @@ const MyInfoEdit = () => {
     }));
   };
 
-  // 프로필 사진 변경 처리
   const handleProfilePictureChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
         setProfileImage(reader.result);
-        setUserInfo((prevState) => ({
-          ...prevState,
-          profilePicture: reader.result,
-        }));
+        setImageToUpload(file);
       };
       reader.readAsDataURL(file);
     }
   };
 
-  // 사용자 정보 수정 요청
+  const handleImageRemove = () => {
+    setProfileImage(originalProfileImage);
+    setImageToUpload(null);
+  };
+
   const handleSubmit = async () => {
     try {
-      await axios.patch("http://localhost:8081/employees", userInfo, {
+      let profilePictureUrl = userInfo.profilePicture;
+      const existingProfilePictureUrl = userInfo.profilePicture;
+
+      if (existingProfilePictureUrl && existingProfilePictureUrl !== defaultAvatar) {
+        await axios.delete(`http://localhost:8084/images?imageUrl=${existingProfilePictureUrl}`);
+      }
+
+      if (imageToUpload) {
+        const formData = new FormData();
+        formData.append("multipartFile", imageToUpload);
+        const response = await axios.post("http://localhost:8081/images", formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
+        profilePictureUrl = response.data;
+      }
+
+      const updatedData = {
+        ...userInfo,
+        profilePicture: profilePictureUrl,
+      };
+
+      await axios.patch("http://localhost:8081/employees", updatedData, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
         },
       });
+      handleUserInfoUpdate(true);
       setSuccessMessage("정보가 성공적으로 수정되었습니다.");
       navigate("/mypage", { replace: true });
     } catch (error) {
+      console.error("정보 수정 실패", error);
       setErrorMessage("정보 수정에 실패했습니다.");
     }
   };
+
 
   return (
     <Box m="20px" display="flex" justifyContent="center">
@@ -118,7 +174,23 @@ const MyInfoEdit = () => {
           >
             {/* 프로필 사진 및 변경 버튼 */}
             <Box display="flex" alignItems="center" justifyContent="center" flexDirection="column">
-              <Avatar alt={userInfo.name} src={profileImage || "/path-to-default-avatar.png"} sx={{ width: 120, height: 120, mb: 2 }} />
+              <Box position="relative">
+                <Avatar alt={userInfo.name} src={profileImage} sx={{ width: 120, height: 120, mb: 2 }} />
+                {imageToUpload && (
+                  <IconButton
+                    onClick={handleImageRemove}
+                    sx={{
+                      position: "absolute",
+                      top: 0,
+                      right: 0,
+                      color: colors.gray[100],
+                      backgroundColor: colors.redAccent[500],
+                    }}
+                  >
+                    <CloseIcon />
+                  </IconButton>
+                )}
+              </Box>
               <Button variant="contained" component="label" color="primary">
                 프로필 사진 변경
                 <input type="file" hidden accept="image/*" onChange={handleProfilePictureChange} />
