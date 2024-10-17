@@ -171,11 +171,11 @@ const Boards = () => {
           sx={{
             height: "50px",
             padding: "0 20px",
-            backgroundColor: colors.greenAccent[500],
+            backgroundColor: colors.blueAccent[500],
             fontSize: "16px",
             fontWeight: "bold",
             "&:hover": {
-              backgroundColor: colors.greenAccent[700],
+              backgroundColor: colors.blueAccent[700],
             },
           }}
         >

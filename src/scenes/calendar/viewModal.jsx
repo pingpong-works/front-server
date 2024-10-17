@@ -128,9 +128,11 @@ const ViewModal = ({ isOpen, eventDetails, onCancel, onUpdate, onDelete }) => {
               </Button>
             </Box>
             
-            <Typography variant="body2" color={colors.gray[200]}>
-              예약 상태: {bookingStatus}
-            </Typography>
+            {bookingStatus && (
+              <Typography variant="body2" color={colors.gray[200]}>
+                예약 상태: {bookingStatus}
+              </Typography>
+            )}
           </Box>
         )}
       </Box>

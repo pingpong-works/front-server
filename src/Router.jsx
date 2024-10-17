@@ -32,6 +32,8 @@ import AdminRoute from './auth/AdminRoute';
 import TemplateForm from './scenes/document/TemplateForm.jsx';
 import Manage from "./scenes/manage/Manage.jsx";
 import Department from "./scenes/department/Department.jsx";
+import Car from "./scenes/resource/car/car.jsx";
+import Room from "./scenes/resource/room/room.jsx";
 import DepartmentManagement from "./scenes/department/DepartmentManagement.jsx";
 
 const AppRouter = () => {
@@ -73,6 +75,9 @@ const AppRouter = () => {
             <Route path="/document" element={<AdminRoute><Document /></AdminRoute>} />
             <Route path="/manage" element={<AdminRoute><Manage /></AdminRoute>} />
             <Route path="/department" element={<AdminRoute><Department /></AdminRoute>} />
+            <Route path="/car" element={<AdminRoute><Car /></AdminRoute>} />
+            <Route path="/room" element={<AdminRoute><Room /></AdminRoute>} />
+
             <Route path="/department-management" element={<AdminRoute><DepartmentManagement /></AdminRoute>} />
 
           </Route>

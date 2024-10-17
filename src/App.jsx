@@ -10,6 +10,12 @@ function App() {
   const [theme, colorMode] = useMode();
   const [toggled, setToggled] = useState(false);
   const values = { toggled, setToggled };
+
+  const [userInfoUpdated, setUserInfoUpdated] = useState(false);
+
+  const handleUserInfoUpdate = (status) => {
+    setUserInfoUpdated(status);
+  };
   
   return (
     <ColorModeContext.Provider value={colorMode}>
@@ -17,7 +23,8 @@ function App() {
         <CssBaseline />
         <ToggledContext.Provider value={values}>
           <Box sx={{ display: "flex", height: "100vh", maxWidth: "100%" }}>
-            <SideBar />
+          <SideBar onUserInfoUpdate={userInfoUpdated}
+            setUserInfoUpdated={setUserInfoUpdated} />
             <Box
               sx={{
                 flexGrow: 1,
@@ -29,7 +36,7 @@ function App() {
             >
               <Navbar />
               <Box sx={{ overflowY: "auto", flex: 1, maxWidth: "100%" }}>
-                <Outlet />
+              <Outlet context={{ handleUserInfoUpdate }} />
               </Box>
             </Box>
           </Box>
