@@ -74,20 +74,21 @@ const Receive = () => {
               variant="h2"
               sx={{
                 fontWeight: "bold",
-                color: "white", 
+                color: colors.primary[100],
                 marginBottom: "20px", 
               }}
           >받은 메일함</Typography>
           <Typography variant="h4"  sx={{  ml:"5px", mb: "20px", }} > 총 {totalElements} 개</Typography>
             <Box display="flex" flexDirection="column">
                 {receivedMails.map((mail, index) => (
-                    <Box sx={{ bgcolor : colors.gray[350]}}
+                    <Box sx={{ 
+                        bgcolor : colors.gray[450]}}
                         key={mail.mailId}
                         display="grid"
-                        borderRadius={4}
+                        borderRadius={1}
                         gridTemplateColumns="30px 60px 250px auto 250px 30px"
                         alignItems="center"
-                        p={2}
+                        p={1}
                         borderBottom="1px solid #cccccc87"
                         
                     >

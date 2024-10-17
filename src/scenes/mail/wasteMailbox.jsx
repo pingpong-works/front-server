@@ -85,7 +85,19 @@ const Waste = () => {
 
     return (
         <Box p={3}>
-            <Typography variant="h2" mb={2}>휴지통 (총 {totalElements}개)</Typography>
+            <Typography variant="h2"           
+            sx={{
+                fontWeight: "bold",
+                color: colors.primary[100],
+                marginBottom: "20px", 
+              }}
+              mb={2}>
+                휴지통
+            </Typography>
+            <Typography variant="h4"  sx={{  ml:"5px", mb: "20px", }} > 
+                총 {totalElements} 개
+            </Typography>
+            
             <Box display="flex" flexDirection="column">
                 {totalElements === 0 ? (
                     <Typography variant="h5" textAlign="center" color="textSecondary">
@@ -93,26 +105,29 @@ const Waste = () => {
                     </Typography>
                 ) : (
                     trashMails.map((mail, index) => (
-                        <Box
-                            key={mail.trashMailId}
-                            display="grid"
-                            gridTemplateColumns="40px 200px auto 150px 40px"
-                            alignItems="center"
-                            p={2}
-                            borderBottom="1px solid #ccc"
-                        >
-                            <Checkbox />
-                            <Typography variant="h4" noWrap>{mail.recipientName || mail.recipientEmail}</Typography>
+                    <Box sx={{ 
+                        bgcolor : colors.gray[450]}}
+                        key={mail.trashMailId}
+                        display="grid"
+                        borderRadius={1}
+                        gridTemplateColumns="30px 250px auto 250px 30px"
+                        alignItems="center"
+                        p={1}
+                        borderBottom="1px solid #cccccc87"
+                        
+                    >
+                <Checkbox />
+                            <Typography variant="h6" noWrap>{mail.recipientName || mail.recipientEmail}</Typography>
                             <Typography
-                                variant="h4"
-                                fontWeight="bold"
-                                noWrap
-                                sx={{ cursor: 'pointer' }}
+                            variant="h6"
+                            fontWeight="bold"
+                            noWrap
+                            sx={{ cursor: 'pointer' }}
                                 onClick={() => navigate(`/read/2/${mail.trashMailId}`)}
                             >
                                 {mail.subject}
                             </Typography>
-                            <Typography variant="body2" color="textSecondary" textAlign="right">
+                            <Typography variant="h6" color="textSecondary" textAlign="right">
                                 {new Date(mail.sentAt).toLocaleString()}
                             </Typography>
                             <Box display="flex" gap={1}>
