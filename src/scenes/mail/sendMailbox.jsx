@@ -24,6 +24,7 @@ const Send = () => {
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [totalElements, setTotalElements] = useState(0);
+
     useEffect(() => {
       const accessToken = localStorage.getItem('accessToken');
       if (!accessToken) {
@@ -69,8 +70,15 @@ const Send = () => {
 
     return (
         <Box p={3}>
-            <Typography variant="h2" mb={2}>보낸 메일함 </Typography>
-            <Typography variant="h5" mb={2}>총 {totalElements}개</Typography>
+            <Typography
+                variant="h2"
+                sx={{
+                    fontWeight: "bold",
+                    color: colors.primary[100],
+                    marginBottom: "20px",
+                }}
+            >보낸 메일함</Typography>
+            <Typography variant="h4"  sx={{  ml:"5px", mb: "20px", }} > 총 {totalElements} 개</Typography>
             <Box display="flex" flexDirection="column">
                 {sentMails.map((mail, index) => (
                     <Box
@@ -92,7 +100,11 @@ const Send = () => {
                             variant="h6"
                             fontWeight="bold"
                             noWrap
-                            sx={{ cursor: 'pointer' }}
+                            sx={{
+                                cursor: 'pointer',
+                                fontWeight: mail.isRead ? 'normal' : 'bold', // 읽었으면 'normal', 읽지 않았으면 'bold'
+                                color: mail.isRead ? 'gray' : 'black', // 읽었으면 회색, 읽지 않았으면 검정색
+                            }}
                             onClick={() => navigate(`/read/1/${mail.mailId}`)}
                         >
                             {mail.subject}
