@@ -10,6 +10,30 @@ import axios from 'axios';
 import { tokens } from "../../theme";
 import { useNavigate } from 'react-router-dom';
 
+// JWT 토큰에서 employeeId를 추출하는 함수
+const getEmployeeIdFromSomeSource = () => {
+  const token = localStorage.getItem('accessToken');
+  if (!token) {
+    console.error('로그인 토큰이 존재하지 않습니다.');
+    return null;
+  }
+
+  try {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(atob(base64).split('').map((c) => {
+      return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
+
+    const parsedToken = JSON.parse(jsonPayload);
+    console.log('Parsed Token: ', parsedToken.employeeId); // JWT 페이로드를 로그로 출력하여 확인
+    return parsedToken.employeeId; // JWT 토큰에서 employeeId 추출
+  } catch (error) {
+    console.error('토큰 디코딩 중 오류 발생: ', error);
+    return null;
+  }
+};
+
 const MailWrite = () => {
   const theme = useTheme();
   console.log("mailwrite진입..."); // 이 로그가 찍히는지 확인
@@ -28,16 +52,12 @@ const MailWrite = () => {
   const initialValues = {
     recipientEmail: "",
     subject: "",
-    address1: "",
-    address2: "",
     body: ""
   };
 
   const checkoutSchema = yup.object().shape({
     recipientEmail: yup.string().email("올바른 이메일 형식이어야 합니다.").required("받는 사람의 이메일이 필요합니다."),
     subject: yup.string().required("제목이 필요합니다."),
-    address1: yup.string(),
-    address2: yup.string(),
     body: yup.string()
   });
 
@@ -53,11 +73,16 @@ const MailWrite = () => {
 
     console.log("메일 전송 요청 시작..."); // 이 로그가 찍히는지 확인
 
+    const employeeId = getEmployeeIdFromSomeSource(); // JWT 토큰에서 employeeId 가져오기
+    if (!employeeId) {
+      alert('로그인된 사용자 정보를 가져올 수 없습니다. employeeId가 정의되지 않았습니다.');
+      return;
+    }
 
     try {
       // 백엔드 API 호출
-      const response = await axios.post('http://localhost:8083/mail/send', values);
-      console.log(response.data);
+      const response = await axios.post(`http://localhost:8083/mail/send?employeeId=${employeeId}`, values);
+      console.log('Email sent successfully', response.data);
       actions.resetForm({ values: initialValues });
       alert("메일이 성공적으로 전송되었습니다.");
     } catch (error) {
@@ -138,32 +163,6 @@ const MailWrite = () => {
                     helperText={touched.recipientEmail && errors.recipientEmail}
                     sx={{ mb: 2 }}
                 />
-                {/*<TextField*/}
-                {/*    fullWidth*/}
-                {/*    variant="outlined"*/}
-                {/*    type="text"*/}
-                {/*    label="참조"*/}
-                {/*    onBlur={handleBlur}*/}
-                {/*    onChange={handleChange}*/}
-                {/*    value={values.address1}*/}
-                {/*    name="address1"*/}
-                {/*    error={touched.address1 && Boolean(errors.address1)}*/}
-                {/*    helperText={touched.address1 && errors.address1}*/}
-                {/*    sx={{ mb: 2 }}*/}
-                {/*/>*/}
-                {/*<TextField*/}
-                {/*    fullWidth*/}
-                {/*    variant="outlined"*/}
-                {/*    type="text"*/}
-                {/*    label="숨은 참조"*/}
-                {/*    onBlur={handleBlur}*/}
-                {/*    onChange={handleChange}*/}
-                {/*    value={values.address2}*/}
-                {/*    name="address2"*/}
-                {/*    error={touched.address2 && Boolean(errors.address2)}*/}
-                {/*    helperText={touched.address2 && errors.address2}*/}
-                {/*    sx={{ mb: 2 }}*/}
-                {/*/>*/}
                 <TextField
                     fullWidth
                     variant="outlined"
@@ -199,9 +198,9 @@ const MailWrite = () => {
                 <div ref={quillRef} style={{ height: '300px', marginBottom: '20px', border: '1px solid #ccc', borderRadius: '5px' }} />
 
                 <Box display="flex" alignItems="center" justifyContent="flex-end" gap="10px" mt="20px">
-                  <Button type="submit" sx={{bgcolor:colors.gray[500]}} variant="contained">
-                    임시저장
-                  </Button>
+                  {/*<Button type="submit" sx={{bgcolor:colors.gray[500]}} variant="contained">*/}
+                  {/*  임시저장*/}
+                  {/*</Button>*/}
                   <Button type="submit"  variant="contained">
                     보내기
                     </Button>

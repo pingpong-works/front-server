@@ -74,20 +74,22 @@ const Send = () => {
             <Box display="flex" flexDirection="column">
                 {sentMails.map((mail, index) => (
                     <Box
+                    sx={{ 
+                        bgcolor : colors.gray[450]}}
                         key={mail.mailId}
                         display="grid"
-                        gridTemplateColumns="40px 40px 200px auto 150px 40px"
+                        gridTemplateColumns="30px 60px 250px auto 250px 30px"
                         alignItems="center"
-                        p={1}
-                        borderBottom="1px solid #ccc"
+                         p={1}
+                        borderBottom="1px solid #cccccc87"
                     >
                         <Checkbox />
                         <IconButton>
                             {mail.isImportant ? <StarIcon /> : <StarBorderIcon />}
                         </IconButton>
-                        <Typography variant="h4" noWrap>{mail.recipientName || mail.recipientEmail}</Typography>
+                        <Typography variant="h6" noWrap>{mail.recipientName || mail.recipientEmail}</Typography>
                         <Typography
-                            variant="h4"
+                            variant="h6"
                             fontWeight="bold"
                             noWrap
                             sx={{ cursor: 'pointer' }}
@@ -95,7 +97,7 @@ const Send = () => {
                         >
                             {mail.subject}
                         </Typography>
-                        <Typography variant="body2" color="textSecondary" textAlign="right">
+                        <Typography variant="h6" color="textSecondary" textAlign="right">
                             {new Date(mail.sentAt).toLocaleString()}
                         </Typography>
                         <IconButton onClick={() => handleDelete(mail.mailId)}>
