@@ -60,7 +60,7 @@ const AddModal = ({ isOpen, onCancel, onSubmit }) => {
           const response = await axios.get(url);
           setAvailableOptions(response.data);
         } catch (error) {
-          console.error("Error fetching available options:", error);
+          alert("정보를 불러오는 데 실패했습니다.");
           setAvailableOptions([]);
         }
       }

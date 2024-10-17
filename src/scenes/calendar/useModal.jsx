@@ -12,6 +12,7 @@ const useModal = (fetchEvents) => {
   const [eventDetails, setEventDetails] = useState(null);
   const [modalType, setModalType] = useState('view');
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [departmentId, setDepartmentId] = useState(null); // departmentId 상태 추가
   const navigate = useNavigate();
   
   useEffect(() => {
@@ -19,8 +20,25 @@ const useModal = (fetchEvents) => {
     if (!accessToken) {
         alert('로그인이 필요합니다.');
         navigate('/login');  // 로그인 페이지로 리다이렉트
+    } else {
+      fetchUserInfo(accessToken); // 사용자 정보 가져오기
     }
   }, [navigate]);
+
+  // 사용자 정보에서 departmentId 가져오기
+  const fetchUserInfo = async (token) => {
+    try {
+      const response = await axios.get("http://localhost:8081/employees/my-info", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const userData = response.data.data;
+      setDepartmentId(userData.departmentId);
+    } catch (error) {
+      alert("사용자 정보를 가져오는 데 실패했습니다.");
+    }
+  };
 
   const showModal = (title, message, type = 'confirm', details = null) => {
     setEventDetails(details);
@@ -47,23 +65,38 @@ const useModal = (fetchEvents) => {
       const calendarId = eventDetails.id;
       const carBookId = eventDetails.carBookId;
       const roomBookId = eventDetails.roomBookId;
-      const departmentId = 1;
-  
+
+      if (!departmentId) {
+        alert('부서 정보가 없습니다.');
+        return;
+      }
+
       const ensureSeconds = (timeString) => {
         return timeString.includes(":") && timeString.split(":").length === 2 
           ? `${timeString}:00` 
           : timeString;
       };
-  
+
       const updatedPayload = {
+        id : updatedData.id,
         title: updatedData.title,
         content: updatedData.content,
         startTime: ensureSeconds(updatedData.start),
         endTime: ensureSeconds(updatedData.end)
       };
-  
+
+      if(!updatedPayload.title) {
+        alert("제목을 입력해주세요.");
+        return;
+      }
+
+      if(!updatedPayload.content) {
+        alert("내용을 입력해주세요.");
+      }
+
       if (carBookId) {
         const carResponse = await axios.patch(`http://localhost:8084/car-books/${carBookId}`, {
+          carId : updatedPayload.id,
           bookStart: updatedPayload.startTime,
           bookEnd: updatedPayload.endTime,
           purpose: updatedData.purpose, 
@@ -74,15 +107,16 @@ const useModal = (fetchEvents) => {
             content: updatedPayload.content
           }
         });
-  
+
         if (carResponse.status !== 200) {
-          console.error("Failed to update car reservation.");
+          alert("차량 예약 변경에 실패했습니다.");
           return;
         }
       }
-  
+
       if (roomBookId) {
         const roomResponse = await axios.patch(`http://localhost:8084/room-books/${roomBookId}`, {
+          roomId : updatedPayload.id,
           bookStart: updatedPayload.startTime,
           bookEnd: updatedPayload.endTime,
           purpose: updatedData.purpose, 
@@ -95,35 +129,34 @@ const useModal = (fetchEvents) => {
         });
 
         if (roomResponse.status !== 200) {
-          console.error("Failed to update room reservation.");
+          alert("회의실 예약 변경에 실패했습니다.");
           return;
         }
       }
-  
+
       if (!carBookId && !roomBookId) {
         const response = await axios.patch(`http://localhost:8084/calendars/${calendarId}`, updatedPayload, {
           params: { departmentId }
         });
-  
+
         if (response.status !== 200) {
-          console.error("Failed to update the calendar event.");
+          alert("일정 변경에 실패했습니다.");
           return;
         }
       }
-  
+
       setIsOpen(false);
-  
+
       if (resolvePromise) resolvePromise(true);
-  
+
       if (fetchEvents) {
         fetchEvents();
       }
       
     } catch (error) {
-      console.error("Error occurred while updating the event:", error);
+      alert("일정 변경에 실패했습니다.");
     }
   };
-  
 
   const handleDelete = () => {
     setIsDeleteModalOpen(true); 
@@ -134,50 +167,54 @@ const useModal = (fetchEvents) => {
       const calendarId = eventDetails.id;
       const carBookId = eventDetails.carBookId;
       const roomBookId = eventDetails.roomBookId;
-      const departmentId = 1;
-  
+
+      if (!departmentId) {
+        alert('부서 정보가 없습니다.');
+        return;
+      }
+
       if (carBookId) {
         const carResponse = await axios.delete(`http://localhost:8084/car-books/${carBookId}`, {
           params: { departmentId }
         });
         if (carResponse.status !== 204) {
-          console.error("Failed to delete car reservation.");
+          alert("차량 예약 삭제에 실패했습니다.");
           return;
         }
       }
-  
+
       if (roomBookId) {
         const roomResponse = await axios.delete(`http://localhost:8084/room-books/${roomBookId}`, {
           params: { departmentId }
         });
         if (roomResponse.status !== 204) {
-          console.error("Failed to delete room reservation.");
+          alert("회의실 예약 삭제에 실패했습니다.");
           return;
         }
       }
-  
+
       if (!carBookId && !roomBookId) {
         const response = await axios.delete(`http://localhost:8084/calendars/${calendarId}`, {
           params: { departmentId }
         });
-  
+
         if (response.status !== 204) {
-          console.error("Failed to delete the calendar event.");
+          alert("일정 삭제에 실패했습니다.");;
           return;
         }
       }
-  
+
       setIsDeleteModalOpen(false);
       setIsOpen(false);
-  
+
       if (resolvePromise) resolvePromise(true);
-  
+
       if (fetchEvents) {
         fetchEvents();
       }
-  
+
     } catch (error) {
-      console.error("Error occurred while deleting the event:", error);
+      alert("일정 삭제에 실패했습니다.");
     }
   };
 
