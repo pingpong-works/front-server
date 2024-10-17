@@ -7,6 +7,7 @@ import {
     IconButton,
     Button,
     CircularProgress,
+    TextField,  // 검색어 입력 필드를 위한 추가
     useTheme,
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -23,33 +24,36 @@ const Waste = () => {
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [totalElements, setTotalElements] = useState(0);
+    const [search, setSearch] = useState('');  // 검색어 상태 추가
 
     useEffect(() => {
-      const accessToken = localStorage.getItem('accessToken');
-      if (!accessToken) {
-          alert('로그인이 필요합니다.');
-          navigate('/login');  // 로그인 페이지로 리다이렉트
-      }
+        const accessToken = localStorage.getItem('accessToken');
+        if (!accessToken) {
+            alert('로그인이 필요합니다.');
+            navigate('/login');  // 로그인 페이지로 리다이렉트
+        }
     }, [navigate]);
 
+    // 메일 데이터를 가져오는 함수
+    const fetchTrashMails = async (searchQuery = '') => {
+        setLoading(true);
+        try {
+            const response = await axios.get(
+                `http://localhost:8083/mail/trash?page=${page}&size=10&sort=deletedAt,DESC&search=${searchQuery}`
+            );
+            setTrashMails(response.data.data);
+            setTotalPages(response.data.pageInfo.totalPages);
+            setTotalElements(response.data.pageInfo.totalElements);
+        } catch (error) {
+            console.error('휴지통 메일 조회 중 오류 발생: ', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     useEffect(() => {
-        const fetchTrashMails = async () => {
-            setLoading(true);
-            try {
-                const response = await axios.get(
-                    `http://localhost:8083/mail/trash?page=${page}&size=10&sort=deletedAt,DESC`
-                );
-                setTrashMails(response.data.data);
-                setTotalPages(response.data.pageInfo.totalPages);
-                setTotalElements(response.data.pageInfo.totalElements);
-            } catch (error) {
-                console.error('휴지통 메일 조회 중 오류 발생: ', error);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchTrashMails();
-    }, [page]);
+        fetchTrashMails(search);  // 검색어가 변경될 때마다 메일 데이터를 필터링
+    }, [page, search]);
 
     const handleRestore = async (mailId) => {
         try {
@@ -85,19 +89,36 @@ const Waste = () => {
 
     return (
         <Box p={3}>
-            <Typography variant="h2"           
-            sx={{
-                fontWeight: "bold",
-                color: colors.primary[100],
-                marginBottom: "20px", 
-              }}
-              mb={2}>
+            <Typography variant="h2"
+                        sx={{
+                            fontWeight: "bold",
+                            color: colors.primary[100],
+                            marginBottom: "20px",
+                        }}
+                        mb={2}>
                 휴지통
             </Typography>
-            <Typography variant="h4"  sx={{  ml:"5px", mb: "20px", }} > 
+            <Typography variant="h4" sx={{ ml: "5px", mb: "20px" }}>
                 총 {totalElements} 개
             </Typography>
-            
+
+            {/* 검색 입력 필드 추가 */}
+            <Box display="flex" mb={2}>
+                <TextField
+                    label="검색"
+                    variant="outlined"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}  // 검색어 상태 업데이트
+                    sx={{ width: "300px", marginRight: "10px" }}
+                />
+                <Button
+                    variant="contained"
+                    onClick={() => fetchTrashMails(search)}  // 검색 버튼 클릭 시 호출
+                >
+                    검색
+                </Button>
+            </Box>
+
             <Box display="flex" flexDirection="column">
                 {totalElements === 0 ? (
                     <Typography variant="h5" textAlign="center" color="textSecondary">
@@ -105,28 +126,29 @@ const Waste = () => {
                     </Typography>
                 ) : (
                     trashMails.map((mail, index) => (
-                    <Box sx={{ 
-                        bgcolor : colors.gray[450]}}
-                        key={mail.trashMailId}
-                        display="grid"
-                        borderRadius={1}
-                        gridTemplateColumns="30px 250px auto 250px 30px"
-                        alignItems="center"
-                        p={1}
-                        borderBottom="1px solid #cccccc87"
-                        
-                    >
-                <Checkbox />
+                        <Box sx={{
+                            bgcolor: colors.gray[450]
+                        }}
+                             key={mail.trashMailId}
+                             display="grid"
+                             borderRadius={1}
+                             gridTemplateColumns="30px 250px auto 150px 80px"
+                             alignItems="center"
+                             p={1}
+                             borderBottom="1px solid #cccccc87"
+                             overflow="hidden"
+                        >
+                            <Checkbox />
                             <Typography variant="h6" noWrap>{mail.recipientName || mail.recipientEmail}</Typography>
                             <Typography
-                            variant="h6"
-                            fontWeight="bold"
-                            noWrap
-                            sx={{
-                                cursor: 'pointer',
-                                fontWeight: mail.isRead ? 'normal' : 'bold', // 읽었으면 'normal', 읽지 않았으면 'bold'
-                                color: mail.isRead ? 'gray' : 'black', // 읽었으면 회색, 읽지 않았으면 검정색
-                            }}
+                                variant="h6"
+                                fontWeight="bold"
+                                noWrap
+                                sx={{
+                                    cursor: 'pointer',
+                                    fontWeight: mail.isRead ? 'normal' : 'bold', // 읽었으면 'normal', 읽지 않았으면 'bold'
+                                    color: mail.isRead ? 'gray' : 'black',  // 읽었으면 회색, 읽지 않았으면 검정색
+                                }}
                                 onClick={() => navigate(`/read/2/${mail.trashMailId}`)}
                             >
                                 {mail.subject}
