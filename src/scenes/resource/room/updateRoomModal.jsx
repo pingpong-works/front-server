@@ -4,6 +4,22 @@ import axios from 'axios';
 import { tokens } from '../../../theme';
 import { useTheme } from "@mui/material/styles";
 
+const parseJwt = (token) => {
+    try {
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(
+        atob(base64)
+          .split('')
+          .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+          .join('')
+      );
+      return JSON.parse(jsonPayload);
+    } catch (error) {
+      return null;
+    }
+};
+
 const UpdateRoomModal = ({ isOpen, roomId, onClose, onUpdateSuccess }) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
@@ -13,11 +29,14 @@ const UpdateRoomModal = ({ isOpen, roomId, onClose, onUpdateSuccess }) => {
     maxCapacity: '',
     location: '',
     available: true,
-    equipment: [''],  // 기본 설비 입력 필드 추가
+    equipment: [],  // 추가된 설비 배열
+    equipmentsToDelete: [],  // 삭제된 설비 배열
   });
-  const [errorMessage, setErrorMessage] = useState('');
 
-  // 폼 유효성 검사: 필수 항목 (회의실 이름과 수용 인원)
+  const [originalEquipment, setOriginalEquipment] = useState([]);  // 원본 설비 배열
+  const [previewEquipment, setPreviewEquipment] = useState([]);  // 미리보기용 설비 배열
+
+  // 폼 유효성 검사
   const isFormValid = roomDetails.name && roomDetails.maxCapacity;
 
   // 회의실 상세 정보 가져오기
@@ -25,30 +44,34 @@ const UpdateRoomModal = ({ isOpen, roomId, onClose, onUpdateSuccess }) => {
     try {
       const response = await axios.get(`http://localhost:8084/rooms/${roomId}`);
       const roomData = response.data.data;
-      setRoomDetails({
+      setRoomDetails((prev) => ({
+        ...prev,
         name: roomData.name || '',
         maxCapacity: roomData.maxCapacity || '',
         location: roomData.location || '',
         available: roomData.available || false,
-        equipment: roomData.equipment.length > 0 ? roomData.equipment : [''],  // 설비가 있으면 추가
-      });
+      }));
+      setOriginalEquipment(roomData.equipment || []); // 원본 설비 저장
+      setPreviewEquipment(roomData.equipment.length > 0 ? roomData.equipment : []); // 미리보기 배열 설정
     } catch (error) {
-      console.error("Error fetching room details:", error);
-      setErrorMessage('회의실 정보를 불러오는 중 문제가 발생했습니다.');
+      alert("회의실 정보를 가져오는 데 실패했습니다.");
     }
   };
 
   useEffect(() => {
     if (roomId && isOpen) {
-      fetchRoomDetails(); // 모달이 열릴 때마다 데이터를 불러옴
+      fetchRoomDetails(); // 모달이 열릴 때마다 데이터 가져오기
     } else {
       setRoomDetails({
         name: '',
         maxCapacity: '',
         location: '',
         available: true,
-        equipment: [''],
+        equipment: [],
+        equipmentsToDelete: [],
       });
+      setOriginalEquipment([]);
+      setPreviewEquipment([]); // 미리보기 배열 초기화
     }
   }, [roomId, isOpen]);
 
@@ -60,47 +83,63 @@ const UpdateRoomModal = ({ isOpen, roomId, onClose, onUpdateSuccess }) => {
 
   // 설비 필드 값 변경 처리
   const handleEquipmentChange = (index, value) => {
-    setRoomDetails((prev) => {
-      const newEquipment = [...prev.equipment];
-      newEquipment[index] = value;
-      return { ...prev, equipment: newEquipment };
-    });
+    const updatedPreviewEquipment = [...previewEquipment];
+    updatedPreviewEquipment[index] = value;  // 미리보기 배열 업데이트
+    setPreviewEquipment(updatedPreviewEquipment);
   };
 
   // 설비 입력창 추가
   const handleAddEquipment = () => {
-    setRoomDetails((prev) => ({
-      ...prev,
-      equipment: [...prev.equipment, ''],
-    }));
+    setPreviewEquipment((prev) => [...prev, '']);  // 미리보기 배열에 추가
   };
 
   // 설비 입력창 제거
   const handleRemoveEquipment = (index) => {
-    setRoomDetails((prev) => {
-      const newEquipment = prev.equipment.filter((_, i) => i !== index);
-      return { ...prev, equipment: newEquipment.length > 0 ? newEquipment : [''] }; // 최소 1개 필드는 유지
-    });
+    const equipmentToRemove = previewEquipment[index];  // 미리보기 배열에서 제거할 설비 선택
+
+    // 만약 삭제할 설비가 원본 설비에 있다면, 삭제 리스트에 추가
+    if (originalEquipment.includes(equipmentToRemove)) {
+      setRoomDetails((prev) => ({
+        ...prev,
+        equipmentsToDelete: [...prev.equipmentsToDelete, equipmentToRemove],  // 삭제된 설비 배열에 추가
+      }));
+    }
+
+    // 미리보기 배열에서 해당 설비 제거
+    setPreviewEquipment((prev) => prev.filter((_, i) => i !== index));
   };
 
   // 제출 처리
   const handleSubmit = async () => {
+    if (!isFormValid) {
+      alert("필수 항목을 모두 채워주세요.");
+      return;
+    }
+
+    // 추가된 설비 배열 만들기 (원본 설비에 없는 설비만 추가)
+    const newEquipments = previewEquipment.filter(equip => !originalEquipment.includes(equip));
+
     try {
       const updatedRoomDetails = {
         ...roomDetails,
+        equipment: newEquipments,  // 추가된 설비만 보냄
       };
 
-      // 회의실 수정 요청
+      const token = localStorage.getItem("accessToken");
+      const decodedToken = parseJwt(token);
+      const employeeId = decodedToken?.employeeId;
+
+      // 서버로 PATCH 요청
       await axios.patch(
-        `http://localhost:8084/rooms/${roomId}`,
+        `http://localhost:8084/rooms/${roomId}?employeeId=${employeeId}`,
         updatedRoomDetails
       );
 
-      onUpdateSuccess(); // 성공 후 상위 컴포넌트에서 처리
-      onClose(); // 모달 닫기
+      onUpdateSuccess();  // 성공 시 처리
+      alert("회의실을 성공적으로 수정했습니다.");
+      onClose();
     } catch (error) {
-      console.error("Error updating room details:", error);
-      setErrorMessage('회의실 수정 중 문제가 발생했습니다.');
+      alert("회의실 수정에 실패했습니다.");
     }
   };
 
@@ -203,7 +242,7 @@ const UpdateRoomModal = ({ isOpen, roomId, onClose, onUpdateSuccess }) => {
         <Typography variant="h6" mb={2} sx={{ color: colors.gray[100] }}>
           설비
         </Typography>
-        {roomDetails.equipment.map((equipment, index) => (
+        {previewEquipment.map((equipment, index) => (
           <Box key={index} display="flex" alignItems="center" mb={2}>
             <TextField
               fullWidth
@@ -220,7 +259,7 @@ const UpdateRoomModal = ({ isOpen, roomId, onClose, onUpdateSuccess }) => {
                 "& .MuiInputLabel-root": { color: colors.gray[100] },
               }}
             />
-            {roomDetails.equipment.length > 1 && (
+            {previewEquipment.length > 1 && (
               <Button
                 variant="text"
                 color="error"
@@ -255,12 +294,6 @@ const UpdateRoomModal = ({ isOpen, roomId, onClose, onUpdateSuccess }) => {
         >
           설비 추가
         </Button>
-
-        {errorMessage && (
-          <Typography color="error" sx={{ mb: 2 }}>
-            {errorMessage}
-          </Typography>
-        )}
 
         <Box display="flex" justifyContent="flex-end">
           <Button

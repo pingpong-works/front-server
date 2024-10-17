@@ -15,7 +15,7 @@ const ViewRoomModal = ({ isOpen, roomId, onClose, onUpdate, onDelete, onPatch })
         const response = await axios.get(`http://localhost:8084/rooms/${roomId}`);
         setRoomDetails(response.data.data);
       } catch (error) {
-        console.error("Error fetching room details:", error);
+        alert("회의실 정보를 가져오는 데 실패했습니다.");
       }
     }
   };

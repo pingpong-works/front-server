@@ -64,7 +64,7 @@ const CreateBoard = () => {
     "image/svg+xml",
   ];
 
-  const maxFileSize = 10 * 1024 * 1024;
+  const maxFileSize = 100 * 1024 * 1024;
 
   const handleImageUpload = (e) => {
     const files = Array.from(e.target.files);

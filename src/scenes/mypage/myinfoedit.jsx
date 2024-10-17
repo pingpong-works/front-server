@@ -42,7 +42,7 @@ const MyInfoEdit = () => {
   const [successMessage, setSuccessMessage] = useState("");
   const [imageToUpload, setImageToUpload] = useState(null);
 
-  const maxFileSize = 10 * 1024 * 1024; 
+  const maxFileSize = 100 * 1024 * 1024; 
 
   useEffect(() => {
     const accessToken = localStorage.getItem('accessToken');

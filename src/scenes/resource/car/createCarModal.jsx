@@ -28,7 +28,6 @@ const parseJwt = (token) => {
     );
     return JSON.parse(jsonPayload);
   } catch (error) {
-    console.error("토큰 파싱 실패", error);
     return null;
   }
 };
@@ -53,7 +52,7 @@ const createCarModal = ({ open, onClose, onCarAdded }) => {
     "image/webp",
     "image/svg+xml",
   ];
-  const maxFileSize = 10 * 1024 * 1024;
+  const maxFileSize = 100 * 1024 * 1024;
 
   // 이미지 업로드 처리
   const handleImageUpload = (e) => {
@@ -97,18 +96,22 @@ const createCarModal = ({ open, onClose, onCarAdded }) => {
   const handleSubmit = async () => {
     try {
       const token = localStorage.getItem("accessToken");
+      if (!carName) {
+        alert("차량 이름을 입력해주세요.");
+        return;
+      }
 
-      if (!token) {
-        alert("로그인된 사용자가 아닙니다. 토큰을 찾을 수 없습니다.");
+      if (!carNumber) {
+        alert("차량 번호를 입력해주세요.");
+        return;
+      }
+
+      if (!fuelType) {
+        alert("연료를 선택해주세요.");
         return;
       }
 
       const decodedToken = parseJwt(token);
-
-      if (!decodedToken || !decodedToken.employeeId) {
-        alert("유효하지 않은 토큰입니다.");
-        return;
-      }
 
       const employeeId = decodedToken.employeeId; // 토큰에서 employeeId 추출
 
@@ -129,7 +132,6 @@ const createCarModal = ({ open, onClose, onCarAdded }) => {
 
         // 서버로부터 URL을 받아오지 못했다면, 오류 발생 가능
         if (!response.data || typeof response.data !== "string") {
-          console.error("이미지 업로드 실패:", response);
           alert("이미지 업로드 중 문제가 발생했습니다.");
           return;
         }
@@ -145,8 +147,6 @@ const createCarModal = ({ open, onClose, onCarAdded }) => {
         images: uploadedImage, // Map<String, String> 형식으로 전송
       };
 
-      console.log("전송할 데이터:", carData);
-
       // 차량 등록 요청 전송
       const response = await axios.post(`http://localhost:8084/cars?employeeId=${employeeId}`, carData, {
         headers: {
@@ -160,11 +160,9 @@ const createCarModal = ({ open, onClose, onCarAdded }) => {
         handleClose(); 
         navigate("/car");
       } else {
-        console.error("응답 상태 코드:", response.status);
         alert("차량 등록에 실패했습니다.");
       }
     } catch (error) {
-      console.error("차량 등록 실패", error);
       alert("차량 등록에 실패했습니다.");
     }
   };

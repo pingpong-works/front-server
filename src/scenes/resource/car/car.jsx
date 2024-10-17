@@ -24,7 +24,6 @@ const parseJwt = (token) => {
     );
     return JSON.parse(jsonPayload);
   } catch (error) {
-    console.error("토큰 파싱 실패", error);
     return null;
   }
 };
@@ -76,7 +75,7 @@ const Car = () => {
 
       setData(filteredData);
     } catch (error) {
-      console.error("Error fetching car data", error);
+      alert("차량 정보를 가져오는 데 실패했습니다.");
     } finally {
       setLoading(false);
     }
@@ -123,10 +122,11 @@ const Car = () => {
         },
       });
       fetchData();
+      alert("차량이 삭제되었습니다.");
       setDeleteModalOpen(false);
       setViewModalOpen(false);
     } catch (error) {
-      console.error("차량 삭제 실패", error);
+      alert("차량을 삭제하는 데 실패했습니다.");
     }
   };
 

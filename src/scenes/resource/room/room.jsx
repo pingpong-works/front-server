@@ -23,7 +23,6 @@ const parseJwt = (token) => {
     );
     return JSON.parse(jsonPayload);
   } catch (error) {
-    console.error("토큰 파싱 실패", error);
     return null;
   }
 };
@@ -77,7 +76,7 @@ const Rooms = () => {
 
       setData(filteredData);
     } catch (error) {
-      console.error("Error fetching room data", error);
+      alert("회의실 정보를 가져오는 데 실패했습니다.");
     } finally {
       setLoading(false);
     }
@@ -124,10 +123,11 @@ const Rooms = () => {
         },
       });
       fetchData();
+      alert("회의실이 삭제되었습니다.");
       setDeleteModalOpen(false);
       setViewModalOpen(false);
     } catch (error) {
-      console.error("회의실 삭제 실패", error);
+      alert("회의실 삭제에 실패했습니다.");
     }
   };
 
