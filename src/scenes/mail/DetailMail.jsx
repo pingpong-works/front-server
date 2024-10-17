@@ -11,6 +11,7 @@ import {
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { tokens } from '../../theme';
+import DOMPurify from 'dompurify';  // XSS 방지용 라이브러리
 
 const DetailMail = () => {
     const theme = useTheme();
@@ -44,6 +45,11 @@ const DetailMail = () => {
 
         fetchMailDetail();
     }, [mailType, mailId]);
+
+    const renderMailBody = (body) => {
+        const cleanBody = DOMPurify.sanitize(body); // XSS 방지를 위해 HTML을 정제
+        return { __html: cleanBody };
+    };
 
     if (loading) {
         return (
@@ -92,9 +98,12 @@ const DetailMail = () => {
             </Box>
 
             <Box p={2} border="1px solid #ccc" borderRadius="5px" bgcolor={colors.primary[400]}>
-                <Typography variant="h3" whiteSpace="pre-line">
-                    {mailDetail.body}
-                </Typography>
+                {/* Quill 에디터로 작성된 HTML 콘텐츠를 안전하게 렌더링 */}
+                <Typography
+                    variant="h3"
+                    dangerouslySetInnerHTML={renderMailBody(mailDetail.body)}  // HTML 콘텐츠 렌더링
+                    sx={{ whiteSpace: 'pre-wrap' }} // 줄바꿈 유지
+                />
             </Box>
 
             <Box display="flex" justifyContent="space-between" mt={3}>
