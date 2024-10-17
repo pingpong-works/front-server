@@ -11,7 +11,6 @@ const useModal = (fetchEvents) => {
   const [eventDetails, setEventDetails] = useState(null);
   const [modalType, setModalType] = useState('view');
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-
   const navigate = useNavigate();
   useEffect(() => {
     const accessToken = localStorage.getItem('accessToken');
