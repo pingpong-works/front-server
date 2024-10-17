@@ -16,7 +16,7 @@ const ViewCarModal = ({ isOpen, carId, onClose, onUpdate, onDelete, onPatch }) =
         const response = await axios.get(`http://localhost:8084/cars/${carId}`);
         setCarDetails(response.data.data);
       } catch (error) {
-        console.error("Error fetching car details:", error);
+        alert("차량 정보를 가져오는 데 실패했습니다.");
       }
     }
   };

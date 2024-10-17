@@ -17,7 +17,6 @@ const parseJwt = (token) => {
     );
     return JSON.parse(jsonPayload);
   } catch (error) {
-    console.error("토큰 파싱 실패", error);
     return null;
   }
 };
@@ -55,7 +54,6 @@ const UpdateCarModal = ({ isOpen, carId, onClose, onUpdateSuccess }) => {
       });
       setImagePreview(carData.images?.url || '');  // 기존 이미지 미리보기 설정
     } catch (error) {
-      console.error("Error fetching car details:", error);
       setErrorMessage('차량 정보를 불러오는 중 문제가 발생했습니다.');
     }
   };
@@ -109,18 +107,24 @@ const UpdateCarModal = ({ isOpen, carId, onClose, onUpdateSuccess }) => {
     try {
       // 로컬스토리지에서 토큰 가져오기
       const token = localStorage.getItem("accessToken");
-  
-      if (!token) {
-        alert("로그인된 사용자가 아닙니다. 토큰을 찾을 수 없습니다.");
+
+      if (!carDetails.name) {
+        alert("차량 이름을 입력해주세요.");
         return;
+      }
+
+      if (!carDetails.number) {
+        alert("차량 번호를 입력해주세요.");
+        return;
+      }
+
+      if (!carDetails.fuel) {
+        alert("연료를 선택해주세요."); return;
+
       }
   
       // 토큰 디코드 및 employeeId 추출
       const decodedToken = parseJwt(token);
-      if (!decodedToken || !decodedToken.employeeId) {
-        alert("유효하지 않은 토큰입니다.");
-        return;
-      }
   
       const employeeId = decodedToken.employeeId;
 
@@ -152,11 +156,10 @@ const UpdateCarModal = ({ isOpen, carId, onClose, onUpdateSuccess }) => {
         `http://localhost:8084/cars/${carId}?employeeId=${employeeId}`,
         updatedCarDetails
       );
-      
       onUpdateSuccess();  // 성공 후 상위 컴포넌트에서 처리
+      alert("차량이 성공적으로 수정되었습니다.");
       onClose();  // 모달 닫기
     } catch (error) {
-      console.error("Error updating car details:", error);
       setErrorMessage('차량 수정 중 문제가 발생했습니다.');
     }
   };

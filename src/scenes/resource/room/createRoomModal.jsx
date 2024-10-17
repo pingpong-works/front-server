@@ -25,7 +25,6 @@ const parseJwt = (token) => {
     );
     return JSON.parse(jsonPayload);
   } catch (error) {
-    console.error("토큰 파싱 실패", error);
     return null;
   }
 };
@@ -71,16 +70,20 @@ const CreateRoomModal = ({ open, onClose, onRoomAdded }) => {
   const handleSubmit = async () => {
     try {
       const token = localStorage.getItem("accessToken");
+      const decodedToken = parseJwt(token);
 
-      if (!token) {
-        alert("로그인된 사용자가 아닙니다. 토큰을 찾을 수 없습니다.");
+      if (!roomName) {
+        alert("회의실 이름을 입력해 주세요.");
         return;
       }
 
-      const decodedToken = parseJwt(token);
+      if (!capacity || isNaN(capacity) || capacity <= 0) {
+        alert("유효한 숫자를 입력해 주세요.");
+        return;
+      }
 
-      if (!decodedToken || !decodedToken.employeeId) {
-        alert("유효하지 않은 토큰입니다.");
+      if (!location) {
+        alert("위치를 입력해 주세요.");
         return;
       }
 
@@ -94,8 +97,6 @@ const CreateRoomModal = ({ open, onClose, onRoomAdded }) => {
         equipment: equipments.filter((equipment) => equipment.trim() !== ""), // 빈 설비는 제외
       };
 
-      console.log("전송할 데이터:", roomData);
-
       // 회의실 등록 요청 전송
       const response = await axios.post(`http://localhost:8084/rooms?employeeId=${employeeId}`, roomData, {
         headers: {
@@ -108,11 +109,9 @@ const CreateRoomModal = ({ open, onClose, onRoomAdded }) => {
         onRoomAdded();
         handleClose();
       } else {
-        console.error("응답 상태 코드:", response.status);
         alert("회의실 등록에 실패했습니다.");
       }
     } catch (error) {
-      console.error("회의실 등록 실패", error);
       alert("회의실 등록에 실패했습니다.");
     }
   };
