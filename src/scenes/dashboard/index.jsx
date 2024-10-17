@@ -374,7 +374,7 @@ function Dashboard() {
   return (
     <Box m="20px">
       <Box display="flex" flexDirection="column" alignItems="flex-start" mb="10px">
-        <Typography variant="h1">안녕하세요 {userInfo.name}님 !</Typography>
+        <Typography variant="h1" sx={{color: colors.primary[100]}}>안녕하세요 {userInfo.name}님 😀</Typography>
         <Header subtitle="오늘도 행복한 하루 되세요" />
       </Box>
       {/* GRID */}
