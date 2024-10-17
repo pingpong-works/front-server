@@ -244,6 +244,7 @@ const Document = () => {
                         isOpen={isModalOpen}
                         handleClose={handleModalClose}
                         templateId={selectedTemplateId}
+                        fetchDocumentTypes={fetchDocumentTypes}  
                     />
                 )}
             </Box>

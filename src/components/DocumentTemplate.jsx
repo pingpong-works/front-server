@@ -6,7 +6,7 @@ import AddIcon from '@mui/icons-material/Add';
 import axios from "axios";
 import { tokens } from "../theme";
 
-const DocumentTemplate = ({ isOpen, handleClose, templateId, docTypeId }) => {
+const DocumentTemplate = ({ isOpen, handleClose, templateId, docTypeId, fetchDocumentTypes }) => {
     const theme = useTheme();
     const colors = tokens(theme.palette.mode);
     const mode = theme.palette.mode;
@@ -34,7 +34,7 @@ const DocumentTemplate = ({ isOpen, handleClose, templateId, docTypeId }) => {
                 console.error("템플릿 데이터가 없습니다.");
             }
         } catch (error) {
-            console.error("템플릿 데이터를 가져오는 중 오류 발생:", error);
+            console.error("템플릿 데이터를 가져오는 중 오류 발생:", error.message);
         } finally {
             setLoading(false);
         }
@@ -50,7 +50,6 @@ const DocumentTemplate = ({ isOpen, handleClose, templateId, docTypeId }) => {
         if (!templateData) return;
 
         try {
-            // 템플릿 패치 요청
             const patchDto = {
                 id: templateData.id,
                 templateName: templateData.templateName,
@@ -71,8 +70,13 @@ const DocumentTemplate = ({ isOpen, handleClose, templateId, docTypeId }) => {
 
             await axios.post(`http://localhost:8082/docs-types`, docsTypeDto);
 
-            alert("템플릿 및 Docs Type 수정 완료!");
+            alert("수정이 완료되었습니다.");
             handleClose();
+
+            // 문서 목록 새로고침
+            if (fetchDocumentTypes) {
+                fetchDocumentTypes();
+            }
         } catch (error) {
             console.error("템플릿 또는 Docs Type 수정 중 오류 발생:", error);
             alert("템플릿 또는 Docs Type 수정 중 오류가 발생했습니다.");
