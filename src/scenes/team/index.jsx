@@ -29,7 +29,7 @@ const Team = () => {
         navigate('/login');  // 로그인 페이지로 리다이렉트
     }
   }, [navigate]);
-  
+
   // 부서 목록 가져오기
   const fetchDepartments = async () => {
     try {
@@ -153,25 +153,27 @@ const Team = () => {
 
   return (
     <Box m="20px">
-      <Box display={"flex"} justifyContent="space-between" alignItems="center" mb = {-4}>
+      <Box display={"flex"} justifyContent="space-between" alignItems="center" mb={-4}>
       <Header title="주소록" subtitle="전체 직원 목록" />
-      <button
-            style={{
-              backgroundColor: colors.blueAccent[500],
-              color: "#fff",
-              padding: "10px 20px",
-              borderRadius: "5px",
-              border: "none",
-              cursor: "pointer",
-              transition: "background-color 0.3s ease",
-            }}
-            onMouseOver={(e) => (e.target.style.backgroundColor = colors.blueAccent[700])}
-            onMouseOut={(e) => (e.target.style.backgroundColor = colors.blueAccent[500])}
-            onClick={handleCreateAccountClick}
-          >
-            계정 생성
-          </button>
-      </Box>
+      {isAdmin && (  // 관리자만 계정 생성 버튼이 보이도록 조건 추가
+        <button
+          style={{
+            backgroundColor: colors.blueAccent[500],
+            color: "#fff",
+            padding: "10px 20px",
+            borderRadius: "5px",
+            border: "none",
+            cursor: "pointer",
+            transition: "background-color 0.3s ease",
+          }}
+          onMouseOver={(e) => (e.target.style.backgroundColor = colors.blueAccent[700])}
+          onMouseOut={(e) => (e.target.style.backgroundColor = colors.blueAccent[500])}
+          onClick={handleCreateAccountClick}
+        >
+          계정 생성
+        </button>
+      )}
+    </Box>
       {isAdmin && (
         <Box display="flex" justifyContent="flex-end" mb={2}>
         </Box>
