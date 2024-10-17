@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from "axios";
-import { Button, Box, IconButton, Modal, Typography, List, ListItem, ListItemText, ListItemIcon, Checkbox } from "@mui/material";
+import { Button, Box, IconButton, Modal, Typography, List, ListItem, ListItemText, ListItemIcon, Checkbox, colors, useTheme } from "@mui/material";
 import CloseIcon from '@mui/icons-material/Close';
+import { tokens } from "../theme";
 
 const OrganizationChart = ({ selectedEmployee, setSelectedEmployee }) => {
     const [departmentList, setDepartmentList] = useState([]);
@@ -9,6 +10,8 @@ const OrganizationChart = ({ selectedEmployee, setSelectedEmployee }) => {
     const [filteredEmployees, setFilteredEmployees] = useState([]);
     const [selectedDepartment, setSelectedDepartment] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
+    const theme = useTheme();
+    const colors = tokens(theme.palette.mode);
 
     useEffect(() => {
         getDepartmentList();
@@ -73,8 +76,8 @@ const OrganizationChart = ({ selectedEmployee, setSelectedEmployee }) => {
     }
 
     return (
-        <Box sx={{ display: 'flex', p: 2, gap: 2, height: '90%' }}>
-            <Box sx={{ flex: 1, bgcolor: '#f1f3f5', borderRadius: 1, p: 2, boxShadow: 1, overflowY: 'auto' }}>
+        <Box sx={{ display: 'flex', p: 2, gap: 2, height: '90%'}}>
+            <Box sx={{ flex: 1, bgcolor:  colors.gray[800], borderRadius: 1, p: 2, boxShadow: 1, overflowY: 'auto' }}>
                 <Typography variant="h6" gutterBottom>부서 목록</Typography>
                 <List>
                     {departmentList.map((department) => (
@@ -84,10 +87,10 @@ const OrganizationChart = ({ selectedEmployee, setSelectedEmployee }) => {
                             onClick={() => handleDepartmentSelect(department.id)}
                             sx={{
                                 py: 1,
-                                bgcolor: selectedDepartment === department.id ? '#e0e0e0' : 'transparent',
+                                bgcolor: selectedDepartment === department.id ? colors.gray[350] : 'transparent',
                                 borderRadius: 1,
                                 '&:hover': {
-                                    bgcolor: '#e0e0e0'
+                                    bgcolor: colors.gray[350]
                                 }
                             }}
                         >
@@ -97,7 +100,7 @@ const OrganizationChart = ({ selectedEmployee, setSelectedEmployee }) => {
                 </List>
             </Box>
 
-            <Box sx={{ flex: 2, bgcolor: '#fff', borderRadius: 1, p: 2, boxShadow: 1, overflowY: 'auto' }}>
+            <Box sx={{ flex: 2, bgcolor: colors.gray[800], borderRadius: 1, p: 2, boxShadow: 1, overflowY: 'auto' }}>
                 <Typography variant="h6" gutterBottom>직원 리스트</Typography>
 
                 <List>
@@ -108,9 +111,9 @@ const OrganizationChart = ({ selectedEmployee, setSelectedEmployee }) => {
                                 button
                                 onClick={() => handleEmployeeSelect(employee)}
                                 sx={{
-                                    bgcolor: selectedEmployee?.employeeId === employee.employeeId ? '#e0e0e0' : 'transparent',
+                                    bgcolor: selectedEmployee?.employeeId === employee.employeeId ? colors.gray[350]: 'transparent',
                                     '&:hover': {
-                                        bgcolor: '#e0e0e0'
+                                        bgcolor: colors.gray[350]
                                     }
                                 }}
                             >
@@ -132,7 +135,7 @@ const OrganizationChart = ({ selectedEmployee, setSelectedEmployee }) => {
                 </List>
             </Box>
 
-            <Box sx={{ flex: 2, bgcolor: '#fff', borderRadius: 1, p: 2, boxShadow: 1, overflowY: 'auto' }}>
+            <Box sx={{ flex: 2, bgcolor: colors.gray[800], borderRadius: 1, p: 2, boxShadow: 1, overflowY: 'auto' }}>
                 <Typography variant="h6" gutterBottom>선택된 직원 정보</Typography>
                 {selectedEmployee ? (
                     <Box
@@ -143,12 +146,12 @@ const OrganizationChart = ({ selectedEmployee, setSelectedEmployee }) => {
                             py: 1,
                             px: 1,
                             mb: 2,
-                            bgcolor: '#f9f9f9',
                             borderRadius: 2,
+                            bgcolor: colors.primary[400],
                             borderLeft: '5px solid #ffd454',
                             boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
                             '&:hover': {
-                                bgcolor: '#f0f0f0'
+                                bgcolor: colors.gray[350]
                             }
                         }}
                     >
@@ -198,7 +201,6 @@ const GroupModal = ({ open, onClose, onSelect }) => {
                 transform: 'translate(-50%, -50%)',
                 width: '80%',
                 height: '80%',
-                bgcolor: 'background.paper',
                 boxShadow: 24,
                 p: 4,
                 display: 'flex',
@@ -216,7 +218,7 @@ const GroupModal = ({ open, onClose, onSelect }) => {
                     setSelectedEmployee={setSelectedEmployee}
                 />
 
-                <Box sx={{ mt: 'auto', display: 'flex', justifyContent: 'space-between' }}>
+                <Box sx={{ mt: 'auto', display: 'flex', justifyContent: 'flex-end' }}>
                     <Button variant="contained" onClick={handleSave}>저장</Button>
                     <Button variant="outlined" onClick={handleClose}>취소</Button>
                 </Box>
