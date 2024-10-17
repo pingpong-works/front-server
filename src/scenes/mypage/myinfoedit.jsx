@@ -43,6 +43,15 @@ const MyInfoEdit = () => {
   const [imageToUpload, setImageToUpload] = useState(null);
 
   useEffect(() => {
+    const accessToken = localStorage.getItem('accessToken');
+    if (!accessToken) {
+        alert('로그인이 필요합니다.');
+        navigate('/login');  // 로그인 페이지로 리다이렉트
+    }
+  }, [navigate]);
+
+  // 사용자 정보 가져오기
+  useEffect(() => {
     const fetchUserInfo = async () => {
       try {
         const response = await axios.get("http://localhost:8081/employees/my-info", {
@@ -51,12 +60,12 @@ const MyInfoEdit = () => {
           },
         });
         const { name, phoneNumber, extensionNumber, emergencyNumber, address, vehicleNumber, profilePicture } = response.data.data;
-        
+
         setUserInfo({ name, phoneNumber, extensionNumber, emergencyNumber, address, vehicleNumber, profilePicture });
 
-        const imageToDisplay = profilePicture || defaultAvatar; 
+        const imageToDisplay = profilePicture || defaultAvatar;
         setProfileImage(imageToDisplay);
-        setOriginalProfileImage(imageToDisplay); 
+        setOriginalProfileImage(imageToDisplay);
 
         setLoading(false);
       } catch (error) {
@@ -80,15 +89,15 @@ const MyInfoEdit = () => {
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setProfileImage(reader.result); 
-        setImageToUpload(file); 
+        setProfileImage(reader.result);
+        setImageToUpload(file);
       };
       reader.readAsDataURL(file);
     }
   };
 
   const handleImageRemove = () => {
-    setProfileImage(originalProfileImage); 
+    setProfileImage(originalProfileImage);
     setImageToUpload(null);
   };
 
@@ -109,7 +118,7 @@ const MyInfoEdit = () => {
             "Content-Type": "multipart/form-data",
           },
         });
-        profilePictureUrl = response.data; 
+        profilePictureUrl = response.data;
       }
 
       const updatedData = {
@@ -122,7 +131,7 @@ const MyInfoEdit = () => {
           Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
         },
       });
-      handleUserInfoUpdate(true); 
+      handleUserInfoUpdate(true);
       setSuccessMessage("정보가 성공적으로 수정되었습니다.");
       navigate("/mypage", { replace: true });
     } catch (error) {

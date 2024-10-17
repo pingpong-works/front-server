@@ -26,6 +26,14 @@ const CreateBoard = () => {
   const [imagesToUpload, setImagesToUpload] = useState([]);
   const [imagePreviews, setImagePreviews] = useState([]);
 
+  useEffect(() => {
+    const accessToken = localStorage.getItem('accessToken');
+    if (!accessToken) {
+        alert('로그인이 필요합니다.');
+        navigate('/login');  // 로그인 페이지로 리다이렉트
+    }
+  }, [navigate]);
+
   const allowedFileTypes = [
     "image/jpeg",
     "image/png",
@@ -52,14 +60,14 @@ const CreateBoard = () => {
     });
 
     if (validFiles.length === 0) {
-      return; 
+      return;
     }
 
     const newImagePreviews = validFiles.map((file) => URL.createObjectURL(file));
     setImagesToUpload((prev) => [...prev, ...validFiles]);
-    setImagePreviews((prev) => [...prev, ...newImagePreviews]); 
+    setImagePreviews((prev) => [...prev, ...newImagePreviews]);
 
-    e.target.value = null; 
+    e.target.value = null;
   };
 
   const handleImageRemove = (index) => {
@@ -101,7 +109,7 @@ const CreateBoard = () => {
         title,
         category,
         content,
-        imageUrls: uploadedImageUrls, 
+        imageUrls: uploadedImageUrls,
       };
 
       const response = await axios.post("http://localhost:8084/boards", postData, {

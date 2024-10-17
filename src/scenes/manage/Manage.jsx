@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Box, Typography, useTheme, Modal, TextField, Button, Select, MenuItem } from "@mui/material";
+import { Box, Typography, useTheme, Modal, TextField, Button, Select, MenuItem, FormControl, InputLabel } from "@mui/material";
 import { Header } from "../../components";
 import { DataGrid } from "@mui/x-data-grid";
 import { tokens } from "../../theme";
-import CircleIcon from '@mui/icons-material/Circle';
+import { useNavigate } from "react-router-dom";
 
 const Manage = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
-
+  const navigate = useNavigate();
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
@@ -29,6 +29,14 @@ const Manage = () => {
     { value: 'DIRECTOR', label: '부장' },
   ]); // 직급 목록
 
+  useEffect(() => {
+    const accessToken = localStorage.getItem('accessToken');
+    if (!accessToken) {
+        alert('로그인이 필요합니다.');
+        navigate('/login');  // 로그인 페이지로 리다이렉트
+    }
+  }, [navigate]);
+  
   const fetchEmployees = async () => {
     try {
       const url = selectedDepartment
@@ -94,10 +102,8 @@ const Manage = () => {
         '부장': 'DIRECTOR'
       };
   
-      // 매핑된 직급 적용
       const mappedRank = rankMapping[employeeData.employeeRank] || employeeData.employeeRank;
   
-      // 기존 직급을 포함한 직원 정보를 상태에 저장
       setSelectedEmployee({
         ...employeeData,
         employeeRank: mappedRank, // 모달에 표시될 기존 직급
@@ -149,21 +155,8 @@ const Manage = () => {
       cellClassName: "name-column--cell",
     },
     { field: "email", headerName: "이메일", flex: 1 },
-    { field: "phoneNumber", headerName: "전화번호", flex: 1 },
     { field: "departmentName", headerName: "부서명", flex: 1 },
     { field: "employeeRank", headerName: "직급", flex: 1 },
-    {
-      field: "status",
-      headerName: "활동 중",
-      flex: 1,
-      renderCell: (params) => (
-        <CircleIcon
-          style={{
-            color: params.value === "로그인" ? colors.greenAccent[500] : colors.gray[500],
-          }}
-        />
-      ),
-    },
   ];
 
   return (
@@ -173,19 +166,21 @@ const Manage = () => {
       {/* 부서 선택 드롭다운 */}
       <Box mb={3}>
         <Typography variant="h6">부서를 선택하세요:</Typography>
-        <Select
-          value={selectedDepartment}
-          onChange={(e) => setSelectedDepartment(e.target.value)}
-          displayEmpty
-          fullWidth
-        >
-          <MenuItem value="">전체 부서</MenuItem>
-          {departments.map((dept) => (
-            <MenuItem key={dept.id} value={dept.id}>
-              {dept.name}
-            </MenuItem>
-          ))}
-        </Select>
+        <FormControl sx={{ minWidth: 200, marginBottom: "20px", fullWidth: true }}>
+          <Select
+            value={selectedDepartment}
+            onChange={(e) => setSelectedDepartment(e.target.value)}
+            displayEmpty
+            fullWidth
+          >
+            <MenuItem value="">전체 부서</MenuItem>
+            {departments.map((dept) => (
+              <MenuItem key={dept.id} value={dept.id}>
+                {dept.name}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
       </Box>
 
       <Box

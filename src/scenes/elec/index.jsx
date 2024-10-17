@@ -8,6 +8,7 @@ import TableModal from '../../components/TableModal';
 import DocumentModal from "../../components/DocumentModal";
 import NewDocumentForm from '../../components/NewDocumentForm';
 import axios from 'axios';
+import { useNavigate } from "react-router-dom";
 
 const Elec = () => {
     const theme = useTheme();
@@ -25,6 +26,15 @@ const Elec = () => {
     const [employeeName, setEmployeeName] = useState(''); // 사용자 이름 추가
     const [selectedRows, setSelectedRows] = useState([]);
     const [isAdmin, setIsAdmin] = useState(false);
+    const navigate = useNavigate();
+
+    useEffect(() => {
+      const accessToken = localStorage.getItem('accessToken');
+      if (!accessToken) {
+          alert('로그인이 필요합니다.');
+          navigate('/login');  // 로그인 페이지로 리다이렉트
+      }
+    }, [navigate]);
 
     const [approvalStatus, setApprovalStatus] = useState({
         0: null,

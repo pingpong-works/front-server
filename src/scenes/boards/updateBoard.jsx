@@ -28,6 +28,16 @@ const UpdateBoard = () => {
   const [imagesToDelete, setImagesToDelete] = useState([]);
   const [imagePreviews, setImagePreviews] = useState([]);
 
+
+  useEffect(() => {
+    const accessToken = localStorage.getItem('accessToken');
+    if (!accessToken) {
+        alert('로그인이 필요합니다.');
+        navigate('/login');  // 로그인 페이지로 리다이렉트
+    }
+  }, [navigate]);
+
+  // 게시글 데이터 가져오기
   useEffect(() => {
     const fetchBoardData = async () => {
       try {
@@ -38,7 +48,7 @@ const UpdateBoard = () => {
         setCategory(boardData.category);
         setContent(boardData.content);
         setOriginalImages(boardData.imageUrls || []);
-        setImagePreviews(boardData.imageUrls || []); 
+        setImagePreviews(boardData.imageUrls || []);
       } catch (error) {
         console.error("게시글 정보를 불러오는데 실패했습니다", error);
         alert("게시글 정보를 불러오는데 실패했습니다.");
@@ -53,7 +63,7 @@ const UpdateBoard = () => {
   const handleImageUpload = (e) => {
     const files = Array.from(e.target.files);
     const newImagePreviews = files.map((file) => URL.createObjectURL(file));
-    setImagesToUpload((prev) => [...prev, ...files]); 
+    setImagesToUpload((prev) => [...prev, ...files]);
     setImagePreviews((prev) => [...prev, ...newImagePreviews]);
 
     e.target.value = null;
@@ -72,7 +82,7 @@ const UpdateBoard = () => {
 
   const handleSubmit = async () => {
     try {
-      const uploadedImageUrls = []; 
+      const uploadedImageUrls = [];
 
       for (const file of imagesToUpload) {
         const formData = new FormData();
@@ -89,7 +99,7 @@ const UpdateBoard = () => {
         title,
         category,
         content,
-        imageUrls: [...uploadedImageUrls], 
+        imageUrls: [...uploadedImageUrls],
         imagesToDelete: [...imagesToDelete],
       };
 

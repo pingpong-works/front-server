@@ -57,17 +57,24 @@ const Notification = ({ onClose }) => {
                 }
             });
 
+            // 상태 업데이트: 읽음 처리 후 알림 목록 갱신
+            setNotifications((prevNotifications) =>
+                prevNotifications.map((n) =>
+                    n.id === notification.id ? { ...n, read: true } : n
+                )
+            );
+
             // 알림의 유형에 따라 경로 설정
             if (notification.bookRoomId) {
-                navigate(`/room-books/${notification.bookRoomId}`);
+                navigate(`/calendar`);
             } else if (notification.calendarId) {
-                navigate(`/calendar/${notification.calendarId}`);
+                navigate(`/calendar`);
             } else if (notification.bookCarId) {
-                navigate(`/car-books/${notification.bookCarId}`);
+                navigate(`/calendar`);
             } else if (notification.postId) {
-                navigate(`/posts/${notification.postId}`);
+                navigate(`/boards`);
             } else if (notification.documentId) {
-                navigate(`/elec/${notification.documentId}`);
+                navigate(`/elec`);
             }
         } catch (error) {
             console.error("Error marking notification as read:", error);

@@ -5,10 +5,20 @@ import { mockDataContacts } from "../../data/mockData.js";
 import { tokens } from "../../theme.js";
 import axios from "axios";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Mine = () => {
     const theme = useTheme();
     const colors = tokens(theme.palette.mode);
+    const navigate = useNavigate();
+    
+    useEffect(() => {
+      const accessToken = localStorage.getItem('accessToken');
+      if (!accessToken) {
+          alert('로그인이 필요합니다.');
+          navigate('/login');  // 로그인 페이지로 리다이렉트
+      }
+    }, [navigate]);
 
     const [list, setList] = useState([]);
     const [filteredData, setFilteredData] = useState([]);

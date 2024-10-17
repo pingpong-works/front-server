@@ -8,7 +8,6 @@ import {
   ContactsOutlined,
   DashboardOutlined,
   DonutLargeOutlined,
-  HelpOutlineOutlined,
   MapOutlined,
   MenuOutlined,
   PeopleAltOutlined,
@@ -21,17 +20,21 @@ import {
   Description,
   PeopleAltRounded,
   Business as BusinessIcon,  // 부서 생성 아이콘 추가
+  DirectionsCar,
+  MeetingRoom,
 } from "@mui/icons-material";
 import Item from "./Item";
 import { ToggledContext } from "../../../App";
 import axios from "axios";
-import defaultAvatar from "../../../assets/images/avatar.png"; // 기본 이미지 경로
+import defaultAvatar from "../../../assets/images/avatar.png";
+import { useNavigate } from "react-router-dom";
 
 const SideBar = ({onUserInfoUpdate, setUserInfoUpdated }) => {
   const [collapsed, setCollapsed] = useState(false);
   const { toggled, setToggled } = useContext(ToggledContext);
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
+  const navigate = useNavigate();
 
   // 사용자 정보 상태 관리
   const [userInfo, setUserInfo] = useState({
@@ -63,12 +66,12 @@ const SideBar = ({onUserInfoUpdate, setUserInfoUpdated }) => {
   };
 
   useEffect(() => {
-    fetchUserInfo(); 
+    fetchUserInfo();
   }, []);
 
   useEffect(() => {
     if (onUserInfoUpdate) {
-      fetchUserInfo(); 
+      fetchUserInfo();
       setUserInfoUpdated(false);
     }
   }, [onUserInfoUpdate]);
@@ -164,13 +167,12 @@ const SideBar = ({onUserInfoUpdate, setUserInfoUpdated }) => {
                   alt="PingPong"
                 />
                 <Typography
-                  component="a"
-                  href="/dashboard"
+                  onClick={() => navigate("/dashboard")}  // onClick 이벤트 추가
                   variant="h4"
                   fontWeight="bold"
                   textTransform="capitalize"
                   color={colors.blueAccent[450]}
-                  style={{ textDecoration: 'none' }}
+                  style={{ textDecoration: 'none', cursor: 'pointer' }}  // cursor 스타일 추가
                 >
                   PingPong
                 </Typography>
@@ -317,10 +319,11 @@ const SideBar = ({onUserInfoUpdate, setUserInfoUpdated }) => {
           <Item title="주소록" path="/team" icon={<PeopleAltOutlined />} />
           {userInfo.email && isAdmin && ( // email이 있을 때만 렌더링
             <>
-              <Item title="계정 생성" path="/signup" icon={<PersonOutlined />} />
+              <Item title="부서 관리" path="/department-management" icon={<BusinessIcon />} />
               <Item title="결재 문서 관리" path="/document" icon={<Description />} />
               <Item title="직원 관리" path="/manage" icon={<PeopleAltRounded />} />
-              <Item title="부서 생성" path="/department" icon={<BusinessIcon />} /> {/* 부서 생성 항목 추가 */}
+              <Item title="차량 관리" path="/car" icon={<DirectionsCar />} />
+              <Item title="회의실 관리" path="/room" icon={<MeetingRoom />} />
             </>
           )}
         </Menu>

@@ -26,6 +26,14 @@ const SignUp = () => {
   const [successMessage, setSuccessMessage] = useState("");
   const [passwordError, setPasswordError] = useState(""); // 비밀번호 오류 메시지
 
+  useEffect(() => {
+    const accessToken = localStorage.getItem('accessToken');
+    if (!accessToken) {
+        alert('로그인이 필요합니다.');
+        navigate('/login');  // 로그인 페이지로 리다이렉트
+    }
+  }, [navigate]);
+
   // 직급 목록
   const ranks = [
     { value: "INTERN", label: "인턴" },
@@ -92,7 +100,7 @@ const SignUp = () => {
       });
       setSuccessMessage("계정이 성공적으로 생성되었습니다.");
       setTimeout(() => {
-        navigate("/mypage"); // 성공 후 마이페이지로 이동
+        navigate("/team"); // 성공 후 마이페이지로 이동
       }, 2000);
     } catch (error) {
       setErrorMessage("계정 생성에 실패했습니다.");
@@ -219,7 +227,7 @@ const SignUp = () => {
             <Button
               variant="contained"
               color="secondary"
-              onClick={() => navigate("/")}
+              onClick={() => navigate("/team")}
               sx={{
                 minWidth: "150px",
               }}

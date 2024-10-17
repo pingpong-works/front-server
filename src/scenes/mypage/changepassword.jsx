@@ -16,6 +16,14 @@ const ChangePassword = () => {
   const [successMessage, setSuccessMessage] = useState("");
   const navigate = useNavigate();
 
+  useEffect(() => {
+    const accessToken = localStorage.getItem('accessToken');
+    if (!accessToken) {
+        alert('로그인이 필요합니다.');
+        navigate('/login');  // 로그인 페이지로 리다이렉트
+    }
+  }, [navigate]);
+  
   const handleChangePassword = async () => {
     if (newPassword !== confirmNewPassword) {
       setErrorMessage("새 비밀번호와 비밀번호 확인이 일치하지 않습니다.");
