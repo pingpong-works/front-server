@@ -5,6 +5,7 @@ import axios from 'axios';
 import CloseIcon from "@mui/icons-material/Close";
 import PeopleIcon from "@mui/icons-material/People";
 import error from "eslint-plugin-react/lib/util/error.js";
+import { South } from '@mui/icons-material';
 
 const ChatRoomContainer = ({profile, activeRoom, onClose, memberId, name, chatRoomId, topic, formatDate2,updateChatRoomList}) => {
     const [messages, setMessages] = useState([]);  // 모든 메시지를 저장할 배열
@@ -14,10 +15,10 @@ const ChatRoomContainer = ({profile, activeRoom, onClose, memberId, name, chatRo
     const [isChatOpen, setIsChatOpen] = useState(true); // 채팅창 열림 상태 추가
     const stompClientRef = useRef(null); // stompClient를 useRef로 관리
     const [messageTopic, setMessageTopic] = useState('');
-
     const chatBodyRef = useRef(null); // 채팅 메시지를 담는 div를 참조하는 ref
 
     let subscriptionUrl = '';
+    const subscriptionUrlRef = useRef('');
 
     // 창이 활성화되었을 때 WebSocket 연결
     useEffect(() => {
@@ -115,36 +116,46 @@ const ChatRoomContainer = ({profile, activeRoom, onClose, memberId, name, chatRo
     const connectWebSocket = () => {
         if (!memberId || !chatRoomId) {
             console.error("User ID 또는 ChatRoom ID가 정의되지 않음");
-            return; // memberId 또는 chatRoomId가 없으면 WebSocket 연결하지 않음
+            return Promise.reject("필수 정보 누락");
         }
-
+    
         console.log(`WebSocket 연결 시도 - ChatRoom ID: ${chatRoomId}`);
-
-        const socket = new WebSocket(`${import.meta.env.VITE_WS_URI}/ws`);
-        const stompClient = Stomp.over(socket);
-        stompClientRef.current = stompClient; // stompClient를 ref에 저장
-
-        if (topic === "create-room-one") {
-            console.log("Setting messageTopic to 'one'");
-            subscriptionUrl = `/topic/messages/${chatRoomId}`;
-            setMessageTopic('one')
-        } else {
-            console.log("Setting messageTopic to 'many'");
-            subscriptionUrl = `/topic/group/${chatRoomId}`;
-            setMessageTopic('many')
-        }
-
-        stompClient.connect({}, (frame) => {
-            console.log('WebSocket이 연결되었습니다: ' + frame);
-            setIsConnected(true); // WebSocket 연결 상태를 true로 설정
-
-            // WebSocket 메시지 구독
-            stompClient.subscribe(subscriptionUrl, (message) => {
+    
+        return new Promise((resolve, reject) => {
+            const socket = new WebSocket(`http://localhost:8085/ws`);
+            const stompClient = Stomp.over(socket);
+            stompClientRef.current = stompClient;
+    
+            stompClient.connect({}, (frame) => {
+                console.log('WebSocket이 연결되었습니다: ' + frame);
+                setIsConnected(true);
+                resolve(stompClient);
+            }, (error) => {
+                console.error('WebSocket 오류 발생: ', error);
+                setIsConnected(false);
+                reject(error);
+            });
+        }).then((stompClient) => {
+            if (topic === "create-room-one" && !messageTopic) {
+                console.log("Setting messageTopic to 'one'");
+                subscriptionUrlRef.current = `/topic/messages/${chatRoomId}`;
+                setMessageTopic('one');
+            } else if (topic === "create-room-many" && !messageTopic) {
+                console.log("Setting messageTopic to 'many'");
+                subscriptionUrlRef.current = `/topic/app/${chatRoomId}`;
+                setMessageTopic('many');
+            }
+    
+            console.log(chatRoomId);
+            console.log("subscriptionUrl:", subscriptionUrlRef.current);
+    
+            stompClient.subscribe(`/topic/chatRoom/${chatRoomId}`, (message) => {
+                console.log("구독 주소 확인:", subscriptionUrlRef.current);
                 const receivedMessage = JSON.parse(message.body);
                 console.log("수신한 메시지:", receivedMessage);
 
                 // 서버로부터 받은 메시지 중에서 본인의 메시지는 제외
-                if (receivedMessage.senderId === memberId) {
+                if (String(receivedMessage.senderId) === String(memberId)) {
                     return;  // 본인이 보낸 메시지는 무시
                 }
 
@@ -176,7 +187,6 @@ const ChatRoomContainer = ({profile, activeRoom, onClose, memberId, name, chatRo
             console.error('WebSocket 오류 발생: ', error);
             setIsConnected(false); // WebSocket 연결 실패 시 false로 설정
         });
-
     };
 
     // 메시지 전송 함수
@@ -188,6 +198,7 @@ const ChatRoomContainer = ({profile, activeRoom, onClose, memberId, name, chatRo
             console.error('WebSocket이 연결되지 않았거나 stompClient가 초기화되지 않았거나 메시지가 비어있습니다.');
             return;
         }
+        let currentTime = new Date()
 
         const messageObj = {
             senderName: name,  // 사용자명
@@ -198,12 +209,13 @@ const ChatRoomContainer = ({profile, activeRoom, onClose, memberId, name, chatRo
             content: inputMessage,
             announcement: '',
             fileUrl: '',
-            topic: messageTopic,
-            timestamp: new Date()
+            topic: "one",
+            timestamp: currentTime
         };
 
         try {
             // 서버로 메시지 전송
+            console.log(messageObj);
             stompClient.send('/app/chat', {}, JSON.stringify(messageObj));
 
             // 내가 보낸 메시지를 오른쪽 말풍선에 추가
@@ -224,7 +236,7 @@ const ChatRoomContainer = ({profile, activeRoom, onClose, memberId, name, chatRo
 
     // 채팅 히스토리 로드 함수
     const getChatHistory = () => {
-        axios('/chat/history?chatRoomId=' + chatRoomId)
+        axios('http://localhost:8085/chat/history?chatRoomId=' + chatRoomId)
             .then(res => {
                 const chatHistory = res.data;
                 console.log("받은 채팅 기록:", chatHistory);
@@ -238,9 +250,10 @@ const ChatRoomContainer = ({profile, activeRoom, onClose, memberId, name, chatRo
 
     // WebSocket 연결 및 채팅 히스토리 로드
     useEffect(() => {
-        if (memberId && chatRoomId) {
-            connectWebSocket();
-            getChatHistory();  // 채팅방에 입장할 때 채팅 기록 불러오기
+        if (!stompClientRef.current && memberId && chatRoomId) {
+            console.log("WebSocket 연결 시작");
+            connectWebSocket(); // WebSocket 연결
+            getChatHistory();  // 채팅 기록 로드
         }
     }, [memberId, chatRoomId]);
 
@@ -313,7 +326,7 @@ const ChatRoomContainer = ({profile, activeRoom, onClose, memberId, name, chatRo
                                 </div>
                             </div>
                         )}
-                    <div key={index} className={`lk-chat-entry ${msg.senderId === memberId ? 'lk-chat-entry-self' : ''}`}>
+                    <div key={index} className={`lk-chat-entry ${String(msg.senderId) === String(memberId) ? 'lk-chat-entry-self' : ''}`}>
                         {msg.senderId !== memberId ? (
                             <div className="lk-chat-entry-other">
                                 <div className="profile-picture">
