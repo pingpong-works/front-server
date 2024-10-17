@@ -27,25 +27,33 @@ const UpdateBoard = () => {
   const [originalImages, setOriginalImages] = useState([]);
   const [imagesToDelete, setImagesToDelete] = useState([]);
   const [imagePreviews, setImagePreviews] = useState([]);
-
-
-  useEffect(() => {
-    const accessToken = localStorage.getItem('accessToken');
-    if (!accessToken) {
-        alert('로그인이 필요합니다.');
-        navigate('/login');  // 로그인 페이지로 리다이렉트
-    }
-  }, [navigate]);
-
+  const [employeeId, setEmployeeId] = useState(null); // employeeId 상태 추가
 
   useEffect(() => {
     const accessToken = localStorage.getItem('accessToken');
     if (!accessToken) {
-        alert('로그인이 필요합니다.');
-        navigate('/login');  // 로그인 페이지로 리다이렉트
+      alert('로그인이 필요합니다.');
+      navigate('/login');  // 로그인 페이지로 리다이렉트
+    } else {
+      fetchUserInfo(accessToken); // 유저 정보 가져오기
     }
   }, [navigate]);
-  
+
+  // 유저 정보 가져오기 함수
+  const fetchUserInfo = async (token) => {
+    try {
+      const response = await axios.get("http://localhost:8081/employees/my-info", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const userData = response.data.data;
+      setEmployeeId(userData.employeeId); // employeeId 저장
+    } catch (error) {
+      alert("유저 정보를 가져오는 데 실패했습니다.");
+    }
+  };
+
   // 게시글 데이터 가져오기
   useEffect(() => {
     const fetchBoardData = async () => {
@@ -59,7 +67,6 @@ const UpdateBoard = () => {
         setOriginalImages(boardData.imageUrls || []);
         setImagePreviews(boardData.imageUrls || []);
       } catch (error) {
-        console.error("게시글 정보를 불러오는데 실패했습니다", error);
         alert("게시글 정보를 불러오는데 실패했습니다.");
       }
     };
@@ -90,6 +97,26 @@ const UpdateBoard = () => {
   };
 
   const handleSubmit = async () => {
+    if (!employeeId) {
+      alert("유저 정보를 확인할 수 없습니다. 다시 시도해주세요.");
+      return;
+    }
+
+    if (!title) {
+      alert("제목을 입력해주세요.");
+      return;
+    }
+
+    if (!content) {
+      alert("내용을 입력해주세요.");
+      return;
+    }
+
+    if (!category) {
+      alert("카테고리를 선택해주세요.");
+      return;
+    }
+
     try {
       const uploadedImageUrls = [];
 
@@ -114,7 +141,7 @@ const UpdateBoard = () => {
 
       const response = await axios.patch(`http://localhost:8084/boards/${boardId}`, updatedData, {
         params: {
-          employeeId: 1,
+          employeeId: employeeId, 
         },
         headers: {
           "Content-Type": "application/json",
@@ -131,15 +158,14 @@ const UpdateBoard = () => {
         navigate(`/viewBoard/${boardId}`);
       }
     } catch (error) {
-      console.error("게시글 수정 실패", error);
       alert("게시글 수정에 실패했습니다.");
     }
   };
 
   return (
     <Box m="20px">
-      <Header title="Boards" subtitle="Board Update" />
-  
+      <Header title="게시판 수정"/>
+
       <Box mt="20px" display="flex" flexDirection="column" gap={2} maxWidth="100%" bgcolor={colors.primary[400]} p={3} borderRadius="8px">
         <TextField
           label="제목"
@@ -162,7 +188,7 @@ const UpdateBoard = () => {
             },
           }}
         />
-  
+
         <TextField
           label="카테고리"
           variant="outlined"
@@ -184,7 +210,7 @@ const UpdateBoard = () => {
             },
           }}
         />
-  
+
         <TextField
           label="내용"
           variant="outlined"
@@ -208,7 +234,7 @@ const UpdateBoard = () => {
             },
           }}
         />
-  
+
         <Button
           variant="outlined"
           component="label"
@@ -223,7 +249,7 @@ const UpdateBoard = () => {
           이미지 업로드
           <input type="file" multiple hidden onChange={handleImageUpload} />
         </Button>
-  
+
         <Box display="flex" flexWrap="wrap" gap={2} mt={2} maxWidth="100%" justifyContent="center">
           {imagePreviews.map((preview, index) => (
             <Box
@@ -258,7 +284,7 @@ const UpdateBoard = () => {
             </Box>
           ))}
         </Box>
-  
+
         <Box display="flex" justifyContent="flex-end" mt={3}>
           <Button
             variant="outlined"

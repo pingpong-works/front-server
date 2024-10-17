@@ -53,7 +53,7 @@ const Calendar = () => {
 
   const fetchEvents = async () => {
     if (!userInfo) return; // 사용자 정보가 없으면 실행하지 않음
-
+    if (!userInfo.departmentId) return;
     try {
       const response = await axios.get("http://localhost:8084/calendars", {
         params: {
@@ -114,8 +114,23 @@ const Calendar = () => {
     if (inputValues && userInfo) {
       const { title, start, end, content, isReservation, reservationType, selectedOption, purpose } = inputValues;
 
-      if (!title || !content || !start || !end) {
-        alert("모든 값을 입력해주세요.");
+      if (!title) {
+        alert("제목을 입력해주세요.");
+        return;
+      }
+  
+      if (!content) {
+        alert("내용을 입력해주세요.");
+        return;
+      }
+  
+      if (!start) {
+        alert("시작일을 입력해주세요.");
+        return;
+      }
+
+      if (!end) {
+        alert("종료일을 입력해주세요.");
         return;
       }
 
@@ -152,8 +167,18 @@ const Calendar = () => {
           reservationUrl = `http://localhost:8084/rooms/${selectedOption}/books?employeeId=${userInfo.employeeId}&title=${title}&content=${content}`;
         }
 
-        if (!reservationType || !selectedOption|| !requestBody.purpose) {
-          alert("모든 값을 입력해주세요.");
+        if (!reservationType) {
+          alert("예약타입을 선택해주세요.");
+          return;
+        }
+
+        if (!selectedOption) {
+          alert("예약 목록을 선택해주세요.");
+          return;
+        }
+
+        if (!requestBody.purpose) {
+          alert("목적을 선택해주세요.");
           return;
         }
 
@@ -203,7 +228,7 @@ const Calendar = () => {
 
   return (
     <Box m="20px">
-      <Header title="Calendar" subtitle="Full Calendar Interactive Page" />
+      <Header title="캘린더"/>
 
       <Box display="flex" justifyContent="center" mb={2}>
         <Box display="flex" alignItems="center" mr={3}>

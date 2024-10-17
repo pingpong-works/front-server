@@ -160,7 +160,7 @@ const AddModal = ({ isOpen, onCancel, onSubmit }) => {
           fullWidth
           variant="outlined"
           margin="normal"
-          label="설명"
+          label="내용"
           name="content"
           value={inputValues.content}
           onChange={handleChange}

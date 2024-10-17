@@ -22,16 +22,37 @@ const ViewBoard = () => {
   const [selectedImage, setSelectedImage] = useState("");
   const [editCommentId, setEditCommentId] = useState(null);
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
+  const [employeeId, setEmployeeId] = useState(null); // employeeId 추가
+
   const handleOpenDeleteModal = () => setOpenDeleteModal(true);
   const handleCloseDeleteModal = () => setOpenDeleteModal(false);
   const navigate = useNavigate();
+
+  // 로그인 상태 확인 및 유저 정보 불러오기
   useEffect(() => {
     const accessToken = localStorage.getItem('accessToken');
     if (!accessToken) {
         alert('로그인이 필요합니다.');
         navigate('/login');  // 로그인 페이지로 리다이렉트
+    } else {
+      fetchUserInfo(accessToken); // 유저 정보 가져오기
     }
   }, [navigate]);
+
+  // 유저 정보 가져오기 함수
+  const fetchUserInfo = async (token) => {
+    try {
+      const response = await axios.get("http://localhost:8081/employees/my-info", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const userData = response.data.data;
+      setEmployeeId(userData.employeeId); // employeeId 설정
+    } catch (error) {
+      alert("유저 정보를 가져오는 데 실패했습니다.");
+    }
+  };
 
   const fetchBoardDetails = async () => {
     try {
@@ -39,10 +60,11 @@ const ViewBoard = () => {
       const boardData = response.data.data;
       setBoard(boardData);
 
-      const loggedInUserId = 1;
-      setIsOwner(boardData.employeeId === loggedInUserId);
+      if (employeeId && boardData.employeeId === employeeId) {
+        setIsOwner(true); // 게시글 작성자인지 여부 확인
+      }
     } catch (error) {
-      console.error("Error fetching board details", error);
+      alert("게시글 정보를 불러오는데 실패했습니다.");
     }
   };
 
@@ -59,7 +81,7 @@ const ViewBoard = () => {
       }));
       setComments(processedComments);
     } catch (error) {
-      console.error("Error fetching comments", error);
+      alert("댓글 정보를 불러오는데 실패했습니다.");
     }
   };
 
@@ -67,13 +89,12 @@ const ViewBoard = () => {
     try {
       await axios.delete(`http://localhost:8084/boards/${id}`, {
         params: {
-          employeeId: 1,
+          employeeId: employeeId, // 동적으로 employeeId 사용
         },
       });
       alert("게시글이 삭제되었습니다.");
       navigate("/boards");
     } catch (error) {
-      console.error("Error deleting board", error);
       alert("게시글 삭제에 실패했습니다.");
     }
   };
@@ -83,13 +104,23 @@ const ViewBoard = () => {
   };
 
   const handleCommentSubmit = async (parentId = null) => {
+    if (!employeeId) {
+      alert("유저 정보를 확인할 수 없습니다. 다시 시도해주세요.");
+      return;
+    }
+
+    if (!(parentId ? replyComments[parentId] : comment)) {
+      alert("댓글을 입력해 주세요.");
+      return;
+    }
+
     try {
       await axios.post(`http://localhost:8084/boards/${id}/comments`, {
         content: parentId ? replyComments[parentId] : comment,
         parentCommentId: parentId,
       }, {
         params: {
-          employeeId: 1,
+          employeeId: employeeId, // 동적으로 employeeId 사용
         },
       });
       alert("댓글이 성공적으로 등록되었습니다.");
@@ -101,40 +132,52 @@ const ViewBoard = () => {
       }
       fetchComments(); 
     } catch (error) {
-      console.error("Error submitting comment", error);
       alert("댓글 등록에 실패했습니다.");
     }
   };
 
   const handleCommentDelete = async (commentId) => {
+    if (!employeeId) {
+      alert("유저 정보를 확인할 수 없습니다. 다시 시도해주세요.");
+      return;
+    }
+
     try {
       await axios.delete(`http://localhost:8084/boards/${id}/comments/${commentId}`, {
         params: {
-          employeeId: 1,
+          employeeId: employeeId, // 동적으로 employeeId 사용
         },
       });
       alert("댓글이 삭제되었습니다.");
       fetchComments(); 
     } catch (error) {
-      console.error("Error deleting comment", error);
       alert("댓글 삭제에 실패했습니다.");
     }
   };
 
   const handleCommentUpdate = async (commentId) => {
+    if (!employeeId) {
+      alert("유저 정보를 확인할 수 없습니다. 다시 시도해주세요.");
+      return;
+    }
+
+    if (!replyComments[commentId]) {
+      alert("댓글을 입력해 주세요.");
+      return;
+    }
+
     try {
       await axios.patch(`http://localhost:8084/boards/${id}/comments/${commentId}`, {
         content: replyComments[commentId],
       }, {
         params: {
-          employeeId: 1,
+          employeeId: employeeId, // 동적으로 employeeId 사용
         },
       });
       alert("댓글이 수정되었습니다.");
       setEditCommentId(null);
       fetchComments();
     } catch (error) {
-      console.error("Error updating comment", error);
       alert("댓글 수정에 실패했습니다.");
     }
   };
@@ -145,12 +188,12 @@ const ViewBoard = () => {
   };
 
   useEffect(() => {
-    if (!isFetched) {
+    if (!isFetched && employeeId) {
       fetchBoardDetails();
       fetchComments();
       setIsFetched(true);
     }
-  }, [isFetched]);
+  }, [isFetched, employeeId]);
 
   if (!board) {
     return <Typography>Loading...</Typography>;
@@ -291,7 +334,7 @@ const ViewBoard = () => {
                         <ReplyIcon sx={{ color: colors.gray[300] }} />
                       </IconButton>
                     </Box>
-                    {comment.employeeId === 1 && (
+                    {comment.employeeId === employeeId && (
                       <Box display="flex" gap={2}>
                         <Button
                           variant="outlined"
@@ -426,7 +469,7 @@ const ViewBoard = () => {
                           {reply.employeeName} | {formatDate(reply.createdAt)}
                         </Typography>
                       </Box>
-                      {reply.employeeId === 1 && (
+                      {reply.employeeId === employeeId && (
                         <Box display="flex" gap={2}>
                           <Button
                             variant="outlined"
